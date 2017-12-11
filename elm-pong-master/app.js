@@ -12226,8 +12226,8 @@ var _davydog187$elm_pong$Main$initialInvader = {
 	_0: {
 		x: 0,
 		y: 0,
-		vx: 100,
-		vy: -100,
+		vx: 0,
+		vy: 0,
 		scale: 1,
 		xProbChange: 1.0e-2,
 		yProbChange: 1.0e-2,
@@ -12251,15 +12251,17 @@ var _davydog187$elm_pong$Main$initialInvader = {
 	}
 };
 var _davydog187$elm_pong$Main$outOfBounds = 1000;
-var _davydog187$elm_pong$Main$filterBullet = function (bullet) {
-	return (_elm_lang$core$Native_Utils.eq(bullet.x, _davydog187$elm_pong$Main$outOfBounds) && _elm_lang$core$Native_Utils.eq(bullet.y, _davydog187$elm_pong$Main$outOfBounds)) ? false : true;
+var _davydog187$elm_pong$Main$filterObject = function (_p5) {
+	var _p6 = _p5;
+	var _p7 = _p6;
+	return (_elm_lang$core$Native_Utils.eq(_p7.x, _davydog187$elm_pong$Main$outOfBounds) && _elm_lang$core$Native_Utils.eq(_p7.y, _davydog187$elm_pong$Main$outOfBounds)) ? false : true;
 };
-var _davydog187$elm_pong$Main$_p5 = {ctor: '_Tuple2', _0: 600, _1: 400};
-var _davydog187$elm_pong$Main$gameWidth = _davydog187$elm_pong$Main$_p5._0;
-var _davydog187$elm_pong$Main$gameHeight = _davydog187$elm_pong$Main$_p5._1;
-var _davydog187$elm_pong$Main$_p6 = {ctor: '_Tuple2', _0: _davydog187$elm_pong$Main$gameWidth / 2, _1: _davydog187$elm_pong$Main$gameHeight / 2};
-var _davydog187$elm_pong$Main$halfWidth = _davydog187$elm_pong$Main$_p6._0;
-var _davydog187$elm_pong$Main$halfHeight = _davydog187$elm_pong$Main$_p6._1;
+var _davydog187$elm_pong$Main$_p8 = {ctor: '_Tuple2', _0: 600, _1: 400};
+var _davydog187$elm_pong$Main$gameWidth = _davydog187$elm_pong$Main$_p8._0;
+var _davydog187$elm_pong$Main$gameHeight = _davydog187$elm_pong$Main$_p8._1;
+var _davydog187$elm_pong$Main$_p9 = {ctor: '_Tuple2', _0: _davydog187$elm_pong$Main$gameWidth / 2, _1: _davydog187$elm_pong$Main$gameHeight / 2};
+var _davydog187$elm_pong$Main$halfWidth = _davydog187$elm_pong$Main$_p9._0;
+var _davydog187$elm_pong$Main$halfHeight = _davydog187$elm_pong$Main$_p9._1;
 var _davydog187$elm_pong$Main$initialSpaceship = {x: 0, y: 0 - _davydog187$elm_pong$Main$halfHeight, vx: 0, vy: 0, score: 0};
 var _davydog187$elm_pong$Main$updateSpaceship = F4(
 	function (t, dir, points, spaceship) {
@@ -12285,8 +12287,8 @@ var _davydog187$elm_pong$Main$decideMovement = F2(
 		var rightCollision = A3(_davydog187$elm_pong$Main$near, invader.x, 2, _davydog187$elm_pong$Main$halfWidth);
 		var leftCollision = A3(_davydog187$elm_pong$Main$near, invader.x, 2, 0 - _davydog187$elm_pong$Main$halfWidth);
 		if (leftCollision || (rightCollision || (upperCollision || lowerCollision))) {
-			var _p7 = A2(_elm_lang$core$Debug$log, 'vy before:', invader.vy);
-			var _p8 = A2(_elm_lang$core$Debug$log, 'vx before:', invader.vx);
+			var _p10 = A2(_elm_lang$core$Debug$log, 'vy before:', invader.vy);
+			var _p11 = A2(_elm_lang$core$Debug$log, 'vx before:', invader.vx);
 			return A2(
 				_davydog187$elm_pong$Main$physicsUpdate,
 				t,
@@ -12314,12 +12316,24 @@ var _davydog187$elm_pong$Main$updateInvader = F3(
 	});
 var _davydog187$elm_pong$Main$updateInvaders = F3(
 	function (t, invaders, bullets) {
-		return A2(
-			_elm_lang$core$List$map,
-			function (i) {
-				return A3(_davydog187$elm_pong$Main$updateInvader, t, bullets, i);
-			},
-			invaders);
+		var _p12 = A2(
+			_elm_lang$core$Debug$log,
+			'invaders before:',
+			_elm_lang$core$List$length(invaders));
+		var aux = A2(
+			_elm_lang$core$List$filter,
+			_davydog187$elm_pong$Main$filterObject,
+			A2(
+				_elm_lang$core$List$map,
+				function (i) {
+					return A3(_davydog187$elm_pong$Main$updateInvader, t, bullets, i);
+				},
+				invaders));
+		var _p13 = A2(
+			_elm_lang$core$Debug$log,
+			'invaders after:',
+			_elm_lang$core$List$length(aux));
+		return aux;
 	});
 var _davydog187$elm_pong$Main$updateBullet = F3(
 	function (t, invaders, bullet) {
@@ -12335,31 +12349,31 @@ var _davydog187$elm_pong$Main$updateBullet = F3(
 	});
 var _davydog187$elm_pong$Main$updateBullets = F3(
 	function (t, bullets, invaders) {
-		var _p9 = _elm_lang$core$List$length(
+		var _p14 = _elm_lang$core$List$length(
 			A2(_elm_lang$core$Debug$log, 'bullets before:', bullets));
 		var aux = A2(
 			_elm_lang$core$List$filter,
-			_davydog187$elm_pong$Main$filterBullet,
+			_davydog187$elm_pong$Main$filterObject,
 			A2(
 				_elm_lang$core$List$map,
 				function (b) {
 					return A3(_davydog187$elm_pong$Main$updateBullet, t, invaders, b);
 				},
 				bullets));
-		var _p10 = _elm_lang$core$List$length(
+		var _p15 = _elm_lang$core$List$length(
 			A2(_elm_lang$core$Debug$log, 'bullets after:', aux));
 		return aux;
 	});
-var _davydog187$elm_pong$Main$view = function (_p11) {
-	var _p12 = _p11;
-	var _p14 = _p12.spaceship;
-	var _p13 = _p12.windowDimensions;
-	var w = _p13._0;
-	var h = _p13._1;
+var _davydog187$elm_pong$Main$view = function (_p16) {
+	var _p17 = _p16;
+	var _p19 = _p17.spaceship;
+	var _p18 = _p17.windowDimensions;
+	var w = _p18._0;
+	var h = _p18._1;
 	var scores = A2(
 		_davydog187$elm_pong$Main$txt,
 		_evancz$elm_graphics$Text$height(50),
-		_elm_lang$core$Basics$toString(_p14.score));
+		_elm_lang$core$Basics$toString(_p19.score));
 	return _evancz$elm_graphics$Element$toHtml(
 		A4(
 			_evancz$elm_graphics$Element$container,
@@ -12382,7 +12396,7 @@ var _davydog187$elm_pong$Main$view = function (_p11) {
 							ctor: '::',
 							_0: A2(
 								_davydog187$elm_pong$Main$make,
-								_p14,
+								_p19,
 								A2(_evancz$elm_graphics$Collage$rect, 10, 40)),
 							_1: {
 								ctor: '::',
@@ -12396,7 +12410,7 @@ var _davydog187$elm_pong$Main$view = function (_p11) {
 										_evancz$elm_graphics$Collage$move,
 										{ctor: '_Tuple2', _0: 0, _1: 40 - (_davydog187$elm_pong$Main$gameHeight / 2)},
 										_evancz$elm_graphics$Collage$toForm(
-											_davydog187$elm_pong$Main$statusMessage(_p12.state))),
+											_davydog187$elm_pong$Main$statusMessage(_p17.state))),
 									_1: {ctor: '[]'}
 								}
 							}
@@ -12412,7 +12426,7 @@ var _davydog187$elm_pong$Main$view = function (_p11) {
 									o,
 									A2(_evancz$elm_graphics$Collage$oval, 10, 40));
 							},
-							_p12.bullets),
+							_p17.bullets),
 						A2(
 							_elm_lang$core$List$map,
 							function (o) {
@@ -12421,7 +12435,7 @@ var _davydog187$elm_pong$Main$view = function (_p11) {
 									o,
 									A2(_evancz$elm_graphics$Collage$rect, 40, 40));
 							},
-							_p12.invaders))))));
+							_p17.invaders))))));
 };
 var _davydog187$elm_pong$Main$getInput = F2(
 	function (game, delta) {
@@ -12488,7 +12502,7 @@ var _davydog187$elm_pong$Main$KeyUp = function (a) {
 var _davydog187$elm_pong$Main$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
-var _davydog187$elm_pong$Main$subscriptions = function (_p15) {
+var _davydog187$elm_pong$Main$subscriptions = function (_p20) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
@@ -12519,54 +12533,54 @@ var _davydog187$elm_pong$Main$initialGame = {
 };
 var _davydog187$elm_pong$Main$Play = {ctor: 'Play'};
 var _davydog187$elm_pong$Main$updateGame = F2(
-	function (_p17, _p16) {
-		var _p18 = _p17;
-		var _p25 = _p18.delta;
-		var _p19 = _p16;
-		var _p24 = _p19.spaceship;
-		var _p23 = _p19.invaders;
-		var _p22 = _p19;
-		var _p21 = _p19.bullets;
+	function (_p22, _p21) {
+		var _p23 = _p22;
+		var _p30 = _p23.delta;
+		var _p24 = _p21;
+		var _p29 = _p24.spaceship;
+		var _p28 = _p24.invaders;
+		var _p27 = _p24;
+		var _p26 = _p24.bullets;
 		var score = 0;
-		var newState = _p18.start ? _davydog187$elm_pong$Main$Play : (_p18.pause ? _davydog187$elm_pong$Main$Pause : _p19.state);
-		if (_p18.reset) {
+		var newState = _p23.start ? _davydog187$elm_pong$Main$Play : (_p23.pause ? _davydog187$elm_pong$Main$Pause : _p24.state);
+		if (_p23.reset) {
 			return _elm_lang$core$Native_Utils.update(
-				_p22,
+				_p27,
 				{state: _davydog187$elm_pong$Main$Pause, spaceship: _davydog187$elm_pong$Main$initialSpaceship, invaders: _davydog187$elm_pong$Main$initialInvader, bullets: _davydog187$elm_pong$Main$initialBullet});
 		} else {
 			var newBullet = function () {
-				if (_p18.space) {
-					var _p20 = A2(_elm_lang$core$Debug$log, 'craft hola', 1);
-					return A2(_davydog187$elm_pong$Main$craftBullet, _p24, _p21);
+				if (_p23.space) {
+					var _p25 = A2(_elm_lang$core$Debug$log, 'craft hola', 1);
+					return A2(_davydog187$elm_pong$Main$craftBullet, _p29, _p26);
 				} else {
 					return {ctor: '[]'};
 				}
 			}();
-			var originalInvaders = _p23;
+			var originalInvaders = _p28;
 			return _elm_lang$core$Native_Utils.update(
-				_p22,
+				_p27,
 				{
 					state: newState,
-					spaceship: A4(_davydog187$elm_pong$Main$updateSpaceship, _p25, _p18.dir, score, _p24),
+					spaceship: A4(_davydog187$elm_pong$Main$updateSpaceship, _p30, _p23.dir, score, _p29),
 					bullets: A2(
 						_elm_lang$core$Basics_ops['++'],
 						newBullet,
-						A3(_davydog187$elm_pong$Main$updateBullets, _p25, _p21, originalInvaders)),
-					invaders: A3(_davydog187$elm_pong$Main$updateInvaders, _p25, _p23, _p21)
+						A3(_davydog187$elm_pong$Main$updateBullets, _p30, _p26, originalInvaders)),
+					invaders: A3(_davydog187$elm_pong$Main$updateInvaders, _p30, _p28, _p26)
 				});
 		}
 	});
 var _davydog187$elm_pong$Main$update = F2(
 	function (msg, game) {
-		var _p26 = msg;
-		switch (_p26.ctor) {
+		var _p31 = msg;
+		switch (_p31.ctor) {
 			case 'KeyDown':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
 						{
-							keysDown: A2(_elm_lang$core$Set$insert, _p26._0, game.keysDown)
+							keysDown: A2(_elm_lang$core$Set$insert, _p31._0, game.keysDown)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -12576,12 +12590,12 @@ var _davydog187$elm_pong$Main$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
 						{
-							keysDown: A2(_elm_lang$core$Set$remove, _p26._0, game.keysDown)
+							keysDown: A2(_elm_lang$core$Set$remove, _p31._0, game.keysDown)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Tick':
-				var input = A2(_davydog187$elm_pong$Main$getInput, game, _p26._0 * 2);
+				var input = A2(_davydog187$elm_pong$Main$getInput, game, _p31._0 * 2);
 				return {
 					ctor: '_Tuple2',
 					_0: A2(_davydog187$elm_pong$Main$updateGame, input, game),
@@ -12592,7 +12606,7 @@ var _davydog187$elm_pong$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
-						{windowDimensions: _p26._0}),
+						{windowDimensions: _p31._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:

@@ -185,8 +185,8 @@ initialSpaceship =
 initialInvader =
     [ { x = 0
       , y = 0
-      , vx = 100
-      , vy = -100
+      , vx = 0
+      , vy = 0
       , scale = 1
       , xProbChange = 0.01
       , yProbChange = 0.01
@@ -314,7 +314,19 @@ updateSpaceship t dir points spaceship =
 
 updateInvaders : Time -> List Invader -> List Bullet -> List Invader
 updateInvaders t invaders bullets =
-    (List.map (\i -> updateInvader t bullets i) invaders)
+    let
+        _ =
+            Debug.log "invaders before:" (List.length invaders)
+    in
+        let
+            aux =
+                List.filter filterObject (List.map (\i -> updateInvader t bullets i) invaders)
+        in
+            let
+                _ =
+                    Debug.log "invaders after:" (List.length aux)
+            in
+                aux
 
 
 updateInvader : Time -> List Bullet -> Invader -> Invader
@@ -403,21 +415,13 @@ updateBullets t bullets invaders =
     in
         let
             aux =
-                List.filter filterBullet (List.map (\b -> updateBullet t invaders b) bullets)
+                List.filter filterObject (List.map (\b -> updateBullet t invaders b) bullets)
         in
             let
                 _ =
                     List.length (Debug.log "bullets after:" aux)
             in
                 aux
-
-
-filterBullet : Bullet -> Bool
-filterBullet bullet =
-    if bullet.x == outOfBounds && bullet.y == outOfBounds then
-        False
-    else
-        True
 
 
 updateBullet : Time -> List Invader -> Bullet -> Bullet
@@ -433,6 +437,13 @@ physicsUpdate t ({ x, y, vx, vy } as obj) =
         | x = x + vx * t
         , y = y + vy * t
     }
+
+
+filterObject ({ x, y } as obj) =
+    if obj.x == outOfBounds && obj.y == outOfBounds then
+        False
+    else
+        True
 
 
 near : Float -> Float -> Float -> Bool
