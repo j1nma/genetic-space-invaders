@@ -16,6 +16,8 @@ import Keyboard exposing (..)
 import Set exposing (Set)
 import Task
 import AnimationFrame
+import Random exposing (..)
+import Tuple
 
 
 main =
@@ -46,7 +48,7 @@ type Msg
 
 getInput : Game -> Float -> Input
 getInput game delta =
-    { space = Set.member (Char.toCode ' ') (game.keysDown)
+    { space = Set.member (Char.toCode 'W') (game.keysDown)
     , reset = Set.member (Char.toCode 'R') (game.keysDown)
     , pause = Set.member (Char.toCode 'P') (game.keysDown)
     , start = Set.member (Char.toCode 'S') (game.keysDown)
@@ -74,7 +76,7 @@ update msg game =
         Tick delta ->
             let
                 input =
-                    getInput game delta
+                    getInput game (delta * 2)
             in
                 ( updateGame input game, Cmd.none )
 
@@ -153,8 +155,11 @@ type alias Invader =
     , y : Float
     , vx : Float
     , vy : Float
-    , lifetime : Int
-    , size : Float
+    , scale : Float
+    , xProbChange : Float
+    , yProbChange : Float
+    , seedX : Seed
+    , seedY : Seed
     }
 
 
@@ -180,10 +185,23 @@ initialSpaceship =
 initialInvader =
     [ { x = 0
       , y = 0
-      , vx = 0
-      , vy = 0
-      , lifetime = 0
-      , size = 1
+      , vx = 100
+      , vy = -100
+      , scale = 1
+      , xProbChange = 0.01
+      , yProbChange = 0.01
+      , seedX = initialSeed 42
+      , seedY = initialSeed 43
+      }
+    , { x = 10
+      , y = 10
+      , vx = 100
+      , vy = -100
+      , scale = 1
+      , xProbChange = 0.01
+      , yProbChange = 0.01
+      , seedX = initialSeed 50
+      , seedY = initialSeed 49
       }
     ]
 
@@ -245,26 +263,41 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
 
                     newBullet =
                         if space then
-                            craftBullet spaceship
+                            let
+                                _ =
+                                    (Debug.log "craft hola" 1)
+                            in
+                                craftBullet spaceship bullets
                         else
                             []
                 in
                     { game
                         | state = newState
                         , spaceship = updateSpaceship delta dir score spaceship
-                        , invaders = updateInvaders delta invaders bullets
                         , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                        , invaders = updateInvaders delta invaders bullets
                     }
 
 
-craftBullet : Spaceship -> List Bullet
-craftBullet spaceship =
-    [ { x = spaceship.x
-      , y = spaceship.y
-      , vx = 0
-      , vy = 200
-      }
-    ]
+craftBullet : Spaceship -> List Bullet -> List Bullet
+craftBullet spaceship bullets =
+    let
+        newBullet =
+            { x = spaceship.x
+            , y = spaceship.y
+            , vx = 0
+            , vy = 200
+            }
+    in
+        if List.any (checkBullet newBullet) bullets then
+            []
+        else
+            [ newBullet ]
+
+
+checkBullet : Bullet -> Bullet -> Bool
+checkBullet b1 b2 =
+    withinBullet b1 b2
 
 
 updateSpaceship : Time -> Int -> Int -> Spaceship -> Spaceship
@@ -289,12 +322,94 @@ updateInvader t bullets invader =
     if (not (List.isEmpty (List.filter (\b -> within invader b) bullets))) then
         { invader | x = outOfBounds, y = outOfBounds }
     else
-        invader
+        decideMovement t invader
+
+
+randomMovement : Time -> Invader -> Invader
+randomMovement t invader =
+    let
+        changeX =
+            probDirChange invader.seedX invader.xProbChange
+
+        newVelX =
+            invader.vx * Tuple.first changeX
+
+        changeY =
+            probDirChange invader.seedY invader.yProbChange
+
+        newVelY =
+            invader.vy * Tuple.first changeY
+    in
+        physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = (Tuple.second changeX), seedY = (Tuple.second changeY) }
+
+
+stepV v lowerCollision upperCollision =
+    if lowerCollision then
+        abs v
+    else if upperCollision then
+        0 - abs v
+    else
+        v
+
+
+decideMovement : Time -> Invader -> Invader
+decideMovement t invader =
+    let
+        leftCollision =
+            near invader.x 2 (-halfWidth)
+
+        rightCollision =
+            near invader.x 2 halfWidth
+
+        upperCollision =
+            near invader.y 2 halfHeight
+
+        lowerCollision =
+            near invader.y 2 (-halfHeight)
+    in
+        if leftCollision || rightCollision || upperCollision || lowerCollision then
+            let
+                _ =
+                    Debug.log "vx before:" invader.vx
+
+                _ =
+                    Debug.log "vy before:" invader.vy
+            in
+                physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
+        else
+            randomMovement t invader
+
+
+probDirChange : Seed -> Float -> ( Float, Seed )
+probDirChange seed p =
+    let
+        generator =
+            float 0 1
+
+        ( addProbability, s ) =
+            step generator seed
+    in
+        if p > addProbability then
+            ( (-1), s )
+        else
+            ( 1, s )
 
 
 updateBullets : Time -> List Bullet -> List Invader -> List Bullet
 updateBullets t bullets invaders =
-    List.filter filterBullet (List.map (\b -> updateBullet t invaders b) bullets)
+    let
+        _ =
+            List.length (Debug.log "bullets before:" bullets)
+    in
+        let
+            aux =
+                List.filter filterBullet (List.map (\b -> updateBullet t invaders b) bullets)
+        in
+            let
+                _ =
+                    List.length (Debug.log "bullets after:" aux)
+            in
+                aux
 
 
 filterBullet : Bullet -> Bool
@@ -326,7 +441,11 @@ near k c n =
 
 
 within bullet invader =
-    near invader.x 8 bullet.x && near invader.y 20 bullet.y
+    near invader.x 20 bullet.x && near invader.y 20 bullet.y
+
+
+withinBullet b1 b2 =
+    near b1.x 30 b2.x && near b1.y 30 b2.y
 
 
 
@@ -349,8 +468,6 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                     gameHeight
                     ([ rect gameWidth gameHeight
                         |> filled pongGreen
-                     , verticalLine gameHeight
-                        |> traced (dashed red)
                      , rect 10 40
                         |> make spaceship
                      , toForm scores
