@@ -48,7 +48,7 @@ type Msg
 
 getInput : Game -> Float -> Input
 getInput game delta =
-    { space = Set.member (Char.toCode 'W') (game.keysDown)
+    { space = Set.member (Char.toCode ' ') (game.keysDown)
     , reset = Set.member (Char.toCode 'R') (game.keysDown)
     , pause = Set.member (Char.toCode 'P') (game.keysDown)
     , start = Set.member (Char.toCode 'S') (game.keysDown)
@@ -138,7 +138,6 @@ type alias Spaceship =
     , y : Float
     , vx : Float
     , vy : Float
-    , score : Int
     }
 
 
@@ -178,15 +177,14 @@ initialSpaceship =
     , y = (-halfHeight)
     , vx = 0
     , vy = 0
-    , score = 0
     }
 
 
 initialInvader =
     [ { x = 0
       , y = 0
-      , vx = 0
-      , vy = 0
+      , vx = -100
+      , vy = 100
       , scale = 1
       , xProbChange = 0.01
       , yProbChange = 0.01
@@ -237,46 +235,47 @@ type alias Input =
 updateGame : Input -> Game -> Game
 updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets } as game) =
     let
-        score =
-            0
-    in
-        let
-            newState =
-                if start then
-                    Play
-                else if (pause) then
-                    Pause
-                else
-                    state
-        in
-            if reset then
-                { game
-                    | state = Pause
-                    , spaceship = initialSpaceship
-                    , invaders = initialInvader
-                    , bullets = initialBullet
-                }
+        newState =
+            if start then
+                Play
+            else if (pause) then
+                Pause
             else
-                let
-                    originalInvaders =
-                        invaders
+                state
+    in
+        if reset then
+            { game
+                | state = Pause
+                , spaceship = initialSpaceship
+                , invaders = initialInvader
+                , bullets = initialBullet
+            }
+        else
+            case state of
+                Play ->
+                    let
+                        originalInvaders =
+                            invaders
 
-                    newBullet =
-                        if space then
-                            let
-                                _ =
-                                    (Debug.log "craft hola" 1)
-                            in
-                                craftBullet spaceship bullets
-                        else
-                            []
-                in
-                    { game
-                        | state = newState
-                        , spaceship = updateSpaceship delta dir score spaceship
-                        , bullets = newBullet ++ updateBullets delta bullets originalInvaders
-                        , invaders = updateInvaders delta invaders bullets
-                    }
+                        newBullet =
+                            if space then
+                                let
+                                    _ =
+                                        (Debug.log "craft hola" 1)
+                                in
+                                    craftBullet spaceship bullets
+                            else
+                                []
+                    in
+                        { game
+                            | state = newState
+                            , spaceship = updateSpaceship delta dir spaceship
+                            , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                            , invaders = updateInvaders delta invaders bullets
+                        }
+
+                Pause ->
+                    { game | state = newState }
 
 
 craftBullet : Spaceship -> List Bullet -> List Bullet
@@ -300,15 +299,14 @@ checkBullet b1 b2 =
     withinBullet b1 b2
 
 
-updateSpaceship : Time -> Int -> Int -> Spaceship -> Spaceship
-updateSpaceship t dir points spaceship =
+updateSpaceship : Time -> Int -> Spaceship -> Spaceship
+updateSpaceship t dir spaceship =
     let
         spaceship1 =
             physicsUpdate t { spaceship | vx = toFloat dir * 200 }
     in
         { spaceship1
             | x = clamp (22 - halfWidth) (halfWidth - 22) spaceship1.x
-            , score = spaceship.score + points
         }
 
 
@@ -466,10 +464,6 @@ withinBullet b1 b2 =
 view : Game -> Html Msg
 view { windowDimensions, state, spaceship, invaders, bullets } =
     let
-        scores : Element
-        scores =
-            txt (Text.height 50) (toString spaceship.score)
-
         ( w, h ) =
             windowDimensions
     in
@@ -481,8 +475,6 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                         |> filled pongGreen
                      , rect 10 40
                         |> make spaceship
-                     , toForm scores
-                        |> move ( 0, gameHeight / 2 - 40 )
                      , toForm (statusMessage state)
                         |> move ( 0, 40 - gameHeight / 2 )
                      ]
@@ -517,7 +509,7 @@ txt f =
 
 
 pauseMessage =
-    "SPACE to start, P to pause, R to reset, WS and &uarr;&darr; to move"
+    "S to start, P to pause, R to reset, &uarr;&darr; to move, SPACE to shoot bullet"
 
 
 make obj shape =
