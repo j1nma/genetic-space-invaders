@@ -1,11 +1,14 @@
 module Initial exposing (..)
 
-import Random exposing (..)
 import Set exposing (Set)
 import Constants exposing (..)
 import Model exposing (..)
+import GeneticHelper exposing (..)
+import Update exposing (..)
+import Genetic exposing (..)
 
 
+initialSpaceship : { vx : Float, vy : Float, x : Float, y : Float }
 initialSpaceship =
     { x = 0
     , y = (-halfHeight)
@@ -14,39 +17,38 @@ initialSpaceship =
     }
 
 
-initialInvader =
-    [ { x = 0
-      , y = 0
-      , vx = -100
-      , vy = 100
-      , scale = 1
-      , xProbChange = 0.01
-      , yProbChange = 0.01
-      , seedX = initialSeed 42
-      , seedY = initialSeed 43
-      }
-    , { x = 10
-      , y = 10
-      , vx = 100
-      , vy = -100
-      , scale = 1
-      , xProbChange = 0.01
-      , yProbChange = 0.01
-      , seedX = initialSeed 50
-      , seedY = initialSeed 49
-      }
-    ]
+initialInvaders : Int -> List Invader
+initialInvaders time =
+    spawnNewInvadersFromBestDna time 15 (initialDna time)
 
 
+
+--Random.initialSeed time
+--    |> Random.step (Random.list 5 randDnaGenerator)
+--    |> Tuple.first
+--    |> spawnNewInvaders time
+
+
+initialBullet : List a
 initialBullet =
     []
 
 
+initialGame :
+    { bullets : List b
+    , invaders : List Invader
+    , keysDown : Set a
+    , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
+    , state : State
+    , windowDimensions : ( Int, Int )
+    , bestSolution : Genetic.IntermediateValue Dna
+    }
 initialGame =
     { keysDown = Set.empty
     , windowDimensions = ( 0, 0 )
     , state = Pause
     , spaceship = initialSpaceship
-    , invaders = initialInvader
+    , invaders = initialInvaders 1212
     , bullets = initialBullet
+    , bestSolution = initialEvolve 1212
     }

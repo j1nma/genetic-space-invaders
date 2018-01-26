@@ -4,6 +4,8 @@ import Model exposing (..)
 import Time exposing (..)
 import Constants exposing (..)
 import Random exposing (..)
+import GeneticHelper exposing (Dna)
+import Array exposing (..)
 
 
 craftBullet : Spaceship -> List Bullet -> List Bullet
@@ -58,9 +60,18 @@ updateInvaders t invaders bullets =
 updateInvader : Time -> List Bullet -> Invader -> Invader
 updateInvader t bullets invader =
     if (not (List.isEmpty (List.filter (\b -> within invader b) bullets))) then
-        { invader | x = outOfBounds, y = outOfBounds }
+        { invader | x = outOfBounds, y = outOfBounds, fitness = 0.0 }
     else
-        decideMovement t invader
+        decideMovement t (increaseFitness invader)
+
+
+increaseFitness : Invader -> Invader
+increaseFitness invader =
+    let
+        oldFitness =
+            invader.fitness
+    in
+        { invader | fitness = oldFitness + 1.0 }
 
 
 randomMovement : Time -> Invader -> Invader
@@ -81,6 +92,7 @@ randomMovement t invader =
         physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = (Tuple.second changeX), seedY = (Tuple.second changeY) }
 
 
+stepV : number -> Bool -> Bool -> number
 stepV v lowerCollision upperCollision =
     if lowerCollision then
         abs v
@@ -158,6 +170,10 @@ updateBullet t invaders bullet =
         physicsUpdate t bullet
 
 
+physicsUpdate :
+    number
+    -> { a | vx : number, vy : number, x : number, y : number }
+    -> { a | vx : number, vy : number, x : number, y : number }
 physicsUpdate t ({ x, y, vx, vy } as obj) =
     { obj
         | x = x + vx * t
@@ -165,6 +181,7 @@ physicsUpdate t ({ x, y, vx, vy } as obj) =
     }
 
 
+filterObject : { a | x : number1, y : number } -> Bool
 filterObject ({ x, y } as obj) =
     if obj.x == outOfBounds && obj.y == outOfBounds then
         False
@@ -177,9 +194,62 @@ near k c n =
     n >= k - c && n <= k + c
 
 
+within : { a | x : Float, y : Float } -> { b | x : Float, y : Float } -> Bool
 within bullet invader =
     near invader.x 20 bullet.x && near invader.y 20 bullet.y
 
 
+withinBullet :
+    { a | x : Float, y : Float }
+    -> { b | x : Float, y : Float }
+    -> Bool
 withinBullet b1 b2 =
     near b1.x 30 b2.x && near b1.y 30 b2.y
+
+
+spawnNewInvaders : Int -> List Dna -> List Invader
+spawnNewInvaders time dnas =
+    dnas
+        |> List.map
+            (\dna ->
+                { x = 0.0
+                , y = 0.0
+                , vx = getValue (Array.get 2 (Array.fromList dna.dna))
+                , vy = getValue (Array.get 3 (Array.fromList dna.dna))
+                , xProbChange = getValue (Array.get 0 (Array.fromList dna.dna))
+                , yProbChange = getValue (Array.get 1 (Array.fromList dna.dna))
+                , seedX = initialSeed time
+                , seedY = initialSeed (-time)
+                , fitness = dna.fitness
+                }
+            )
+
+
+spawnNewInvadersFromBestDna : Int -> Int -> Dna -> List Invader
+spawnNewInvadersFromBestDna time amount dna =
+    case amount of
+        0 ->
+            []
+
+        n ->
+            { x = 0.0
+            , y = 0.0
+            , vx = getValue (Array.get 2 (Array.fromList dna.dna))
+            , vy = getValue (Array.get 3 (Array.fromList dna.dna))
+            , xProbChange = getValue (Array.get 0 (Array.fromList dna.dna))
+            , yProbChange = getValue (Array.get 1 (Array.fromList dna.dna))
+            , seedX = initialSeed time
+            , seedY = initialSeed (-time)
+            , fitness = dna.fitness
+            }
+                :: spawnNewInvadersFromBestDna (time + 1) (n - 1) dna
+
+
+getValue : Maybe Float -> Float
+getValue m =
+    case m of
+        Just v ->
+            v
+
+        Nothing ->
+            Debug.crash "No value on dna list!"

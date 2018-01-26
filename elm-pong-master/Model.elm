@@ -29,9 +29,9 @@ type alias Invader =
     , y : Float
     , vx : Float
     , vy : Float
-    , scale : Float
     , xProbChange : Float
     , yProbChange : Float
     , seedX : Seed
     , seedY : Seed
+    , fitness : Float
     }

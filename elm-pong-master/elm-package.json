@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "Game of pong, based on Evan's blog post. Enhanced with some new features",
-    "repository": "https://github.com/davydog187/elm-pong.git",
+    "summary": "",
+    "repository": "https://github.com/j1nma/genetic-spaceinvaders.git",
     "license": "BSD3",
     "source-directories": [
         "."
@@ -9,6 +9,7 @@
     "exposed-modules": [],
     "dependencies": {
         "Gizra/elm-keyboard-event": "1.0.0 <= v < 2.0.0",
+        "ckoster22/elm-genetic": "1.0.1 <= v < 2.0.0",
         "elm-community/random-extra": "2.0.0 <= v < 3.0.0",
         "elm-lang/animation-frame": "1.0.1 <= v < 2.0.0",
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
@@ -17,7 +18,8 @@
         "elm-lang/keyboard": "1.0.1 <= v < 2.0.0",
         "elm-lang/window": "1.0.1 <= v < 2.0.0",
         "evancz/elm-graphics": "1.0.1 <= v < 2.0.0",
-        "folkertdev/elm-state": "3.0.0 <= v < 4.0.0"
+        "folkertdev/elm-state": "3.0.0 <= v < 4.0.0",
+        "mgold/elm-nonempty-list": "3.1.0 <= v < 4.0.0"
     },
     "elm-version": "0.18.0 <= v < 0.19.0"
 }

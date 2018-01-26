@@ -1,4 +1,4 @@
-module Main exposing (..)
+module BasicSI exposing (..)
 
 import Element exposing (..)
 import Char
@@ -9,17 +9,15 @@ import Keyboard exposing (..)
 import Set exposing (Set)
 import Task
 import AnimationFrame
-import Random exposing (..)
-import Tuple
 import Initial exposing (..)
 import Constants exposing (..)
 import Model exposing (..)
 import Update exposing (..)
 import View exposing (..)
 import Collage exposing (..)
-
-
---import State exposing (state, andThen, State)
+import GeneticHelper exposing (..)
+import Random exposing (..)
+import Genetic exposing (..)
 
 
 main =
@@ -110,6 +108,7 @@ type alias Game =
     , spaceship : Spaceship
     , invaders : List Invader
     , bullets : List Bullet
+    , bestSolution : Genetic.IntermediateValue Dna
     }
 
 
@@ -128,7 +127,7 @@ type alias Input =
 
 
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets } as game) =
+updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution } as game) =
     let
         newState =
             if start then
@@ -142,7 +141,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
             { game
                 | state = Pause
                 , spaceship = initialSpaceship
-                , invaders = initialInvader
+                , invaders = initialInvaders 1212
                 , bullets = initialBullet
             }
         else
@@ -154,11 +153,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
 
                         newBullet =
                             if space then
-                                let
-                                    _ =
-                                        (Debug.log "craft hola" 1)
-                                in
-                                    craftBullet spaceship bullets
+                                craftBullet spaceship bullets
                             else
                                 []
                     in
@@ -166,7 +161,21 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                             | state = newState
                             , spaceship = updateSpaceship delta dir spaceship
                             , bullets = newBullet ++ updateBullets delta bullets originalInvaders
-                            , invaders = updateInvaders delta invaders bullets
+                            , invaders =
+                                let
+                                    updatedInvaders =
+                                        updateInvaders delta invaders bullets
+
+                                    betterSolution =
+                                        (GeneticHelper.evolve (round (inSeconds delta)) bestSolution)
+
+                                    _ =
+                                        Debug.log "update time:" ((inSeconds delta))
+                                in
+                                    if (round ((inSeconds delta) * 1000000)) % 50 == 0 then
+                                        updatedInvaders ++ spawnNewInvadersFromBestDna (round ((inSeconds delta) * 1000000)) 1 (dnaFromValue betterSolution)
+                                    else
+                                        updatedInvaders
                         }
 
                 Pause ->
