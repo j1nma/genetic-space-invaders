@@ -43,16 +43,12 @@ updateSpaceship t dir spaceship =
 
 updateInvaders : Time -> List Invader -> List Bullet -> List Invader
 updateInvaders t invaders bullets =
-    let
-        aux =
-            List.filter filterObject (List.map (\i -> updateInvader t bullets i) invaders)
-    in
-        aux
+    List.filter filterOutOfBoundsObject (List.map (\i -> updateInvader t bullets i) invaders)
 
 
 updateInvader : Time -> List Bullet -> Invader -> Invader
 updateInvader t bullets invader =
-    if (not (List.isEmpty (List.filter (\b -> within invader b) bullets))) then
+    if not (List.isEmpty (List.filter (\b -> within invader b) bullets)) then
         { invader | x = outOfBounds, y = outOfBounds }
     else
         decideMovement t invader
@@ -60,11 +56,7 @@ updateInvader t bullets invader =
 
 updateBullets : Time -> List Bullet -> List Invader -> List Bullet
 updateBullets t bullets invaders =
-    let
-        aux =
-            List.filter filterObject (List.map (\b -> updateBullet t invaders b) bullets)
-    in
-        aux
+    List.filter filterOutOfBoundsObject (List.map (\b -> updateBullet t invaders b) bullets)
 
 
 updateBullet : Time -> List Invader -> Bullet -> Bullet

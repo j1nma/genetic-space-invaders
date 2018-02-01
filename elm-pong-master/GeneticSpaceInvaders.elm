@@ -122,11 +122,7 @@ update msg game =
             ( { game
                 | currentTime = t
                 , mainSeed =
-                    let
-                        _ =
-                            Debug.log "mainSeed" "seeded"
-                    in
-                        initialSeed (round t)
+                    initialSeed (round t)
               }
             , Cmd.none
             )
@@ -236,8 +232,9 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                             updatedInvaders =
                                                 updateInvaders delta invaders bullets
 
-                                            --_ =
-                                            --    Debug.log "best" betterSolution
+                                            _ =
+                                                Debug.log "best" betterSolution
+
                                             betterDna =
                                                 dnaFromValue (Tuple.first betterSolution)
                                         in

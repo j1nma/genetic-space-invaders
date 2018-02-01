@@ -6,29 +6,11 @@ import Constants exposing (..)
 import Random exposing (..)
 
 
-randomMovement : Time -> Invader -> Invader
-randomMovement t invader =
-    let
-        changeX =
-            probDirChange invader.seedX invader.xProbChange
-
-        newVelX =
-            invader.vx * Tuple.first changeX
-
-        changeY =
-            probDirChange invader.seedY invader.yProbChange
-
-        newVelY =
-            invader.vy * Tuple.first changeY
-    in
-        physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = (Tuple.second changeX), seedY = (Tuple.second changeY) }
-
-
 stepV : number -> Bool -> Bool -> number
-stepV v lowerCollision upperCollision =
-    if lowerCollision then
+stepV v negativeCollision positiveCollision =
+    if negativeCollision then
         abs v
-    else if upperCollision then
+    else if positiveCollision then
         0 - abs v
     else
         v
@@ -52,7 +34,7 @@ decideMovement t invader =
         if leftCollision || rightCollision || upperCollision || lowerCollision then
             physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
         else
-            randomMovement t invader
+            physicsUpdate t invader
 
 
 probDirChange : Seed -> Float -> ( Float, Seed )
@@ -81,8 +63,8 @@ physicsUpdate t ({ x, y, vx, vy } as obj) =
     }
 
 
-filterObject : { a | x : Float, y : Float } -> Bool
-filterObject ({ x, y } as obj) =
+filterOutOfBoundsObject : { a | x : Float, y : Float } -> Bool
+filterOutOfBoundsObject ({ x, y } as obj) =
     if obj.x == outOfBounds && obj.y == outOfBounds then
         False
     else
