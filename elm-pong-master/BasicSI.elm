@@ -16,10 +16,22 @@ import Update exposing (..)
 import View exposing (..)
 import Collage exposing (..)
 import GeneticHelper exposing (..)
-import Random exposing (..)
 import Genetic exposing (..)
 
 
+main :
+    Program Never
+        { bestSolution : IntermediateValue Dna
+        , bullets : List Bullet
+        , currentTime : Time
+        , invaders : List Invader
+        , keysDown : Set KeyCode
+        , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
+        , state : State
+        , windowDimensions : ( Int, Int )
+        , hasSpawned : Bool
+        }
+        Msg
 main =
     program
         { init = ( initialGame, initialSizeCmd )
@@ -35,6 +47,7 @@ type Msg
     | WindowResize ( Int, Int )
     | Tick Float
     | NoOp
+    | OnTime Time
 
 
 getInput : Game -> Float -> Input
@@ -56,6 +69,32 @@ getInput game delta =
     }
 
 
+update :
+    Msg
+    ->
+        { bestSolution : IntermediateValue Dna
+        , bullets : List Bullet
+        , currentTime : Time
+        , invaders : List Invader
+        , keysDown : Set KeyCode
+        , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
+        , state : State
+        , windowDimensions : ( Int, Int )
+        , hasSpawned : Bool
+        }
+    ->
+        ( { bestSolution : IntermediateValue Dna
+          , bullets : List Bullet
+          , currentTime : Time
+          , invaders : List Invader
+          , keysDown : Set KeyCode
+          , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
+          , state : State
+          , windowDimensions : ( Int, Int )
+          , hasSpawned : Bool
+          }
+        , Cmd Msg
+        )
 update msg game =
     case msg of
         KeyDown key ->
@@ -69,7 +108,7 @@ update msg game =
                 input =
                     getInput game (delta * 2)
             in
-                ( updateGame input game, Cmd.none )
+                ( updateGame input game, getTime )
 
         WindowResize dim ->
             ( { game | windowDimensions = dim }, Cmd.none )
@@ -77,7 +116,11 @@ update msg game =
         NoOp ->
             ( game, Cmd.none )
 
+        OnTime t ->
+            ( { game | currentTime = t }, Cmd.none )
 
+
+subscriptions : a -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Keyboard.downs KeyDown
@@ -109,6 +152,8 @@ type alias Game =
     , invaders : List Invader
     , bullets : List Bullet
     , bestSolution : Genetic.IntermediateValue Dna
+    , currentTime : Time
+    , hasSpawned : Bool
     }
 
 
@@ -127,7 +172,7 @@ type alias Input =
 
 
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution } as game) =
+updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned } as game) =
     let
         newState =
             if start then
@@ -141,8 +186,10 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
             { game
                 | state = Pause
                 , spaceship = initialSpaceship
-                , invaders = initialInvaders 1212
+                , invaders = initialInvaders (round currentTime)
                 , bullets = initialBullet
+                , bestSolution = initialEvolve (round currentTime)
+                , hasSpawned = False
             }
         else
             case state of
@@ -157,29 +204,50 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                             else
                                 []
                     in
-                        { game
-                            | state = newState
-                            , spaceship = updateSpaceship delta dir spaceship
-                            , bullets = newBullet ++ updateBullets delta bullets originalInvaders
-                            , invaders =
-                                let
-                                    updatedInvaders =
-                                        updateInvaders delta invaders bullets
+                        if (((round (inSeconds currentTime)) % 5) == 0) then
+                            { game
+                                | state = newState
+                                , spaceship = updateSpaceship delta dir spaceship
+                                , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                                , invaders =
+                                    let
+                                        updatedInvaders =
+                                            updateInvaders delta invaders bullets
 
-                                    betterSolution =
-                                        (GeneticHelper.evolve (round (inSeconds delta)) bestSolution)
+                                        betterSolution =
+                                            (GeneticHelper.evolve (round currentTime) bestSolution)
+                                    in
+                                        if not hasSpawned then
+                                            updatedInvaders ++ spawnNewInvadersFromBestDna (round (currentTime)) 1 (dnaFromValue betterSolution)
+                                        else
+                                            updatedInvaders
+                                , hasSpawned = True
+                            }
+                        else
+                            { game
+                                | state = newState
+                                , spaceship = updateSpaceship delta dir spaceship
+                                , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                                , invaders =
+                                    let
+                                        updatedInvaders =
+                                            updateInvaders delta invaders bullets
 
-                                    _ =
-                                        Debug.log "update time:" ((inSeconds delta))
-                                in
-                                    if (round ((inSeconds delta) * 1000000)) % 50 == 0 then
-                                        updatedInvaders ++ spawnNewInvadersFromBestDna (round ((inSeconds delta) * 1000000)) 1 (dnaFromValue betterSolution)
-                                    else
+                                        betterSolution =
+                                            (GeneticHelper.evolve (round currentTime) bestSolution)
+                                    in
                                         updatedInvaders
-                        }
+                                , hasSpawned = False
+                            }
 
                 Pause ->
                     { game | state = newState }
+
+
+getTime : Cmd Msg
+getTime =
+    Time.now
+        |> Task.perform OnTime
 
 
 

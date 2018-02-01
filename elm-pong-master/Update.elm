@@ -43,18 +43,10 @@ updateSpaceship t dir spaceship =
 updateInvaders : Time -> List Invader -> List Bullet -> List Invader
 updateInvaders t invaders bullets =
     let
-        _ =
-            Debug.log "invaders before:" (List.length invaders)
+        aux =
+            List.filter filterObject (List.map (\i -> updateInvader t bullets i) invaders)
     in
-        let
-            aux =
-                List.filter filterObject (List.map (\i -> updateInvader t bullets i) invaders)
-        in
-            let
-                _ =
-                    Debug.log "invaders after:" (List.length aux)
-            in
-                aux
+        aux
 
 
 updateInvader : Time -> List Bullet -> Invader -> Invader
@@ -115,17 +107,10 @@ decideMovement t invader =
             near invader.y 2 halfHeight
 
         lowerCollision =
-            near invader.y 2 (-halfHeight)
+            near invader.y 2 (-halfHeight + 40)
     in
         if leftCollision || rightCollision || upperCollision || lowerCollision then
-            let
-                _ =
-                    Debug.log "vx before:" invader.vx
-
-                _ =
-                    Debug.log "vy before:" invader.vy
-            in
-                physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
+            physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
         else
             randomMovement t invader
 
@@ -148,18 +133,10 @@ probDirChange seed p =
 updateBullets : Time -> List Bullet -> List Invader -> List Bullet
 updateBullets t bullets invaders =
     let
-        _ =
-            List.length (Debug.log "bullets before:" bullets)
+        aux =
+            List.filter filterObject (List.map (\b -> updateBullet t invaders b) bullets)
     in
-        let
-            aux =
-                List.filter filterObject (List.map (\b -> updateBullet t invaders b) bullets)
-        in
-            let
-                _ =
-                    List.length (Debug.log "bullets after:" aux)
-            in
-                aux
+        aux
 
 
 updateBullet : Time -> List Invader -> Bullet -> Bullet

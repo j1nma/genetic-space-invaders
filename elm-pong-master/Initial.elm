@@ -6,6 +6,7 @@ import Model exposing (..)
 import GeneticHelper exposing (..)
 import Update exposing (..)
 import Genetic exposing (..)
+import Time exposing (..)
 
 
 initialSpaceship : { vx : Float, vy : Float, x : Float, y : Float }
@@ -42,6 +43,8 @@ initialGame :
     , state : State
     , windowDimensions : ( Int, Int )
     , bestSolution : Genetic.IntermediateValue Dna
+    , currentTime : Time
+    , hasSpawned : Bool
     }
 initialGame =
     { keysDown = Set.empty
@@ -51,4 +54,6 @@ initialGame =
     , invaders = initialInvaders 1212
     , bullets = initialBullet
     , bestSolution = initialEvolve 1212
+    , currentTime = 0.0
+    , hasSpawned = False
     }
