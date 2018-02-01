@@ -12825,12 +12825,13 @@ var _j1nma$genetic_spaceinvaders$Model$Bullet = F4(
 	function (a, b, c, d) {
 		return {x: a, y: b, vx: c, vy: d};
 	});
-var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h, fitness: i};
+var _j1nma$genetic_spaceinvaders$Model$Invader = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h};
 	});
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
+var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 5;
 var _j1nma$genetic_spaceinvaders$Constants$outOfBounds = 1000;
 var _j1nma$genetic_spaceinvaders$Constants$_p0 = {ctor: '_Tuple2', _0: 600, _1: 400};
 var _j1nma$genetic_spaceinvaders$Constants$gameWidth = _j1nma$genetic_spaceinvaders$Constants$_p0._0;
@@ -12840,10 +12841,25 @@ var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvad
 var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
 var _j1nma$genetic_spaceinvaders$Constants$leftArrow = 37;
 var _j1nma$genetic_spaceinvaders$Constants$rightArrow = 39;
+var _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition = function (seed) {
+	var randomHeightGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
+	var randomWidthGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
+	var _p0 = A2(_elm_lang$core$Random$step, randomWidthGenerator, seed);
+	var w = _p0._0;
+	var seedY = _p0._1;
+	var _p1 = A2(_elm_lang$core$Random$step, randomHeightGenerator, seedY);
+	var h = _p1._0;
+	var newSeed = _p1._1;
+	return {
+		ctor: '_Tuple2',
+		_0: {ctor: '_Tuple2', _0: w, _1: h},
+		_1: newSeed
+	};
+};
 var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
-	var _p0 = m;
-	if (_p0.ctor === 'Just') {
-		return _p0._0;
+	var _p2 = m;
+	if (_p2.ctor === 'Just') {
+		return _p2._0;
 	} else {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'Auxiliary',
@@ -12851,7 +12867,7 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
 				start: {line: 112, column: 5},
 				end: {line: 117, column: 48}
 			},
-			_p0)('No value on dna list!');
+			_p2)('No value on dna list!');
 	}
 };
 var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
@@ -12866,24 +12882,24 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
 	function (b1, b2) {
 		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.x, 30, b2.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.y, 30, b2.y);
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$filterObject = function (_p2) {
-	var _p3 = _p2;
-	var _p4 = _p3;
-	return (_elm_lang$core$Native_Utils.eq(_p4.x, _j1nma$genetic_spaceinvaders$Constants$outOfBounds) && _elm_lang$core$Native_Utils.eq(_p4.y, _j1nma$genetic_spaceinvaders$Constants$outOfBounds)) ? false : true;
+var _j1nma$genetic_spaceinvaders$Auxiliary$filterObject = function (_p4) {
+	var _p5 = _p4;
+	var _p6 = _p5;
+	return (_elm_lang$core$Native_Utils.eq(_p6.x, _j1nma$genetic_spaceinvaders$Constants$outOfBounds) && _elm_lang$core$Native_Utils.eq(_p6.y, _j1nma$genetic_spaceinvaders$Constants$outOfBounds)) ? false : true;
 };
 var _j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate = F2(
-	function (t, _p5) {
-		var _p6 = _p5;
+	function (t, _p7) {
+		var _p8 = _p7;
 		return _elm_lang$core$Native_Utils.update(
-			_p6,
-			{x: _p6.x + (_p6.vx * t), y: _p6.y + (_p6.vy * t)});
+			_p8,
+			{x: _p8.x + (_p8.vx * t), y: _p8.y + (_p8.vy * t)});
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$probDirChange = F2(
 	function (seed, p) {
 		var generator = A2(_elm_lang$core$Random$float, 0, 1);
-		var _p7 = A2(_elm_lang$core$Random$step, generator, seed);
-		var addProbability = _p7._0;
-		var s = _p7._1;
+		var _p9 = A2(_elm_lang$core$Random$step, generator, seed);
+		var addProbability = _p9._0;
+		var s = _p9._1;
 		return (_elm_lang$core$Native_Utils.cmp(p, addProbability) > 0) ? {ctor: '_Tuple2', _0: -1, _1: s} : {ctor: '_Tuple2', _0: 1, _1: s};
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$stepV = F3(
@@ -12910,10 +12926,10 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$randomMovement = F2(
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$decideMovement = F2(
 	function (t, invader) {
-		var lowerCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 40);
-		var upperCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, _j1nma$genetic_spaceinvaders$Constants$halfHeight);
-		var rightCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, _j1nma$genetic_spaceinvaders$Constants$halfWidth);
-		var leftCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, 0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth);
+		var lowerCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60);
+		var upperCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
+		var rightCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
+		var leftCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20);
 		return (leftCollision || (rightCollision || (upperCollision || lowerCollision))) ? A2(
 			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
 			t,
@@ -12938,7 +12954,7 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$randomProbabilityGenerator = A2(
 var _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator = A2(
 	_elm_lang$core$Random$map,
 	function (randDna) {
-		return {dna: randDna, fitness: 0.0};
+		return {genes: randDna, fitness: 0.0};
 	},
 	A3(
 		_elm_lang$core$Random$map2,
@@ -12951,13 +12967,6 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator = A2(
 			_elm_lang$core$Random$list,
 			2,
 			A2(_elm_lang$core$Random$float, -100, 100))));
-var _j1nma$genetic_spaceinvaders$GeneticHelper$runDnaGenerator = function (time) {
-	return _elm_lang$core$Tuple$first(
-		A2(
-			_elm_lang$core$Random$step,
-			_j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator,
-			_elm_lang$core$Random$initialSeed(time)));
-};
 var _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution = function (dna) {
 	return dna.fitness;
 };
@@ -12969,13 +12978,13 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$crossoverDnas = F2(
 	function (dna1, dna2) {
 		var _p0 = {
 			ctor: '_Tuple2',
-			_0: A2(_elm_lang$core$List$take, _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index, dna1.dna),
-			_1: A2(_elm_lang$core$List$drop, _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index, dna2.dna)
+			_0: A2(_elm_lang$core$List$take, _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index, dna1.genes),
+			_1: A2(_elm_lang$core$List$drop, _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index, dna2.genes)
 		};
 		var dnaPart1 = _p0._0;
 		var dnaPart2 = _p0._1;
 		return {
-			dna: A2(_elm_lang$core$List$append, dnaPart1, dnaPart2),
+			genes: A2(_elm_lang$core$List$append, dnaPart1, dnaPart2),
 			fitness: (dna1.fitness + dna2.fitness) / 2
 		};
 	});
@@ -12988,7 +12997,7 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna = function (dna) {
 		F3(
 			function (randomIndex, randomVelGene, randomProbGene) {
 				return function (randDna) {
-					return {dna: randDna, fitness: dna.fitness + 1.0};
+					return {genes: randDna, fitness: dna.fitness + 1.0};
 				}(
 					A2(
 						_elm_lang$core$List$indexedMap,
@@ -12996,140 +13005,78 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna = function (dna) {
 							function (index, gene) {
 								return _elm_lang$core$Native_Utils.eq(index, randomIndex) ? ((_elm_lang$core$Native_Utils.cmp(index, _j1nma$genetic_spaceinvaders$GeneticHelper$indexWhereProbabilitiesEnd) > -1) ? randomVelGene : randomProbGene) : gene;
 							}),
-						dna.dna));
+						dna.genes));
 			}),
 		randomIndexGenerator,
 		randomVelGenerator,
 		randomProbGenerator);
 };
-var _j1nma$genetic_spaceinvaders$GeneticHelper$runMutatedDnaGenerator = F2(
-	function (time, dna) {
-		return _elm_lang$core$Tuple$first(
-			A2(
-				_elm_lang$core$Random$step,
-				_j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna(dna),
-				_elm_lang$core$Random$initialSeed(time)));
-	});
-var _j1nma$genetic_spaceinvaders$GeneticHelper$myOptions = {randomDnaGenerator: _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator, evaluateSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution, crossoverDnas: _j1nma$genetic_spaceinvaders$GeneticHelper$crossoverDnas, mutateDna: _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna, isDoneEvolving: _j1nma$genetic_spaceinvaders$GeneticHelper$isDoneEvolving, method: _ckoster22$elm_genetic$Genetic$MinimizePenalty};
-var _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve = function (time) {
-	return _elm_lang$core$Tuple$first(
-		A2(
-			_elm_lang$core$Random$step,
-			_ckoster22$elm_genetic$Genetic$executeInitialStep(_j1nma$genetic_spaceinvaders$GeneticHelper$myOptions),
-			_elm_lang$core$Random$initialSeed(time)));
+var _j1nma$genetic_spaceinvaders$GeneticHelper$myOptions = {randomDnaGenerator: _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator, evaluateSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution, crossoverDnas: _j1nma$genetic_spaceinvaders$GeneticHelper$crossoverDnas, mutateDna: _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna, isDoneEvolving: _j1nma$genetic_spaceinvaders$GeneticHelper$isDoneEvolving, method: _ckoster22$elm_genetic$Genetic$MaximizeScore};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve = function (seed) {
+	return A2(
+		_elm_lang$core$Random$step,
+		_ckoster22$elm_genetic$Genetic$executeInitialStep(_j1nma$genetic_spaceinvaders$GeneticHelper$myOptions),
+		seed);
 };
-var _j1nma$genetic_spaceinvaders$GeneticHelper$initialDna = function (time) {
+var _j1nma$genetic_spaceinvaders$GeneticHelper$initialDna = function (seed) {
 	return _ckoster22$elm_genetic$Genetic$dnaFromValue(
-		_j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(time));
+		_elm_lang$core$Tuple$first(
+			_j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(seed)));
 };
 var _j1nma$genetic_spaceinvaders$GeneticHelper$evolve = F2(
-	function (time, intermediate) {
-		return _elm_lang$core$Tuple$first(
-			A2(
-				_elm_lang$core$Random$step,
-				A2(_ckoster22$elm_genetic$Genetic$executeStep, _j1nma$genetic_spaceinvaders$GeneticHelper$myOptions, intermediate),
-				_elm_lang$core$Random$initialSeed(time)));
+	function (seed, intermediate) {
+		return A2(
+			_elm_lang$core$Random$step,
+			A2(_ckoster22$elm_genetic$Genetic$executeStep, _j1nma$genetic_spaceinvaders$GeneticHelper$myOptions, intermediate),
+			seed);
 	});
-var _j1nma$genetic_spaceinvaders$GeneticHelper$main = _elm_lang$virtual_dom$Native_VirtualDom.staticProgram(
-	function () {
-		var first = _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(10);
-		var second = A2(_j1nma$genetic_spaceinvaders$GeneticHelper$evolve, 12, first);
-		var third = A2(_j1nma$genetic_spaceinvaders$GeneticHelper$evolve, 13, second);
-		return _elm_lang$html$Html$text(
-			A2(
-				F2(
-					function (x, y) {
-						return A2(_elm_lang$core$Basics_ops['++'], x, y);
-					}),
-				_elm_lang$core$Basics$toString(
-					_ckoster22$elm_genetic$Genetic$numGenerationsFromValue(first)),
-				A2(
-					F2(
-						function (x, y) {
-							return A2(_elm_lang$core$Basics_ops['++'], x, y);
-						}),
-					_elm_lang$core$Basics$toString(
-						_ckoster22$elm_genetic$Genetic$numGenerationsFromValue(second)),
-					_elm_lang$core$Basics$toString(
-						_ckoster22$elm_genetic$Genetic$numGenerationsFromValue(third)))));
-	}());
 var _j1nma$genetic_spaceinvaders$GeneticHelper$Dna = F2(
 	function (a, b) {
-		return {dna: a, fitness: b};
+		return {genes: a, fitness: b};
 	});
 var _j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna = F3(
-	function (time, amount, dna) {
+	function (seed, amount, dna) {
 		var _p0 = amount;
 		if (_p0 === 0) {
 			return {ctor: '[]'};
 		} else {
+			var _p1 = A2(_elm_lang$core$Debug$log, 'genes', dna.genes);
+			var randomPositionAndSeed = _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition(seed);
+			var newSeed = _elm_lang$core$Tuple$second(randomPositionAndSeed);
+			var randomP = _elm_lang$core$Tuple$first(randomPositionAndSeed);
+			var newX = _elm_lang$core$Tuple$first(randomP);
+			var newY = _elm_lang$core$Tuple$second(randomP);
 			return {
 				ctor: '::',
 				_0: {
-					x: 0.0,
-					y: 0.0,
+					x: newX,
+					y: newY,
 					vx: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
 						A2(
 							_elm_lang$core$Array$get,
 							2,
-							_elm_lang$core$Array$fromList(dna.dna))),
+							_elm_lang$core$Array$fromList(dna.genes))),
 					vy: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
 						A2(
 							_elm_lang$core$Array$get,
 							3,
-							_elm_lang$core$Array$fromList(dna.dna))),
+							_elm_lang$core$Array$fromList(dna.genes))),
 					xProbChange: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
 						A2(
 							_elm_lang$core$Array$get,
 							0,
-							_elm_lang$core$Array$fromList(dna.dna))),
+							_elm_lang$core$Array$fromList(dna.genes))),
 					yProbChange: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
 						A2(
 							_elm_lang$core$Array$get,
 							1,
-							_elm_lang$core$Array$fromList(dna.dna))),
-					seedX: _elm_lang$core$Random$initialSeed(time),
-					seedY: _elm_lang$core$Random$initialSeed(0 - time),
-					fitness: dna.fitness + 1.0
+							_elm_lang$core$Array$fromList(dna.genes))),
+					seedX: newSeed,
+					seedY: newSeed
 				},
-				_1: A3(_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna, time + 1, _p0 - 1, dna)
+				_1: A3(_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna, newSeed, _p0 - 1, dna)
 			};
 		}
-	});
-var _j1nma$genetic_spaceinvaders$Update$spawnNewInvaders = F2(
-	function (time, dnas) {
-		return A2(
-			_elm_lang$core$List$map,
-			function (dna) {
-				return {
-					x: 0.0,
-					y: 0.0,
-					vx: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
-						A2(
-							_elm_lang$core$Array$get,
-							2,
-							_elm_lang$core$Array$fromList(dna.dna))),
-					vy: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
-						A2(
-							_elm_lang$core$Array$get,
-							3,
-							_elm_lang$core$Array$fromList(dna.dna))),
-					xProbChange: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
-						A2(
-							_elm_lang$core$Array$get,
-							0,
-							_elm_lang$core$Array$fromList(dna.dna))),
-					yProbChange: _j1nma$genetic_spaceinvaders$Auxiliary$getValue(
-						A2(
-							_elm_lang$core$Array$get,
-							1,
-							_elm_lang$core$Array$fromList(dna.dna))),
-					seedX: _elm_lang$core$Random$initialSeed(time),
-					seedY: _elm_lang$core$Random$initialSeed(0 - time),
-					fitness: dna.fitness
-				};
-			},
-			dnas);
 	});
 var _j1nma$genetic_spaceinvaders$Update$updateBullet = F3(
 	function (t, invaders, bullet) {
@@ -13156,12 +13103,6 @@ var _j1nma$genetic_spaceinvaders$Update$updateBullets = F3(
 				bullets));
 		return aux;
 	});
-var _j1nma$genetic_spaceinvaders$Update$increaseFitness = function (invader) {
-	var oldFitness = invader.fitness;
-	return _elm_lang$core$Native_Utils.update(
-		invader,
-		{fitness: oldFitness + 1.0});
-};
 var _j1nma$genetic_spaceinvaders$Update$updateInvader = F3(
 	function (t, bullets, invader) {
 		return (!_elm_lang$core$List$isEmpty(
@@ -13172,10 +13113,7 @@ var _j1nma$genetic_spaceinvaders$Update$updateInvader = F3(
 				},
 				bullets))) ? _elm_lang$core$Native_Utils.update(
 			invader,
-			{x: _j1nma$genetic_spaceinvaders$Constants$outOfBounds, y: _j1nma$genetic_spaceinvaders$Constants$outOfBounds, fitness: 0.0}) : A2(
-			_j1nma$genetic_spaceinvaders$Auxiliary$decideMovement,
-			t,
-			_j1nma$genetic_spaceinvaders$Update$increaseFitness(invader));
+			{x: _j1nma$genetic_spaceinvaders$Constants$outOfBounds, y: _j1nma$genetic_spaceinvaders$Constants$outOfBounds}) : A2(_j1nma$genetic_spaceinvaders$Auxiliary$decideMovement, t, invader);
 	});
 var _j1nma$genetic_spaceinvaders$Update$updateInvaders = F3(
 	function (t, invaders, bullets) {
@@ -13223,12 +13161,12 @@ var _j1nma$genetic_spaceinvaders$Update$craftBullet = F2(
 		};
 	});
 var _j1nma$genetic_spaceinvaders$Initial$initialBullet = {ctor: '[]'};
-var _j1nma$genetic_spaceinvaders$Initial$initialInvaders = function (time) {
+var _j1nma$genetic_spaceinvaders$Initial$initialInvaders = function (seed) {
 	return A3(
 		_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna,
-		time,
-		10,
-		_j1nma$genetic_spaceinvaders$GeneticHelper$initialDna(time));
+		seed,
+		_j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders,
+		_j1nma$genetic_spaceinvaders$GeneticHelper$initialDna(seed));
 };
 var _j1nma$genetic_spaceinvaders$Initial$initialSpaceship = {x: 0, y: 0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight, vx: 0, vy: 0};
 var _j1nma$genetic_spaceinvaders$Initial$initialGame = {
@@ -13236,11 +13174,13 @@ var _j1nma$genetic_spaceinvaders$Initial$initialGame = {
 	windowDimensions: {ctor: '_Tuple2', _0: 0, _1: 0},
 	state: _j1nma$genetic_spaceinvaders$Model$Pause,
 	spaceship: _j1nma$genetic_spaceinvaders$Initial$initialSpaceship,
-	invaders: _j1nma$genetic_spaceinvaders$Initial$initialInvaders(1212),
+	invaders: {ctor: '[]'},
 	bullets: _j1nma$genetic_spaceinvaders$Initial$initialBullet,
-	bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(1212),
+	bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(
+		_elm_lang$core$Random$initialSeed(0)),
 	currentTime: 0.0,
-	hasSpawned: false
+	hasSpawned: false,
+	mainSeed: _elm_lang$core$Random$initialSeed(0)
 };
 var _j1nma$genetic_spaceinvaders$View$makeInvader = function (obj) {
 	return A2(
@@ -13271,7 +13211,6 @@ var _j1nma$genetic_spaceinvaders$View$make = F2(
 			A2(_evancz$elm_graphics$Collage$filled, _elm_lang$core$Color$white, shape));
 	});
 var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
-var _j1nma$genetic_spaceinvaders$View$whiteText = A3(_elm_lang$core$Color$rgb, 255, 255, 255);
 var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
 	return function (_p0) {
 		return _evancz$elm_graphics$Element$leftAligned(
@@ -13279,7 +13218,7 @@ var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
 				_evancz$elm_graphics$Text$monospace(
 					A2(
 						_evancz$elm_graphics$Text$color,
-						_j1nma$genetic_spaceinvaders$View$whiteText,
+						_elm_lang$core$Color$yellow,
 						_evancz$elm_graphics$Text$fromString(_p0)))));
 	};
 };
@@ -13296,9 +13235,17 @@ var _j1nma$genetic_spaceinvaders$View$verticalLine = function (height) {
 			}
 		});
 };
-var _j1nma$genetic_spaceinvaders$View$statusMessage = function (state) {
+var _j1nma$genetic_spaceinvaders$View$statusTitle = function (state) {
 	var _p1 = state;
 	if (_p1.ctor === 'Play') {
+		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
+	} else {
+		return A3(_evancz$elm_graphics$Element$image, 400, 340, '../res/mainTitle.png');
+	}
+};
+var _j1nma$genetic_spaceinvaders$View$statusMessage = function (state) {
+	var _p2 = state;
+	if (_p2.ctor === 'Play') {
 		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 	} else {
 		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$pauseMessage);
@@ -13306,6 +13253,7 @@ var _j1nma$genetic_spaceinvaders$View$statusMessage = function (state) {
 };
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view = function (_p0) {
 	var _p1 = _p0;
+	var _p3 = _p1.state;
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
@@ -13333,15 +13281,7 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view = function (_p0) {
 										_evancz$elm_graphics$Collage$filled,
 										_j1nma$genetic_spaceinvaders$View$blackBackground,
 										A2(_evancz$elm_graphics$Collage$rect, _j1nma$genetic_spaceinvaders$Constants$gameWidth, _j1nma$genetic_spaceinvaders$Constants$gameHeight)),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_evancz$elm_graphics$Collage$move,
-											{ctor: '_Tuple2', _0: 0, _1: 80 - (_j1nma$genetic_spaceinvaders$Constants$gameHeight / 2)},
-											_evancz$elm_graphics$Collage$toForm(
-												_j1nma$genetic_spaceinvaders$View$statusMessage(_p1.state))),
-										_1: {ctor: '[]'}
-									}
+									_1: {ctor: '[]'}
 								},
 								A2(
 									_elm_lang$core$Basics_ops['++'],
@@ -13362,44 +13302,61 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view = function (_p0) {
 										{
 											ctor: '::',
 											_0: _j1nma$genetic_spaceinvaders$View$makeSpaceship(_p1.spaceship),
-											_1: {ctor: '[]'}
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_evancz$elm_graphics$Collage$move,
+													{ctor: '_Tuple2', _0: 0, _1: 30},
+													_evancz$elm_graphics$Collage$toForm(
+														_j1nma$genetic_spaceinvaders$View$statusTitle(_p3))),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_evancz$elm_graphics$Collage$move,
+														{ctor: '_Tuple2', _0: 0, _1: 80 - (_j1nma$genetic_spaceinvaders$Constants$gameHeight / 2)},
+														_evancz$elm_graphics$Collage$toForm(
+															_j1nma$genetic_spaceinvaders$View$statusMessage(_p3))),
+													_1: {ctor: '[]'}
+												}
+											}
 										}))))));
 			}(),
 			_1: {ctor: '[]'}
 		});
 };
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame = F2(
-	function (_p4, _p3) {
-		var _p5 = _p4;
-		var _p18 = _p5.dir;
-		var _p17 = _p5.delta;
-		var _p6 = _p3;
-		var _p16 = _p6.state;
-		var _p15 = _p6.spaceship;
-		var _p14 = _p6.invaders;
-		var _p13 = _p6.hasSpawned;
-		var _p12 = _p6;
-		var _p11 = _p6.currentTime;
-		var _p10 = _p6.bullets;
-		var _p9 = _p6.bestSolution;
-		var newState = _p5.start ? _j1nma$genetic_spaceinvaders$Model$Play : (_p5.pause ? _j1nma$genetic_spaceinvaders$Model$Pause : _p16);
-		if (_p5.reset) {
+	function (_p5, _p4) {
+		var _p6 = _p5;
+		var _p19 = _p6.dir;
+		var _p18 = _p6.delta;
+		var _p7 = _p4;
+		var _p17 = _p7.state;
+		var _p16 = _p7.spaceship;
+		var _p15 = _p7.mainSeed;
+		var _p14 = _p7.invaders;
+		var _p13 = _p7.hasSpawned;
+		var _p12 = _p7;
+		var _p11 = _p7.currentTime;
+		var _p10 = _p7.bullets;
+		var _p9 = _p7.bestSolution;
+		var newState = _p6.start ? _j1nma$genetic_spaceinvaders$Model$Play : (_p6.pause ? _j1nma$genetic_spaceinvaders$Model$Pause : _p17);
+		if (_p6.reset) {
 			return _elm_lang$core$Native_Utils.update(
 				_p12,
 				{
 					state: _j1nma$genetic_spaceinvaders$Model$Pause,
 					spaceship: _j1nma$genetic_spaceinvaders$Initial$initialSpaceship,
-					invaders: _j1nma$genetic_spaceinvaders$Initial$initialInvaders(
-						_elm_lang$core$Basics$round(_p11)),
+					invaders: {ctor: '[]'},
 					bullets: _j1nma$genetic_spaceinvaders$Initial$initialBullet,
-					bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(
-						_elm_lang$core$Basics$round(_p11)),
-					hasSpawned: false
+					bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(_p15),
+					hasSpawned: false,
+					mainSeed: _elm_lang$core$Random$initialSeed(
+						_elm_lang$core$Basics$round(_p11))
 				});
 		} else {
-			var _p7 = _p16;
-			if (_p7.ctor === 'Play') {
-				var newBullet = _p5.space ? A2(_j1nma$genetic_spaceinvaders$Update$craftBullet, _p15, _p10) : {ctor: '[]'};
+			var _p8 = _p17;
+			if (_p8.ctor === 'Play') {
+				var newBullet = _p6.space ? A2(_j1nma$genetic_spaceinvaders$Update$craftBullet, _p16, _p10) : {ctor: '[]'};
 				var originalInvaders = _p14;
 				if (_elm_lang$core$Native_Utils.eq(
 					A2(
@@ -13410,47 +13367,44 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame = F2(
 					0)) {
 					var betterSolution = (!_p13) ? A2(
 						_j1nma$genetic_spaceinvaders$GeneticHelper$evolve,
-						_elm_lang$core$Basics$round(_p11),
-						_p9) : _p9;
+						_elm_lang$core$Tuple$second(_p9),
+						_elm_lang$core$Tuple$first(_p9)) : _p9;
 					return _elm_lang$core$Native_Utils.update(
 						_p12,
 						{
 							state: newState,
-							spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p17, _p18, _p15),
+							spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p18, _p19, _p16),
 							bullets: A2(
 								_elm_lang$core$Basics_ops['++'],
 								newBullet,
-								A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p17, _p10, originalInvaders)),
+								A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p18, _p10, originalInvaders)),
 							bestSolution: betterSolution,
 							invaders: function () {
-								var _p8 = A2(
-									_elm_lang$core$Debug$log,
-									'best gen',
-									_ckoster22$elm_genetic$Genetic$numGenerationsFromValue(betterSolution));
-								var updatedInvaders = A3(_j1nma$genetic_spaceinvaders$Update$updateInvaders, _p17, _p14, _p10);
+								var betterDna = _ckoster22$elm_genetic$Genetic$dnaFromValue(
+									_elm_lang$core$Tuple$first(betterSolution));
+								var updatedInvaders = A3(_j1nma$genetic_spaceinvaders$Update$updateInvaders, _p18, _p14, _p10);
 								return (!_p13) ? A2(
 									_elm_lang$core$Basics_ops['++'],
 									updatedInvaders,
-									A3(
-										_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna,
-										_elm_lang$core$Basics$round(_p11),
-										1,
-										_ckoster22$elm_genetic$Genetic$dnaFromValue(betterSolution))) : updatedInvaders;
+									A3(_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna, _p15, _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders, betterDna)) : updatedInvaders;
 							}(),
-							hasSpawned: true
+							hasSpawned: true,
+							mainSeed: _elm_lang$core$Tuple$second(betterSolution)
 						});
 				} else {
 					return _elm_lang$core$Native_Utils.update(
 						_p12,
 						{
 							state: newState,
-							spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p17, _p18, _p15),
+							spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p18, _p19, _p16),
 							bullets: A2(
 								_elm_lang$core$Basics_ops['++'],
 								newBullet,
-								A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p17, _p10, originalInvaders)),
-							invaders: A3(_j1nma$genetic_spaceinvaders$Update$updateInvaders, _p17, _p14, _p10),
-							hasSpawned: false
+								A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p18, _p10, originalInvaders)),
+							invaders: A3(_j1nma$genetic_spaceinvaders$Update$updateInvaders, _p18, _p14, _p10),
+							hasSpawned: false,
+							mainSeed: _elm_lang$core$Random$initialSeed(
+								_elm_lang$core$Basics$round(_p11))
 						});
 				}
 			} else {
@@ -13487,10 +13441,27 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput = F2(
 			delta: _elm_lang$core$Time$inSeconds(delta)
 		};
 	});
-var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Game = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {keysDown: a, windowDimensions: b, state: c, spaceship: d, invaders: e, bullets: f, bestSolution: g, currentTime: h, hasSpawned: i};
-	});
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Game = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {keysDown: a, windowDimensions: b, state: c, spaceship: d, invaders: e, bullets: f, bestSolution: g, currentTime: h, hasSpawned: i, mainSeed: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Input = F6(
 	function (a, b, c, d, e, f) {
 		return {space: a, reset: b, pause: c, start: d, dir: e, delta: f};
@@ -13501,15 +13472,15 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$OnTime = function (a) {
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getTime = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$OnTime, _elm_lang$core$Time$now);
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 	function (msg, game) {
-		var _p19 = msg;
-		switch (_p19.ctor) {
+		var _p20 = msg;
+		switch (_p20.ctor) {
 			case 'KeyDown':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
 						{
-							keysDown: A2(_elm_lang$core$Set$insert, _p19._0, game.keysDown)
+							keysDown: A2(_elm_lang$core$Set$insert, _p20._0, game.keysDown)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -13519,12 +13490,12 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
 						{
-							keysDown: A2(_elm_lang$core$Set$remove, _p19._0, game.keysDown)
+							keysDown: A2(_elm_lang$core$Set$remove, _p20._0, game.keysDown)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Tick':
-				var input = A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput, game, _p19._0 * 2);
+				var input = A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput, game, _p20._0 * 2);
 				return {
 					ctor: '_Tuple2',
 					_0: A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame, input, game),
@@ -13535,17 +13506,25 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
-						{windowDimensions: _p19._0}),
+						{windowDimensions: _p20._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: game, _1: _elm_lang$core$Platform_Cmd$none};
 			default:
+				var _p22 = _p20._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
-						{currentTime: _p19._0}),
+						{
+							currentTime: _p22,
+							mainSeed: function () {
+								var _p21 = A2(_elm_lang$core$Debug$log, 'mainSeed', 'seeded');
+								return _elm_lang$core$Random$initialSeed(
+									_elm_lang$core$Basics$round(_p22));
+							}()
+						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
@@ -13568,7 +13547,7 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$KeyUp = function (a) {
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$subscriptions = function (_p20) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$subscriptions = function (_p23) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',

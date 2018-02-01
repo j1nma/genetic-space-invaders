@@ -38,16 +38,16 @@ decideMovement : Time -> Invader -> Invader
 decideMovement t invader =
     let
         leftCollision =
-            near invader.x 2 (-halfWidth)
+            near invader.x 2 (-halfWidth + 20)
 
         rightCollision =
-            near invader.x 2 halfWidth
+            near invader.x 2 (halfWidth - 20)
 
         upperCollision =
-            near invader.y 2 halfHeight
+            near invader.y 2 (halfHeight - 20)
 
         lowerCollision =
-            near invader.y 2 (-halfHeight + 40)
+            near invader.y 2 (-halfHeight + 60)
     in
         if leftCollision || rightCollision || upperCollision || lowerCollision then
             physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
@@ -115,3 +115,22 @@ getValue m =
 
         Nothing ->
             Debug.crash "No value on dna list!"
+
+
+randomPosition : Seed -> ( ( Float, Float ), Seed )
+randomPosition seed =
+    let
+        randomWidthGenerator =
+            Random.float (-halfWidth + 20) (halfWidth - 20)
+
+        randomHeightGenerator =
+            Random.float (-halfHeight + 60) (halfHeight - 20)
+    in
+        let
+            ( w, seedY ) =
+                Random.step randomWidthGenerator seed
+
+            ( h, newSeed ) =
+                Random.step randomHeightGenerator seedY
+        in
+            ( ( w, h ), newSeed )

@@ -33,5 +33,4 @@ type alias Invader =
     , yProbChange : Float
     , seedX : Seed
     , seedY : Seed
-    , fitness : Float
     }

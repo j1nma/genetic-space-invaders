@@ -7,6 +7,7 @@ import GeneticHelper exposing (..)
 import Update exposing (..)
 import Genetic exposing (..)
 import Time exposing (..)
+import Random exposing (..)
 
 
 initialSpaceship : { vx : Float, vy : Float, x : Float, y : Float }
@@ -18,9 +19,9 @@ initialSpaceship =
     }
 
 
-initialInvaders : Int -> List Invader
-initialInvaders time =
-    spawnNewInvadersFromBestDna time 10 (initialDna time)
+initialInvaders : Seed -> List Invader
+initialInvaders seed =
+    spawnNewInvadersFromBestDna seed newSpawnedInvaders (initialDna seed)
 
 
 initialBullet : List a
@@ -35,18 +36,20 @@ initialGame :
     , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
     , state : State
     , windowDimensions : ( Int, Int )
-    , bestSolution : Genetic.IntermediateValue Dna
+    , bestSolution : ( Genetic.IntermediateValue Dna, Seed )
     , currentTime : Time
     , hasSpawned : Bool
+    , mainSeed : Seed
     }
 initialGame =
     { keysDown = Set.empty
     , windowDimensions = ( 0, 0 )
     , state = Pause
     , spaceship = initialSpaceship
-    , invaders = initialInvaders 1212
+    , invaders = []
     , bullets = initialBullet
-    , bestSolution = initialEvolve 1212
+    , bestSolution = initialEvolve (initialSeed 0)
     , currentTime = 0.0
     , hasSpawned = False
+    , mainSeed = initialSeed 0
     }

@@ -6,24 +6,16 @@ module GeneticHelper exposing (..)
 import Genetic exposing (..)
 import Random exposing (..)
 import Tuple exposing (..)
-import Html exposing (..)
 
 
 {-| Order: [x direction change probability, y direction change probability, x velocity, y velocity]
 -}
 type alias Dna =
-    { dna : List Float
+    { genes : List Float
     , fitness : Float
     }
 
 
-{-| For simple use cases the genetic algorithm will be doing one of two things:
-
-  - Maximizing a score
-  - Minimizing a penalty or cost
-    Your `evaluateSolution` function is used to assign a value to an entire generation of possible solutions. `Method` tells the algorithm whether to keep and "breed" the solutions with a higher value or a lower value.
-
--}
 myOptions : Options Dna
 myOptions =
     { randomDnaGenerator = randDnaGenerator
@@ -31,7 +23,7 @@ myOptions =
     , crossoverDnas = crossoverDnas
     , mutateDna = mutateDna
     , isDoneEvolving = isDoneEvolving
-    , method = MinimizePenalty
+    , method = MaximizeScore
     }
 
 
@@ -65,7 +57,7 @@ randDnaGenerator =
         |> Random.map2 (++) randomProbabilityGenerator
         |> Random.map
             (\randDna ->
-                { dna = randDna
+                { genes = randDna
                 , fitness = 0.0
                 }
             )
@@ -75,16 +67,6 @@ randomProbabilityGenerator : Generator (List Float)
 randomProbabilityGenerator =
     Random.float 0 1
         |> Random.list 2
-
-
-runDnaGenerator : Int -> Dna
-runDnaGenerator time =
-    Tuple.first (Random.step randDnaGenerator (Random.initialSeed time))
-
-
-runMutatedDnaGenerator : Int -> Dna -> Dna
-runMutatedDnaGenerator time dna =
-    Tuple.first (Random.step (mutateDna dna) (Random.initialSeed time))
 
 
 
@@ -100,9 +82,9 @@ crossoverDnas : Dna -> Dna -> Dna
 crossoverDnas dna1 dna2 =
     let
         ( dnaPart1, dnaPart2 ) =
-            ( List.take crossover_split_index dna1.dna, List.drop crossover_split_index dna2.dna )
+            ( List.take crossover_split_index dna1.genes, List.drop crossover_split_index dna2.genes )
     in
-        { dna = List.append dnaPart1 dnaPart2
+        { genes = List.append dnaPart1 dnaPart2
         , fitness = (dna1.fitness + dna2.fitness) / 2
         }
 
@@ -125,7 +107,7 @@ mutateDna dna =
     in
         Random.map3
             (\randomIndex randomVelGene randomProbGene ->
-                dna.dna
+                dna.genes
                     |> List.indexedMap
                         (\index gene ->
                             if index == randomIndex then
@@ -137,8 +119,8 @@ mutateDna dna =
                                 gene
                         )
                     |> (\randDna ->
-                            { dna = randDna
-                            , fitness = dna.fitness
+                            { genes = randDna
+                            , fitness = dna.fitness + 1.0
                             }
                        )
             )
@@ -161,35 +143,16 @@ isDoneEvolving bestDna bestDnaScore numGenerations =
     bestDnaScore == toFloat Random.maxInt || numGenerations >= max_iterations
 
 
-initialEvolve : Int -> IntermediateValue Dna
-initialEvolve time =
-    Tuple.first (Random.step (Genetic.executeInitialStep myOptions) (Random.initialSeed time))
+initialEvolve : Seed -> ( IntermediateValue Dna, Seed )
+initialEvolve seed =
+    Random.step (Genetic.executeInitialStep myOptions) seed
 
 
-initialDna : Int -> Dna
-initialDna time =
-    dnaFromValue (initialEvolve time)
+initialDna : Seed -> Dna
+initialDna seed =
+    dnaFromValue (Tuple.first (initialEvolve seed))
 
 
-evolve : Int -> IntermediateValue Dna -> IntermediateValue Dna
-evolve time intermediate =
-    (Tuple.first (Random.step (Genetic.executeStep myOptions intermediate) (Random.initialSeed time)))
-
-
-main : Html msg
-main =
-    let
-        first =
-            initialEvolve 10
-
-        second =
-            evolve 12 first
-
-        third =
-            evolve 13 second
-    in
-        numGenerationsFromValue third
-            |> toString
-            |> (++) (toString (numGenerationsFromValue second))
-            |> (++) (toString (numGenerationsFromValue first))
-            |> text
+evolve : Seed -> IntermediateValue Dna -> ( IntermediateValue Dna, Seed )
+evolve seed intermediate =
+    Random.step (Genetic.executeStep myOptions intermediate) seed

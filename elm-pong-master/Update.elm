@@ -53,18 +53,9 @@ updateInvaders t invaders bullets =
 updateInvader : Time -> List Bullet -> Invader -> Invader
 updateInvader t bullets invader =
     if (not (List.isEmpty (List.filter (\b -> within invader b) bullets))) then
-        { invader | x = outOfBounds, y = outOfBounds, fitness = 0.0 }
+        { invader | x = outOfBounds, y = outOfBounds }
     else
-        decideMovement t (increaseFitness invader)
-
-
-increaseFitness : Invader -> Invader
-increaseFitness invader =
-    let
-        oldFitness =
-            invader.fitness
-    in
-        { invader | fitness = oldFitness + 1.0 }
+        decideMovement t invader
 
 
 updateBullets : Time -> List Bullet -> List Invader -> List Bullet
@@ -84,39 +75,39 @@ updateBullet t invaders bullet =
         physicsUpdate t bullet
 
 
-spawnNewInvaders : Int -> List Dna -> List Invader
-spawnNewInvaders time dnas =
-    dnas
-        |> List.map
-            (\dna ->
-                { x = 0.0
-                , y = 0.0
-                , vx = getValue (Array.get 2 (Array.fromList dna.dna))
-                , vy = getValue (Array.get 3 (Array.fromList dna.dna))
-                , xProbChange = getValue (Array.get 0 (Array.fromList dna.dna))
-                , yProbChange = getValue (Array.get 1 (Array.fromList dna.dna))
-                , seedX = initialSeed time
-                , seedY = initialSeed (-time)
-                , fitness = dna.fitness
-                }
-            )
-
-
-spawnNewInvadersFromBestDna : Int -> Int -> Dna -> List Invader
-spawnNewInvadersFromBestDna time amount dna =
+spawnNewInvadersFromBestDna : Seed -> Int -> Dna -> List Invader
+spawnNewInvadersFromBestDna seed amount dna =
     case amount of
         0 ->
             []
 
         n ->
-            { x = 0.0
-            , y = 0.0
-            , vx = getValue (Array.get 2 (Array.fromList dna.dna))
-            , vy = getValue (Array.get 3 (Array.fromList dna.dna))
-            , xProbChange = getValue (Array.get 0 (Array.fromList dna.dna))
-            , yProbChange = getValue (Array.get 1 (Array.fromList dna.dna))
-            , seedX = initialSeed time
-            , seedY = initialSeed (-time)
-            , fitness = dna.fitness
-            }
-                :: spawnNewInvadersFromBestDna (time + 1) (n - 1) dna
+            let
+                randomPositionAndSeed =
+                    randomPosition seed
+
+                newSeed =
+                    Tuple.second randomPositionAndSeed
+
+                randomP =
+                    Tuple.first randomPositionAndSeed
+
+                newX =
+                    Tuple.first randomP
+
+                newY =
+                    Tuple.second randomP
+
+                _ =
+                    Debug.log "genes" dna.genes
+            in
+                { x = newX
+                , y = newY
+                , vx = getValue (Array.get 2 (Array.fromList dna.genes))
+                , vy = getValue (Array.get 3 (Array.fromList dna.genes))
+                , xProbChange = getValue (Array.get 0 (Array.fromList dna.genes))
+                , yProbChange = getValue (Array.get 1 (Array.fromList dna.genes))
+                , seedX = newSeed
+                , seedY = newSeed
+                }
+                    :: spawnNewInvadersFromBestDna newSeed (n - 1) dna

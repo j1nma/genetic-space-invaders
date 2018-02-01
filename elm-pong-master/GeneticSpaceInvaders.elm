@@ -17,11 +17,12 @@ import View exposing (..)
 import Collage exposing (..)
 import GeneticHelper exposing (..)
 import Genetic exposing (..)
+import Random exposing (..)
 
 
 main :
     Program Never
-        { bestSolution : IntermediateValue Dna
+        { bestSolution : ( IntermediateValue Dna, Seed )
         , bullets : List Bullet
         , currentTime : Time
         , invaders : List Invader
@@ -30,6 +31,7 @@ main :
         , state : State
         , windowDimensions : ( Int, Int )
         , hasSpawned : Bool
+        , mainSeed : Seed
         }
         Msg
 main =
@@ -70,7 +72,7 @@ getInput game delta =
 update :
     Msg
     ->
-        { bestSolution : IntermediateValue Dna
+        { bestSolution : ( IntermediateValue Dna, Seed )
         , bullets : List Bullet
         , currentTime : Time
         , invaders : List Invader
@@ -79,9 +81,10 @@ update :
         , state : State
         , windowDimensions : ( Int, Int )
         , hasSpawned : Bool
+        , mainSeed : Seed
         }
     ->
-        ( { bestSolution : IntermediateValue Dna
+        ( { bestSolution : ( IntermediateValue Dna, Seed )
           , bullets : List Bullet
           , currentTime : Time
           , invaders : List Invader
@@ -90,6 +93,7 @@ update :
           , state : State
           , windowDimensions : ( Int, Int )
           , hasSpawned : Bool
+          , mainSeed : Seed
           }
         , Cmd Msg
         )
@@ -115,7 +119,17 @@ update msg game =
             ( game, Cmd.none )
 
         OnTime t ->
-            ( { game | currentTime = t }, Cmd.none )
+            ( { game
+                | currentTime = t
+                , mainSeed =
+                    let
+                        _ =
+                            Debug.log "mainSeed" "seeded"
+                    in
+                        initialSeed (round t)
+              }
+            , Cmd.none
+            )
 
 
 subscriptions : a -> Sub Msg
@@ -149,9 +163,10 @@ type alias Game =
     , spaceship : Spaceship
     , invaders : List Invader
     , bullets : List Bullet
-    , bestSolution : Genetic.IntermediateValue Dna
+    , bestSolution : ( IntermediateValue Dna, Seed )
     , currentTime : Time
     , hasSpawned : Bool
+    , mainSeed : Seed
     }
 
 
@@ -170,7 +185,7 @@ type alias Input =
 
 
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned } as game) =
+updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, mainSeed } as game) =
     let
         newState =
             if start then
@@ -184,10 +199,11 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
             { game
                 | state = Pause
                 , spaceship = initialSpaceship
-                , invaders = initialInvaders (round currentTime)
+                , invaders = []
                 , bullets = initialBullet
-                , bestSolution = initialEvolve (round currentTime)
+                , bestSolution = initialEvolve mainSeed
                 , hasSpawned = False
+                , mainSeed = initialSeed (round currentTime)
             }
         else
             case state of
@@ -206,7 +222,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                             let
                                 betterSolution =
                                     if not hasSpawned then
-                                        (GeneticHelper.evolve (round currentTime) bestSolution)
+                                        (GeneticHelper.evolve (Tuple.second (bestSolution)) (Tuple.first (bestSolution)))
                                     else
                                         bestSolution
                             in
@@ -220,14 +236,17 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                             updatedInvaders =
                                                 updateInvaders delta invaders bullets
 
-                                            _ =
-                                                Debug.log "best gen" (numGenerationsFromValue betterSolution)
+                                            --_ =
+                                            --    Debug.log "best" betterSolution
+                                            betterDna =
+                                                dnaFromValue (Tuple.first betterSolution)
                                         in
                                             if not hasSpawned then
-                                                updatedInvaders ++ spawnNewInvadersFromBestDna (round (currentTime)) 1 (dnaFromValue betterSolution)
+                                                updatedInvaders ++ spawnNewInvadersFromBestDna mainSeed newSpawnedInvaders betterDna
                                             else
                                                 updatedInvaders
                                     , hasSpawned = True
+                                    , mainSeed = Tuple.second (betterSolution)
                                 }
                         else
                             { game
@@ -236,6 +255,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                 , bullets = newBullet ++ updateBullets delta bullets originalInvaders
                                 , invaders = updateInvaders delta invaders bullets
                                 , hasSpawned = False
+                                , mainSeed = initialSeed (round currentTime)
                             }
 
                 Pause ->
@@ -265,11 +285,14 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                         gameHeight
                         ([ rect gameWidth gameHeight
                             |> filled blackBackground
-                         , toForm (statusMessage state)
-                            |> move ( 0, 80 - gameHeight / 2 )
                          ]
                             ++ (List.map (\o -> makeBullet o) bullets)
                             ++ (List.map (\o -> makeInvader o) invaders)
-                            ++ [ makeSpaceship spaceship ]
+                            ++ [ makeSpaceship spaceship
+                               , toForm (statusTitle state)
+                                    |> move ( 0, 30 )
+                               , toForm (statusMessage state)
+                                    |> move ( 0, 80 - gameHeight / 2 )
+                               ]
                         )
         ]

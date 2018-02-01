@@ -17,6 +17,16 @@ statusMessage state =
             txt identity pauseMessage
 
 
+statusTitle : State -> Element
+statusTitle state =
+    case state of
+        Play ->
+            txt identity ""
+
+        Pause ->
+            image 400 340 "../res/mainTitle.png"
+
+
 verticalLine : Float -> Path
 verticalLine height =
     path [ ( 0, height ), ( 0, -height ) ]
@@ -27,14 +37,9 @@ blackBackground =
     rgb 0 0 0
 
 
-whiteText : Color
-whiteText =
-    rgb 255 255 255
-
-
 txt : (Text.Text -> Text.Text) -> String -> Element
 txt f =
-    Text.fromString >> Text.color whiteText >> Text.monospace >> f >> leftAligned
+    Text.fromString >> Text.color yellow >> Text.monospace >> f >> leftAligned
 
 
 pauseMessage : String
