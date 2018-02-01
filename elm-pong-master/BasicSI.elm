@@ -204,7 +204,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                             else
                                 []
                     in
-                        if (((round (inSeconds currentTime)) % 5) == 0) then
+                        if (((round (inSeconds currentTime)) % 2) == 0) then
                             { game
                                 | state = newState
                                 , spaceship = updateSpaceship delta dir spaceship
@@ -266,13 +266,12 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                     collage gameWidth
                         gameHeight
                         ([ rect gameWidth gameHeight
-                            |> filled pongGreen
-                         , rect 10 40
-                            |> make spaceship
+                            |> filled blackBackground
                          , toForm (statusMessage state)
-                            |> move ( 0, 40 - gameHeight / 2 )
+                            |> move ( 0, 80 - gameHeight / 2 )
                          ]
-                            ++ (List.map (\o -> make o (oval 10 40)) bullets)
-                            ++ (List.map (\o -> make o (rect 40 40)) invaders)
+                            ++ (List.map (\o -> makeBullet o) bullets)
+                            ++ (List.map (\o -> makeInvader o) invaders)
+                            ++ [ makeSpaceship spaceship ]
                         )
         ]
