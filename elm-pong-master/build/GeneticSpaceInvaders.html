@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="UTF-8"><title>BasicSI</title><style>html,head,body { padding:0; margin:0; }
+<html><head><meta charset="UTF-8"><title>GeneticSpaceInvaders</title><style>html,head,body { padding:0; margin:0; }
 body { font-family: calibri, helvetica, arial, sans-serif; }</style><script type="text/javascript">
 (function() {
 'use strict';
@@ -12824,20 +12824,6 @@ var _j1nma$genetic_spaceinvaders$Constants$gameHeight = _j1nma$genetic_spaceinva
 var _j1nma$genetic_spaceinvaders$Constants$_p1 = {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Constants$gameWidth / 2, _1: _j1nma$genetic_spaceinvaders$Constants$gameHeight / 2};
 var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvaders$Constants$_p1._0;
 var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
-var _j1nma$genetic_spaceinvaders$Model$Spaceship = F4(
-	function (a, b, c, d) {
-		return {x: a, y: b, vx: c, vy: d};
-	});
-var _j1nma$genetic_spaceinvaders$Model$Bullet = F4(
-	function (a, b, c, d) {
-		return {x: a, y: b, vx: c, vy: d};
-	});
-var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h, fitness: i};
-	});
-var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
-var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
 var _j1nma$genetic_spaceinvaders$GeneticHelper$max_iterations = 3000;
 var _j1nma$genetic_spaceinvaders$GeneticHelper$isDoneEvolving = F3(
 	function (bestDna, bestDnaScore, numGenerations) {
@@ -12971,6 +12957,20 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$Dna = F2(
 	function (a, b) {
 		return {dna: a, fitness: b};
 	});
+var _j1nma$genetic_spaceinvaders$Model$Spaceship = F4(
+	function (a, b, c, d) {
+		return {x: a, y: b, vx: c, vy: d};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Bullet = F4(
+	function (a, b, c, d) {
+		return {x: a, y: b, vx: c, vy: d};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h, fitness: i};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
+var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
 var _j1nma$genetic_spaceinvaders$Update$getValue = function (m) {
 	var _p0 = m;
 	if (_p0.ctor === 'Just') {
@@ -13270,15 +13270,30 @@ var _j1nma$genetic_spaceinvaders$View$make = F2(
 	});
 var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
 var _j1nma$genetic_spaceinvaders$View$whiteText = A3(_elm_lang$core$Color$rgb, 255, 255, 255);
+var _j1nma$genetic_spaceinvaders$View$messageStyle = {
+	typeface: {
+		ctor: '::',
+		_0: 'Geostar',
+		_1: {ctor: '[]'}
+	},
+	height: _elm_lang$core$Maybe$Nothing,
+	color: _j1nma$genetic_spaceinvaders$View$whiteText,
+	bold: false,
+	italic: false,
+	line: _elm_lang$core$Maybe$Nothing
+};
 var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
 	return function (_p0) {
 		return _evancz$elm_graphics$Element$leftAligned(
 			f(
-				_evancz$elm_graphics$Text$monospace(
-					A2(
-						_evancz$elm_graphics$Text$color,
-						_j1nma$genetic_spaceinvaders$View$whiteText,
-						_evancz$elm_graphics$Text$fromString(_p0)))));
+				A2(
+					_evancz$elm_graphics$Text$style,
+					_j1nma$genetic_spaceinvaders$View$messageStyle,
+					_evancz$elm_graphics$Text$monospace(
+						A2(
+							_evancz$elm_graphics$Text$color,
+							_j1nma$genetic_spaceinvaders$View$whiteText,
+							_evancz$elm_graphics$Text$fromString(_p0))))));
 	};
 };
 var _j1nma$genetic_spaceinvaders$View$blackBackground = A3(_elm_lang$core$Color$rgb, 0, 0, 0);
@@ -13302,7 +13317,7 @@ var _j1nma$genetic_spaceinvaders$View$statusMessage = function (state) {
 		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$pauseMessage);
 	}
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$view = function (_p0) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view = function (_p0) {
 	var _p1 = _p0;
 	return A2(
 		_elm_lang$html$Html$div,
@@ -13366,7 +13381,7 @@ var _j1nma$genetic_spaceinvaders$BasicSI$view = function (_p0) {
 			_1: {ctor: '[]'}
 		});
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$updateGame = F2(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame = F2(
 	function (_p4, _p3) {
 		var _p5 = _p4;
 		var _p16 = _p5.dir;
@@ -13455,7 +13470,7 @@ var _j1nma$genetic_spaceinvaders$BasicSI$updateGame = F2(
 			}
 		}
 	});
-var _j1nma$genetic_spaceinvaders$BasicSI$getInput = F2(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput = F2(
 	function (game, delta) {
 		return {
 			space: A2(
@@ -13482,19 +13497,19 @@ var _j1nma$genetic_spaceinvaders$BasicSI$getInput = F2(
 			delta: _elm_lang$core$Time$inSeconds(delta)
 		};
 	});
-var _j1nma$genetic_spaceinvaders$BasicSI$Game = F9(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Game = F9(
 	function (a, b, c, d, e, f, g, h, i) {
 		return {keysDown: a, windowDimensions: b, state: c, spaceship: d, invaders: e, bullets: f, bestSolution: g, currentTime: h, hasSpawned: i};
 	});
-var _j1nma$genetic_spaceinvaders$BasicSI$Input = F6(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Input = F6(
 	function (a, b, c, d, e, f) {
 		return {space: a, reset: b, pause: c, start: d, dir: e, delta: f};
 	});
-var _j1nma$genetic_spaceinvaders$BasicSI$OnTime = function (a) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$OnTime = function (a) {
 	return {ctor: 'OnTime', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$getTime = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$BasicSI$OnTime, _elm_lang$core$Time$now);
-var _j1nma$genetic_spaceinvaders$BasicSI$update = F2(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getTime = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$OnTime, _elm_lang$core$Time$now);
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 	function (msg, game) {
 		var _p17 = msg;
 		switch (_p17.ctor) {
@@ -13519,11 +13534,11 @@ var _j1nma$genetic_spaceinvaders$BasicSI$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Tick':
-				var input = A2(_j1nma$genetic_spaceinvaders$BasicSI$getInput, game, _p17._0 * 2);
+				var input = A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput, game, _p17._0 * 2);
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_j1nma$genetic_spaceinvaders$BasicSI$updateGame, input, game),
-					_1: _j1nma$genetic_spaceinvaders$BasicSI$getTime
+					_0: A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame, input, game),
+					_1: _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getTime
 				};
 			case 'WindowResize':
 				return {
@@ -13545,55 +13560,55 @@ var _j1nma$genetic_spaceinvaders$BasicSI$update = F2(
 				};
 		}
 	});
-var _j1nma$genetic_spaceinvaders$BasicSI$NoOp = {ctor: 'NoOp'};
-var _j1nma$genetic_spaceinvaders$BasicSI$Tick = function (a) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$NoOp = {ctor: 'NoOp'};
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$WindowResize = function (a) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$WindowResize = function (a) {
 	return {ctor: 'WindowResize', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$sizeToMsg = function (size) {
-	return _j1nma$genetic_spaceinvaders$BasicSI$WindowResize(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$sizeToMsg = function (size) {
+	return _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$WindowResize(
 		{ctor: '_Tuple2', _0: size.width, _1: size.height});
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$initialSizeCmd = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$BasicSI$sizeToMsg, _elm_lang$window$Window$size);
-var _j1nma$genetic_spaceinvaders$BasicSI$KeyUp = function (a) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$initialSizeCmd = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$sizeToMsg, _elm_lang$window$Window$size);
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$KeyUp = function (a) {
 	return {ctor: 'KeyUp', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$KeyDown = function (a) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$subscriptions = function (_p18) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$subscriptions = function (_p18) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: _elm_lang$keyboard$Keyboard$downs(_j1nma$genetic_spaceinvaders$BasicSI$KeyDown),
+			_0: _elm_lang$keyboard$Keyboard$downs(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$KeyDown),
 			_1: {
 				ctor: '::',
-				_0: _elm_lang$keyboard$Keyboard$ups(_j1nma$genetic_spaceinvaders$BasicSI$KeyUp),
+				_0: _elm_lang$keyboard$Keyboard$ups(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$KeyUp),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$window$Window$resizes(_j1nma$genetic_spaceinvaders$BasicSI$sizeToMsg),
+					_0: _elm_lang$window$Window$resizes(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$sizeToMsg),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$animation_frame$AnimationFrame$diffs(_j1nma$genetic_spaceinvaders$BasicSI$Tick),
+						_0: _elm_lang$animation_frame$AnimationFrame$diffs(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$Tick),
 						_1: {ctor: '[]'}
 					}
 				}
 			}
 		});
 };
-var _j1nma$genetic_spaceinvaders$BasicSI$main = _elm_lang$html$Html$program(
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$main = _elm_lang$html$Html$program(
 	{
-		init: {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Initial$initialGame, _1: _j1nma$genetic_spaceinvaders$BasicSI$initialSizeCmd},
-		view: _j1nma$genetic_spaceinvaders$BasicSI$view,
-		update: _j1nma$genetic_spaceinvaders$BasicSI$update,
-		subscriptions: _j1nma$genetic_spaceinvaders$BasicSI$subscriptions
+		init: {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Initial$initialGame, _1: _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$initialSizeCmd},
+		view: _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view,
+		update: _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update,
+		subscriptions: _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$subscriptions
 	})();
 var Elm = {};
-Elm['BasicSI'] = Elm['BasicSI'] || {};
-if (typeof _j1nma$genetic_spaceinvaders$BasicSI$main !== 'undefined') {
-    _j1nma$genetic_spaceinvaders$BasicSI$main(Elm['BasicSI'], 'BasicSI', undefined);
+Elm['GeneticSpaceInvaders'] = Elm['GeneticSpaceInvaders'] || {};
+if (typeof _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$main !== 'undefined') {
+    _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$main(Elm['GeneticSpaceInvaders'], 'GeneticSpaceInvaders', undefined);
 }
 
 if (typeof define === "function" && define['amd'])
@@ -13625,4 +13640,4 @@ for (var publicModule in Elm)
 }
 
 }).call(this);
-</script></head><body><script type="text/javascript">Elm.BasicSI.fullscreen()</script></body></html>
+</script></head><body><script type="text/javascript">Elm.GeneticSpaceInvaders.fullscreen()</script></body></html>
