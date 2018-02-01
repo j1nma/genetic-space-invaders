@@ -9509,7 +9509,7 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna = function (dna) {
 		F3(
 			function (randomIndex, randomVelGene, randomProbGene) {
 				return function (randDna) {
-					return {dna: randDna, fitness: dna.fitness};
+					return {dna: randDna, fitness: dna.fitness + 1.0};
 				}(
 					A2(
 						_elm_lang$core$List$indexedMap,
@@ -9639,7 +9639,7 @@ var _j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna = F3(
 							_elm_lang$core$Array$fromList(dna.dna))),
 					seedX: _elm_lang$core$Random$initialSeed(time),
 					seedY: _elm_lang$core$Random$initialSeed(0 - time),
-					fitness: dna.fitness
+					fitness: dna.fitness + 1.0
 				},
 				_1: A3(_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna, time + 1, _p2 - 1, dna)
 			};
@@ -9846,7 +9846,7 @@ var _j1nma$genetic_spaceinvaders$Initial$initialInvaders = function (time) {
 	return A3(
 		_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna,
 		time,
-		15,
+		10,
 		_j1nma$genetic_spaceinvaders$GeneticHelper$initialDna(time));
 };
 var _j1nma$genetic_spaceinvaders$Initial$initialSpaceship = {x: 0, y: 0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight, vx: 0, vy: 0};

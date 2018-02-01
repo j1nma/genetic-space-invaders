@@ -1,5 +1,19 @@
 module Constants exposing (..)
 
+-- GAME
+
+
+rightArrow : Int
+rightArrow =
+    39
+
+
+leftArrow : Int
+leftArrow =
+    37
+
+
+
 -- MODEL
 
 
@@ -9,5 +23,6 @@ module Constants exposing (..)
     ( gameWidth / 2, gameHeight / 2 )
 
 
+outOfBounds : Float
 outOfBounds =
     1000

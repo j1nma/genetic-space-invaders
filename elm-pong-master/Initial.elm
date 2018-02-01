@@ -20,14 +20,7 @@ initialSpaceship =
 
 initialInvaders : Int -> List Invader
 initialInvaders time =
-    spawnNewInvadersFromBestDna time 15 (initialDna time)
-
-
-
---Random.initialSeed time
---    |> Random.step (Random.list 5 randDnaGenerator)
---    |> Tuple.first
---    |> spawnNewInvaders time
+    spawnNewInvadersFromBestDna time 10 (initialDna time)
 
 
 initialBullet : List a

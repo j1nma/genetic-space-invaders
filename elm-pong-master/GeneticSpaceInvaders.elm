@@ -57,12 +57,10 @@ getInput game delta =
     , pause = Set.member (Char.toCode 'P') (game.keysDown)
     , start = Set.member (Char.toCode 'S') (game.keysDown)
     , dir =
-        if Set.member 39 (game.keysDown) then
+        if Set.member rightArrow (game.keysDown) then
             1
-            -- right arrow
-        else if Set.member 37 (game.keysDown) then
+        else if Set.member leftArrow (game.keysDown) then
             -1
-            -- left arrow
         else
             0
     , delta = inSeconds delta
@@ -205,38 +203,38 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                 []
                     in
                         if (((round (inSeconds currentTime)) % 2) == 0) then
-                            { game
-                                | state = newState
-                                , spaceship = updateSpaceship delta dir spaceship
-                                , bullets = newBullet ++ updateBullets delta bullets originalInvaders
-                                , invaders =
-                                    let
-                                        updatedInvaders =
-                                            updateInvaders delta invaders bullets
+                            let
+                                betterSolution =
+                                    if not hasSpawned then
+                                        (GeneticHelper.evolve (round currentTime) bestSolution)
+                                    else
+                                        bestSolution
+                            in
+                                { game
+                                    | state = newState
+                                    , spaceship = updateSpaceship delta dir spaceship
+                                    , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                                    , bestSolution = betterSolution
+                                    , invaders =
+                                        let
+                                            updatedInvaders =
+                                                updateInvaders delta invaders bullets
 
-                                        betterSolution =
-                                            (GeneticHelper.evolve (round currentTime) bestSolution)
-                                    in
-                                        if not hasSpawned then
-                                            updatedInvaders ++ spawnNewInvadersFromBestDna (round (currentTime)) 1 (dnaFromValue betterSolution)
-                                        else
-                                            updatedInvaders
-                                , hasSpawned = True
-                            }
+                                            _ =
+                                                Debug.log "best gen" (numGenerationsFromValue betterSolution)
+                                        in
+                                            if not hasSpawned then
+                                                updatedInvaders ++ spawnNewInvadersFromBestDna (round (currentTime)) 1 (dnaFromValue betterSolution)
+                                            else
+                                                updatedInvaders
+                                    , hasSpawned = True
+                                }
                         else
                             { game
                                 | state = newState
                                 , spaceship = updateSpaceship delta dir spaceship
                                 , bullets = newBullet ++ updateBullets delta bullets originalInvaders
-                                , invaders =
-                                    let
-                                        updatedInvaders =
-                                            updateInvaders delta invaders bullets
-
-                                        betterSolution =
-                                            (GeneticHelper.evolve (round currentTime) bestSolution)
-                                    in
-                                        updatedInvaders
+                                , invaders = updateInvaders delta invaders bullets
                                 , hasSpawned = False
                             }
 
