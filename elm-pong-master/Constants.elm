@@ -23,11 +23,11 @@ leftArrow =
     ( gameWidth / 2, gameHeight / 2 )
 
 
-outOfBounds : Float
-outOfBounds =
-    1000
-
-
 newSpawnedInvaders : Int
 newSpawnedInvaders =
     1
+
+
+
+-- UPDATE
+-- VIEW

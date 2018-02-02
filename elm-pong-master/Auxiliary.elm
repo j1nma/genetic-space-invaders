@@ -81,12 +81,14 @@ physicsUpdate t ({ x, y, vx, vy } as obj) =
     }
 
 
-filterOutOfBoundsObject : { a | x : Float, y : Float } -> Bool
-filterOutOfBoundsObject ({ x, y } as obj) =
-    if obj.x == outOfBounds && obj.y == outOfBounds then
-        False
-    else
-        True
+filterInvaderHit : Invader -> Bool
+filterInvaderHit invader =
+    not invader.wasHit
+
+
+filterBulletHit : Bullet -> Bool
+filterBulletHit bullet =
+    not bullet.hit
 
 
 near : Float -> Float -> Float -> Bool
@@ -96,7 +98,7 @@ near k c n =
 
 within : { a | x : Float, y : Float } -> { b | x : Float, y : Float } -> Bool
 within bullet invader =
-    near invader.x 30 bullet.x && near invader.y 60 bullet.y
+    near invader.x 20 bullet.x && near invader.y 60 bullet.y
 
 
 withinBullet :

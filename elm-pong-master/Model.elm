@@ -22,6 +22,7 @@ type alias Bullet =
     , y : Float
     , vx : Float
     , vy : Float
+    , hit : Bool
     }
 
 
@@ -34,4 +35,5 @@ type alias Invader =
     , yProbChange : Float
     , seedX : Seed
     , seedY : Seed
+    , wasHit : Bool
     }

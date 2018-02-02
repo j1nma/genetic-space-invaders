@@ -17,6 +17,7 @@ craftBullet spaceship bullets =
             , y = spaceship.y
             , vx = 0
             , vy = 200
+            , hit = False
             }
     in
         if List.any (checkBullet newBullet) bullets then
@@ -43,26 +44,26 @@ updateSpaceship t dir spaceship =
 
 updateInvaders : Time -> List Invader -> List Bullet -> List Invader
 updateInvaders t invaders bullets =
-    List.filter filterOutOfBoundsObject (List.map (\i -> updateInvader t bullets i) invaders)
+    List.filter filterInvaderHit (List.map (\i -> updateInvader t bullets i) invaders)
 
 
 updateInvader : Time -> List Bullet -> Invader -> Invader
 updateInvader t bullets invader =
     if not (List.isEmpty (List.filter (\b -> within invader b) bullets)) then
-        { invader | x = outOfBounds, y = outOfBounds }
+        { invader | wasHit = True }
     else
         decideMovement t invader
 
 
 updateBullets : Time -> List Bullet -> List Invader -> List Bullet
 updateBullets t bullets invaders =
-    List.filter filterOutOfBoundsObject (List.map (\b -> updateBullet t invaders b) bullets)
+    List.filter filterBulletHit (List.map (\b -> updateBullet t invaders b) bullets)
 
 
 updateBullet : Time -> List Invader -> Bullet -> Bullet
 updateBullet t invaders bullet =
     if (not (bullet.y |> near 0 halfHeight)) || (not (List.isEmpty (List.filter (\i -> within bullet i) invaders))) then
-        { bullet | x = outOfBounds, y = outOfBounds }
+        { bullet | hit = True }
     else
         physicsUpdate t bullet
 
@@ -101,6 +102,7 @@ spawnNewInvadersFromBestDna seed amount dna =
                 , yProbChange = getValue (Array.get 1 (Array.fromList dna.genes))
                 , seedX = newSeed
                 , seedY = newSeed
+                , wasHit = False
                 }
                     :: spawnNewInvadersFromBestDna newSeed (n - 1) dna
 
