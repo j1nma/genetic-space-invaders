@@ -4838,6 +4838,188 @@ var _elm_lang$core$Json_Decode$int = _elm_lang$core$Native_Json.decodePrimitive(
 var _elm_lang$core$Json_Decode$bool = _elm_lang$core$Native_Json.decodePrimitive('bool');
 var _elm_lang$core$Json_Decode$string = _elm_lang$core$Native_Json.decodePrimitive('string');
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
+var _elm_lang$dom$Native_Dom = function() {
+
+var fakeNode = {
+	addEventListener: function() {},
+	removeEventListener: function() {}
+};
+
+var onDocument = on(typeof document !== 'undefined' ? document : fakeNode);
+var onWindow = on(typeof window !== 'undefined' ? window : fakeNode);
+
+function on(node)
+{
+	return function(eventName, decoder, toTask)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+
+			function performTask(event)
+			{
+				var result = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, event);
+				if (result.ctor === 'Ok')
+				{
+					_elm_lang$core$Native_Scheduler.rawSpawn(toTask(result._0));
+				}
+			}
+
+			node.addEventListener(eventName, performTask);
+
+			return function()
+			{
+				node.removeEventListener(eventName, performTask);
+			};
+		});
+	};
+}
+
+var rAF = typeof requestAnimationFrame !== 'undefined'
+	? requestAnimationFrame
+	: function(callback) { callback(); };
+
+function withNode(id, doStuff)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		rAF(function()
+		{
+			var node = document.getElementById(id);
+			if (node === null)
+			{
+				callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'NotFound', _0: id }));
+				return;
+			}
+			callback(_elm_lang$core$Native_Scheduler.succeed(doStuff(node)));
+		});
+	});
+}
+
+
+// FOCUS
+
+function focus(id)
+{
+	return withNode(id, function(node) {
+		node.focus();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function blur(id)
+{
+	return withNode(id, function(node) {
+		node.blur();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SCROLLING
+
+function getScrollTop(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollTop;
+	});
+}
+
+function setScrollTop(id, desiredScrollTop)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = desiredScrollTop;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toBottom(id)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = node.scrollHeight;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function getScrollLeft(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollLeft;
+	});
+}
+
+function setScrollLeft(id, desiredScrollLeft)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = desiredScrollLeft;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toRight(id)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = node.scrollWidth;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SIZE
+
+function width(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollWidth;
+			case 'VisibleContent':
+				return node.clientWidth;
+			case 'VisibleContentWithBorders':
+				return node.offsetWidth;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.right - rect.left;
+		}
+	});
+}
+
+function height(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollHeight;
+			case 'VisibleContent':
+				return node.clientHeight;
+			case 'VisibleContentWithBorders':
+				return node.offsetHeight;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.bottom - rect.top;
+		}
+	});
+}
+
+return {
+	onDocument: F3(onDocument),
+	onWindow: F3(onWindow),
+
+	focus: focus,
+	blur: blur,
+
+	getScrollTop: getScrollTop,
+	setScrollTop: F2(setScrollTop),
+	getScrollLeft: getScrollLeft,
+	setScrollLeft: F2(setScrollLeft),
+	toBottom: toBottom,
+	toRight: toRight,
+
+	height: F2(height),
+	width: F2(width)
+};
+
+}();
 //import Native.Utils //
 
 var _elm_lang$core$Native_Scheduler = function() {
@@ -5929,6 +6111,8 @@ var _elm_lang$core$Tuple$first = function (_p6) {
 	var _p7 = _p6;
 	return _p7._0;
 };
+var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
+var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
 //import Native.Scheduler //
 
 var _elm_lang$core$Native_Time = function() {
@@ -6142,6 +6326,177 @@ var _elm_lang$core$Time$subMap = F2(
 			});
 	});
 _elm_lang$core$Native_Platform.effectManagers['Time'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Time$init, onEffects: _elm_lang$core$Time$onEffects, onSelfMsg: _elm_lang$core$Time$onSelfMsg, tag: 'sub', subMap: _elm_lang$core$Time$subMap};
+var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
+var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
+var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+var _elm_lang$keyboard$Keyboard$onSelfMsg = F3(
+	function (router, _p0, state) {
+		var _p1 = _p0;
+		var _p2 = A2(_elm_lang$core$Dict$get, _p1.category, state);
+		if (_p2.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var send = function (tagger) {
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					tagger(_p1.keyCode));
+			};
+			return A2(
+				_elm_lang$core$Task$andThen,
+				function (_p3) {
+					return _elm_lang$core$Task$succeed(state);
+				},
+				_elm_lang$core$Task$sequence(
+					A2(_elm_lang$core$List$map, send, _p2._0.taggers)));
+		}
+	});
+var _elm_lang$keyboard$Keyboard_ops = _elm_lang$keyboard$Keyboard_ops || {};
+_elm_lang$keyboard$Keyboard_ops['&>'] = F2(
+	function (task1, task2) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (_p4) {
+				return task2;
+			},
+			task1);
+	});
+var _elm_lang$keyboard$Keyboard$init = _elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty);
+var _elm_lang$keyboard$Keyboard$categorizeHelpHelp = F2(
+	function (value, maybeValues) {
+		var _p5 = maybeValues;
+		if (_p5.ctor === 'Nothing') {
+			return _elm_lang$core$Maybe$Just(
+				{
+					ctor: '::',
+					_0: value,
+					_1: {ctor: '[]'}
+				});
+		} else {
+			return _elm_lang$core$Maybe$Just(
+				{ctor: '::', _0: value, _1: _p5._0});
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorizeHelp = F2(
+	function (subs, subDict) {
+		categorizeHelp:
+		while (true) {
+			var _p6 = subs;
+			if (_p6.ctor === '[]') {
+				return subDict;
+			} else {
+				var _v4 = _p6._1,
+					_v5 = A3(
+					_elm_lang$core$Dict$update,
+					_p6._0._0,
+					_elm_lang$keyboard$Keyboard$categorizeHelpHelp(_p6._0._1),
+					subDict);
+				subs = _v4;
+				subDict = _v5;
+				continue categorizeHelp;
+			}
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorize = function (subs) {
+	return A2(_elm_lang$keyboard$Keyboard$categorizeHelp, subs, _elm_lang$core$Dict$empty);
+};
+var _elm_lang$keyboard$Keyboard$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$keyboard$Keyboard$subscription = _elm_lang$core$Native_Platform.leaf('Keyboard');
+var _elm_lang$keyboard$Keyboard$Watcher = F2(
+	function (a, b) {
+		return {taggers: a, pid: b};
+	});
+var _elm_lang$keyboard$Keyboard$Msg = F2(
+	function (a, b) {
+		return {category: a, keyCode: b};
+	});
+var _elm_lang$keyboard$Keyboard$onEffects = F3(
+	function (router, newSubs, oldState) {
+		var rightStep = F3(
+			function (category, taggers, task) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (state) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (pid) {
+								return _elm_lang$core$Task$succeed(
+									A3(
+										_elm_lang$core$Dict$insert,
+										category,
+										A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, pid),
+										state));
+							},
+							_elm_lang$core$Process$spawn(
+								A3(
+									_elm_lang$dom$Dom_LowLevel$onDocument,
+									category,
+									_elm_lang$keyboard$Keyboard$keyCode,
+									function (_p7) {
+										return A2(
+											_elm_lang$core$Platform$sendToSelf,
+											router,
+											A2(_elm_lang$keyboard$Keyboard$Msg, category, _p7));
+									})));
+					},
+					task);
+			});
+		var bothStep = F4(
+			function (category, _p8, taggers, task) {
+				var _p9 = _p8;
+				return A2(
+					_elm_lang$core$Task$map,
+					A2(
+						_elm_lang$core$Dict$insert,
+						category,
+						A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, _p9.pid)),
+					task);
+			});
+		var leftStep = F3(
+			function (category, _p10, task) {
+				var _p11 = _p10;
+				return A2(
+					_elm_lang$keyboard$Keyboard_ops['&>'],
+					_elm_lang$core$Process$kill(_p11.pid),
+					task);
+			});
+		return A6(
+			_elm_lang$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			oldState,
+			_elm_lang$keyboard$Keyboard$categorize(newSubs),
+			_elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty));
+	});
+var _elm_lang$keyboard$Keyboard$MySub = F2(
+	function (a, b) {
+		return {ctor: 'MySub', _0: a, _1: b};
+	});
+var _elm_lang$keyboard$Keyboard$presses = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keypress', tagger));
+};
+var _elm_lang$keyboard$Keyboard$downs = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keydown', tagger));
+};
+var _elm_lang$keyboard$Keyboard$ups = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keyup', tagger));
+};
+var _elm_lang$keyboard$Keyboard$subMap = F2(
+	function (func, _p12) {
+		var _p13 = _p12;
+		return A2(
+			_elm_lang$keyboard$Keyboard$MySub,
+			_p13._0,
+			function (_p14) {
+				return func(
+					_p13._1(_p14));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Keyboard'] = {pkg: 'elm-lang/keyboard', init: _elm_lang$keyboard$Keyboard$init, onEffects: _elm_lang$keyboard$Keyboard$onEffects, onSelfMsg: _elm_lang$keyboard$Keyboard$onSelfMsg, tag: 'sub', subMap: _elm_lang$keyboard$Keyboard$subMap};
 var _elm_lang$core$Random$onSelfMsg = F3(
 	function (_p1, _p0, seed) {
 		return _elm_lang$core$Task$succeed(seed);
@@ -6520,6 +6875,759 @@ var _elm_lang$core$Random$cmdMap = F2(
 			A2(_elm_lang$core$Random$map, func, _p79._0));
 	});
 _elm_lang$core$Native_Platform.effectManagers['Random'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Random$init, onEffects: _elm_lang$core$Random$onEffects, onSelfMsg: _elm_lang$core$Random$onSelfMsg, tag: 'cmd', cmdMap: _elm_lang$core$Random$cmdMap};
+var _mgold$elm_nonempty_list$List_Nonempty$foldl1 = F2(
+	function (f, _p0) {
+		var _p1 = _p0;
+		return A3(_elm_lang$core$List$foldl, f, _p1._0, _p1._1);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$foldl = F3(
+	function (f, b, _p2) {
+		var _p3 = _p2;
+		return A3(
+			_elm_lang$core$List$foldl,
+			f,
+			b,
+			{ctor: '::', _0: _p3._0, _1: _p3._1});
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$any = F2(
+	function (f, _p4) {
+		var _p5 = _p4;
+		return f(_p5._0) || A2(_elm_lang$core$List$any, f, _p5._1);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$all = F2(
+	function (f, _p6) {
+		var _p7 = _p6;
+		return f(_p7._0) && A2(_elm_lang$core$List$all, f, _p7._1);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$member = F2(
+	function (y, _p8) {
+		var _p9 = _p8;
+		return _elm_lang$core$Native_Utils.eq(_p9._0, y) || A2(_elm_lang$core$List$member, y, _p9._1);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$length = function (_p10) {
+	var _p11 = _p10;
+	return _elm_lang$core$List$length(_p11._1) + 1;
+};
+var _mgold$elm_nonempty_list$List_Nonempty$isSingleton = function (_p12) {
+	var _p13 = _p12;
+	return _elm_lang$core$List$isEmpty(_p13._1);
+};
+var _mgold$elm_nonempty_list$List_Nonempty$get = F2(
+	function (i, _p14) {
+		var _p15 = _p14;
+		var find = F2(
+			function (k, ys) {
+				find:
+				while (true) {
+					var _p16 = ys;
+					if (_p16.ctor === '[]') {
+						return _elm_lang$core$Native_Utils.crashCase(
+							'List.Nonempty',
+							{
+								start: {line: 131, column: 13},
+								end: {line: 139, column: 40}
+							},
+							_p16)('This can\'t happen: attempted to take value at safe index from empty list');
+					} else {
+						if (_elm_lang$core$Native_Utils.eq(k, 0)) {
+							return _p16._0;
+						} else {
+							var _v9 = k - 1,
+								_v10 = _p16._1;
+							k = _v9;
+							ys = _v10;
+							continue find;
+						}
+					}
+				}
+			});
+		var j = A2(
+			_elm_lang$core$Basics_ops['%'],
+			i,
+			_mgold$elm_nonempty_list$List_Nonempty$length(_p15));
+		return _elm_lang$core$Native_Utils.eq(j, 0) ? _p15._0 : A2(find, j - 1, _p15._1);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$sample = function (nonempty) {
+	return A2(
+		_elm_lang$core$Random$map,
+		function (i) {
+			return A2(_mgold$elm_nonempty_list$List_Nonempty$get, i, nonempty);
+		},
+		A2(
+			_elm_lang$core$Random$int,
+			0,
+			_mgold$elm_nonempty_list$List_Nonempty$length(nonempty) - 1));
+};
+var _mgold$elm_nonempty_list$List_Nonempty$toList = function (_p18) {
+	var _p19 = _p18;
+	return {ctor: '::', _0: _p19._0, _1: _p19._1};
+};
+var _mgold$elm_nonempty_list$List_Nonempty$tail = function (_p20) {
+	var _p21 = _p20;
+	return _p21._1;
+};
+var _mgold$elm_nonempty_list$List_Nonempty$head = function (_p22) {
+	var _p23 = _p22;
+	return _p23._0;
+};
+var _mgold$elm_nonempty_list$List_Nonempty$Nonempty = F2(
+	function (a, b) {
+		return {ctor: 'Nonempty', _0: a, _1: b};
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$fromElement = function (x) {
+	return A2(
+		_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+		x,
+		{ctor: '[]'});
+};
+var _mgold$elm_nonempty_list$List_Nonempty$fromList = function (ys) {
+	var _p24 = ys;
+	if (_p24.ctor === '::') {
+		return _elm_lang$core$Maybe$Just(
+			A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p24._0, _p24._1));
+	} else {
+		return _elm_lang$core$Maybe$Nothing;
+	}
+};
+var _mgold$elm_nonempty_list$List_Nonempty$cons = F2(
+	function (y, _p25) {
+		var _p26 = _p25;
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			y,
+			{ctor: '::', _0: _p26._0, _1: _p26._1});
+	});
+var _mgold$elm_nonempty_list$List_Nonempty_ops = _mgold$elm_nonempty_list$List_Nonempty_ops || {};
+_mgold$elm_nonempty_list$List_Nonempty_ops[':::'] = _mgold$elm_nonempty_list$List_Nonempty$cons;
+var _mgold$elm_nonempty_list$List_Nonempty$append = F2(
+	function (_p28, _p27) {
+		var _p29 = _p28;
+		var _p30 = _p27;
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			_p29._0,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				_p29._1,
+				{ctor: '::', _0: _p30._0, _1: _p30._1}));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$pop = function (_p31) {
+	var _p32 = _p31;
+	var _p34 = _p32._1;
+	var _p33 = _p34;
+	if (_p33.ctor === '[]') {
+		return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p32._0, _p34);
+	} else {
+		return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p33._0, _p33._1);
+	}
+};
+var _mgold$elm_nonempty_list$List_Nonempty$reverse = function (_p35) {
+	var _p36 = _p35;
+	var revapp = function (_p37) {
+		revapp:
+		while (true) {
+			var _p38 = _p37;
+			var _p41 = _p38._0;
+			var _p40 = _p38._1;
+			var _p39 = _p38._2;
+			if (_p39.ctor === '[]') {
+				return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p40, _p41);
+			} else {
+				var _v23 = {
+					ctor: '_Tuple3',
+					_0: {ctor: '::', _0: _p40, _1: _p41},
+					_1: _p39._0,
+					_2: _p39._1
+				};
+				_p37 = _v23;
+				continue revapp;
+			}
+		}
+	};
+	return revapp(
+		{
+			ctor: '_Tuple3',
+			_0: {ctor: '[]'},
+			_1: _p36._0,
+			_2: _p36._1
+		});
+};
+var _mgold$elm_nonempty_list$List_Nonempty$concat = function (_p42) {
+	var _p43 = _p42;
+	var _p44 = _p43._0;
+	var tl = A2(
+		_elm_lang$core$Basics_ops['++'],
+		_mgold$elm_nonempty_list$List_Nonempty$tail(_p44),
+		_elm_lang$core$List$concat(
+			A2(_elm_lang$core$List$map, _mgold$elm_nonempty_list$List_Nonempty$toList, _p43._1)));
+	var hd = _mgold$elm_nonempty_list$List_Nonempty$head(_p44);
+	return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, hd, tl);
+};
+var _mgold$elm_nonempty_list$List_Nonempty$replaceHead = F2(
+	function (y, _p45) {
+		var _p46 = _p45;
+		return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, y, _p46._1);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$replaceTail = F2(
+	function (ys, _p47) {
+		var _p48 = _p47;
+		return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p48._0, ys);
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$dropTail = function (_p49) {
+	var _p50 = _p49;
+	return A2(
+		_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+		_p50._0,
+		{ctor: '[]'});
+};
+var _mgold$elm_nonempty_list$List_Nonempty$map = F2(
+	function (f, _p51) {
+		var _p52 = _p51;
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			f(_p52._0),
+			A2(_elm_lang$core$List$map, f, _p52._1));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$concatMap = F2(
+	function (f, xs) {
+		return _mgold$elm_nonempty_list$List_Nonempty$concat(
+			A2(_mgold$elm_nonempty_list$List_Nonempty$map, f, xs));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$map2 = F3(
+	function (f, _p54, _p53) {
+		var _p55 = _p54;
+		var _p56 = _p53;
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			A2(f, _p55._0, _p56._0),
+			A3(_elm_lang$core$List$map2, f, _p55._1, _p56._1));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$andMap = _mgold$elm_nonempty_list$List_Nonempty$map2(
+	F2(
+		function (x, y) {
+			return y(x);
+		}));
+var _mgold$elm_nonempty_list$List_Nonempty$indexedMap = F2(
+	function (f, _p57) {
+		var _p58 = _p57;
+		var wrapped = F2(
+			function (i, d) {
+				return A2(f, i + 1, d);
+			});
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			A2(f, 0, _p58._0),
+			A2(_elm_lang$core$List$indexedMap, wrapped, _p58._1));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$filter = F3(
+	function (p, d, _p59) {
+		var _p60 = _p59;
+		var _p63 = _p60._1;
+		var _p62 = _p60._0;
+		if (p(_p62)) {
+			return A2(
+				_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+				_p62,
+				A2(_elm_lang$core$List$filter, p, _p63));
+		} else {
+			var _p61 = A2(_elm_lang$core$List$filter, p, _p63);
+			if (_p61.ctor === '[]') {
+				return A2(
+					_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+					d,
+					{ctor: '[]'});
+			} else {
+				return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p61._0, _p61._1);
+			}
+		}
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$sort = function (_p64) {
+	var _p65 = _p64;
+	var _p66 = _elm_lang$core$List$sort(
+		{ctor: '::', _0: _p65._0, _1: _p65._1});
+	if (_p66.ctor === '::') {
+		return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p66._0, _p66._1);
+	} else {
+		return _elm_lang$core$Native_Utils.crashCase(
+			'List.Nonempty',
+			{
+				start: {line: 360, column: 5},
+				end: {line: 365, column: 92}
+			},
+			_p66)('This can\'t happen: sorting a nonempty list returned an empty list');
+	}
+};
+var _mgold$elm_nonempty_list$List_Nonempty$sortBy = F2(
+	function (f, _p68) {
+		var _p69 = _p68;
+		var _p70 = A2(
+			_elm_lang$core$List$sortBy,
+			f,
+			{ctor: '::', _0: _p69._0, _1: _p69._1});
+		if (_p70.ctor === '::') {
+			return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p70._0, _p70._1);
+		} else {
+			return _elm_lang$core$Native_Utils.crashCase(
+				'List.Nonempty',
+				{
+					start: {line: 372, column: 5},
+					end: {line: 377, column: 94}
+				},
+				_p70)('This can\'t happen: sortBying a nonempty list returned an empty list');
+		}
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$sortWith = F2(
+	function (f, _p72) {
+		var _p73 = _p72;
+		var _p74 = A2(
+			_elm_lang$core$List$sortWith,
+			f,
+			{ctor: '::', _0: _p73._0, _1: _p73._1});
+		if (_p74.ctor === '::') {
+			return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p74._0, _p74._1);
+		} else {
+			return _elm_lang$core$Native_Utils.crashCase(
+				'List.Nonempty',
+				{
+					start: {line: 384, column: 5},
+					end: {line: 389, column: 96}
+				},
+				_p74)('This can\'t happen: sortWithing a nonempty list returned an empty list');
+		}
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$dedup = function (_p76) {
+	var _p77 = _p76;
+	var dedupe = F3(
+		function (prev, done, next) {
+			dedupe:
+			while (true) {
+				var _p78 = next;
+				if (_p78.ctor === '[]') {
+					return A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, prev, done);
+				} else {
+					var _p80 = _p78._1;
+					var _p79 = _p78._0;
+					if (_elm_lang$core$Native_Utils.eq(_p79, prev)) {
+						var _v42 = prev,
+							_v43 = done,
+							_v44 = _p80;
+						prev = _v42;
+						done = _v43;
+						next = _v44;
+						continue dedupe;
+					} else {
+						var _v45 = _p79,
+							_v46 = {ctor: '::', _0: prev, _1: done},
+							_v47 = _p80;
+						prev = _v45;
+						done = _v46;
+						next = _v47;
+						continue dedupe;
+					}
+				}
+			}
+		});
+	return _mgold$elm_nonempty_list$List_Nonempty$reverse(
+		A3(
+			dedupe,
+			_p77._0,
+			{ctor: '[]'},
+			_p77._1));
+};
+var _mgold$elm_nonempty_list$List_Nonempty$uniq = function (_p81) {
+	var _p82 = _p81;
+	var _p86 = _p82._0;
+	var unique = F3(
+		function (seen, done, next) {
+			unique:
+			while (true) {
+				var _p83 = next;
+				if (_p83.ctor === '[]') {
+					return done;
+				} else {
+					var _p85 = _p83._1;
+					var _p84 = _p83._0;
+					if (A2(_elm_lang$core$List$member, _p84, seen)) {
+						var _v50 = seen,
+							_v51 = done,
+							_v52 = _p85;
+						seen = _v50;
+						done = _v51;
+						next = _v52;
+						continue unique;
+					} else {
+						var _v53 = {ctor: '::', _0: _p84, _1: seen},
+							_v54 = A2(_mgold$elm_nonempty_list$List_Nonempty_ops[':::'], _p84, done),
+							_v55 = _p85;
+						seen = _v53;
+						done = _v54;
+						next = _v55;
+						continue unique;
+					}
+				}
+			}
+		});
+	return _mgold$elm_nonempty_list$List_Nonempty$reverse(
+		A3(
+			unique,
+			{
+				ctor: '::',
+				_0: _p86,
+				_1: {ctor: '[]'}
+			},
+			A2(
+				_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+				_p86,
+				{ctor: '[]'}),
+			_p82._1));
+};
+var _mgold$elm_nonempty_list$List_Nonempty$scanl = F3(
+	function (f, b, _p87) {
+		var _p88 = _p87;
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			b,
+			A3(
+				_elm_lang$core$List$scanl,
+				f,
+				A2(f, _p88._0, b),
+				_p88._1));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$scanl1 = F2(
+	function (f, _p89) {
+		var _p90 = _p89;
+		var _p92 = _p90._0;
+		var _p91 = _p90._1;
+		if (_p91.ctor === '[]') {
+			return A2(
+				_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+				_p92,
+				{ctor: '[]'});
+		} else {
+			return A2(
+				_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+				_p92,
+				A3(
+					_elm_lang$core$List$scanl,
+					f,
+					A2(f, _p91._0, _p92),
+					_p91._1));
+		}
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$zip = F2(
+	function (_p94, _p93) {
+		var _p95 = _p94;
+		var _p96 = _p93;
+		return A2(
+			_mgold$elm_nonempty_list$List_Nonempty$Nonempty,
+			{ctor: '_Tuple2', _0: _p95._0, _1: _p96._0},
+			A3(
+				_elm_lang$core$List$map2,
+				F2(
+					function (v0, v1) {
+						return {ctor: '_Tuple2', _0: v0, _1: v1};
+					}),
+				_p95._1,
+				_p96._1));
+	});
+var _mgold$elm_nonempty_list$List_Nonempty$unzip = function (_p97) {
+	var _p98 = _p97;
+	var _p99 = _elm_lang$core$List$unzip(_p98._1);
+	var xs = _p99._0;
+	var ys = _p99._1;
+	return {
+		ctor: '_Tuple2',
+		_0: A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p98._0._0, xs),
+		_1: A2(_mgold$elm_nonempty_list$List_Nonempty$Nonempty, _p98._0._1, ys)
+	};
+};
+var _ckoster22$elm_genetic$NonemptyHelper$fromHeadRest = F2(
+	function (head, rest) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (item, nonemptyList) {
+					return A2(_mgold$elm_nonempty_list$List_Nonempty$cons, item, nonemptyList);
+				}),
+			_mgold$elm_nonempty_list$List_Nonempty$fromElement(head),
+			rest);
+	});
+var _ckoster22$elm_genetic$NonemptyHelper$constructNonemptyFromHead = F3(
+	function (thing, size, _p0) {
+		var _p1 = _p0;
+		var headList = _mgold$elm_nonempty_list$List_Nonempty$fromElement(thing);
+		var entireList = A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (item, nonemptyList) {
+					return A2(_mgold$elm_nonempty_list$List_Nonempty$cons, item, nonemptyList);
+				}),
+			headList,
+			_p1._0);
+		return {ctor: '_Tuple2', _0: entireList, _1: _p1._1};
+	});
+var _ckoster22$elm_genetic$NonemptyHelper$randomNonemptyList = F3(
+	function (size, seed, generator) {
+		var _p2 = A2(_elm_lang$core$Random$step, generator, seed);
+		var head = _p2._0;
+		var seed2 = _p2._1;
+		return A3(
+			_ckoster22$elm_genetic$NonemptyHelper$constructNonemptyFromHead,
+			head,
+			size,
+			A2(
+				_elm_lang$core$Random$step,
+				A2(_elm_lang$core$Random$list, size - 1, generator),
+				seed2));
+	});
+var _ckoster22$elm_genetic$Genetic$constantGen = function (val) {
+	return A2(
+		_elm_lang$core$Random$map,
+		_elm_lang$core$Basics$always(val),
+		_elm_lang$core$Random$bool);
+};
+var _ckoster22$elm_genetic$Genetic$initialPoints = function (method) {
+	var _p0 = method;
+	if (_p0.ctor === 'MinimizePenalty') {
+		return _elm_lang$core$Basics$toFloat(_elm_lang$core$Random$maxInt);
+	} else {
+		return _elm_lang$core$Basics$toFloat(_elm_lang$core$Random$minInt);
+	}
+};
+var _ckoster22$elm_genetic$Genetic$getPopulation = function (_p1) {
+	var _p2 = _p1;
+	return _p2._0;
+};
+var _ckoster22$elm_genetic$Genetic$numGenerationsFromValue = function (_p3) {
+	var _p4 = _p3;
+	return _p4._2;
+};
+var _ckoster22$elm_genetic$Genetic$dnaFromValue = function (_p5) {
+	var _p6 = _p5;
+	return _p6._1.dna;
+};
+var _ckoster22$elm_genetic$Genetic$population_size = 20;
+var _ckoster22$elm_genetic$Genetic$half_population_size = (_ckoster22$elm_genetic$Genetic$population_size / 2) | 0;
+var _ckoster22$elm_genetic$Genetic$PointedDna = F2(
+	function (a, b) {
+		return {dna: a, points: b};
+	});
+var _ckoster22$elm_genetic$Genetic$childGenerator = F3(
+	function (options, parent1, parent2) {
+		return A2(
+			_elm_lang$core$Random$map,
+			function (childDna) {
+				return A2(
+					_ckoster22$elm_genetic$Genetic$PointedDna,
+					childDna,
+					options.evaluateSolution(childDna));
+			},
+			A2(
+				_elm_lang$core$Random$andThen,
+				options.mutateDna,
+				A2(
+					_elm_lang$core$Random$map,
+					function (dna1IsFirst) {
+						return dna1IsFirst ? A2(options.crossoverDnas, parent1.dna, parent2.dna) : A2(options.crossoverDnas, parent2.dna, parent1.dna);
+					},
+					_elm_lang$core$Random$bool)));
+	});
+var _ckoster22$elm_genetic$Genetic$familyGenerator = F3(
+	function (options, parent1, parent2) {
+		var bestParent = function () {
+			var _p7 = options.method;
+			if (_p7.ctor === 'MaximizeScore') {
+				return (_elm_lang$core$Native_Utils.cmp(parent1.points, parent2.points) > 0) ? parent1 : parent2;
+			} else {
+				return (_elm_lang$core$Native_Utils.cmp(parent1.points, parent2.points) < 0) ? parent1 : parent2;
+			}
+		}();
+		return A4(
+			_elm_lang$core$Random$map3,
+			F3(
+				function (child1, child2, child3) {
+					return {
+						ctor: '::',
+						_0: child1,
+						_1: {
+							ctor: '::',
+							_0: child2,
+							_1: {
+								ctor: '::',
+								_0: child3,
+								_1: {
+									ctor: '::',
+									_0: bestParent,
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					};
+				}),
+			A3(_ckoster22$elm_genetic$Genetic$childGenerator, options, parent1, parent2),
+			A3(_ckoster22$elm_genetic$Genetic$childGenerator, options, parent1, parent2),
+			A3(_ckoster22$elm_genetic$Genetic$childGenerator, options, parent1, parent2));
+	});
+var _ckoster22$elm_genetic$Genetic$bestOrganismsGenerator = F2(
+	function (options, bestHalfOfPopulation) {
+		var _p8 = bestHalfOfPopulation;
+		if (_p8.ctor === '[]') {
+			return _ckoster22$elm_genetic$Genetic$constantGen(
+				{ctor: '[]'});
+		} else {
+			if (_p8._1.ctor === '[]') {
+				return _ckoster22$elm_genetic$Genetic$constantGen(
+					{
+						ctor: '::',
+						_0: _p8._0,
+						_1: {ctor: '[]'}
+					});
+			} else {
+				return A2(
+					_elm_lang$core$Random$andThen,
+					function (family) {
+						return A2(
+							_elm_lang$core$Random$map,
+							function (organisms) {
+								return A2(_elm_lang$core$List$append, organisms, family);
+							},
+							A2(_ckoster22$elm_genetic$Genetic$bestOrganismsGenerator, options, _p8._1._1));
+					},
+					A3(_ckoster22$elm_genetic$Genetic$familyGenerator, options, _p8._0, _p8._1._0));
+			}
+		}
+	});
+var _ckoster22$elm_genetic$Genetic$nextGenerationGenerator = F2(
+	function (options, currPopulation) {
+		var sortedPopulation = _mgold$elm_nonempty_list$List_Nonempty$toList(
+			A2(
+				_mgold$elm_nonempty_list$List_Nonempty$sortBy,
+				function (_) {
+					return _.points;
+				},
+				currPopulation));
+		var bestHalfOfPopulation = function () {
+			var _p9 = options.method;
+			if (_p9.ctor === 'MaximizeScore') {
+				return A2(_elm_lang$core$List$drop, _ckoster22$elm_genetic$Genetic$half_population_size, sortedPopulation);
+			} else {
+				return A2(_elm_lang$core$List$take, _ckoster22$elm_genetic$Genetic$half_population_size, sortedPopulation);
+			}
+		}();
+		return A2(
+			_elm_lang$core$Random$map,
+			function (organismList) {
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					currPopulation,
+					_mgold$elm_nonempty_list$List_Nonempty$fromList(organismList));
+			},
+			A2(_ckoster22$elm_genetic$Genetic$bestOrganismsGenerator, options, bestHalfOfPopulation));
+	});
+var _ckoster22$elm_genetic$Genetic$Options = F6(
+	function (a, b, c, d, e, f) {
+		return {randomDnaGenerator: a, evaluateSolution: b, crossoverDnas: c, mutateDna: d, isDoneEvolving: e, method: f};
+	});
+var _ckoster22$elm_genetic$Genetic$MinimizePenalty = {ctor: 'MinimizePenalty'};
+var _ckoster22$elm_genetic$Genetic$MaximizeScore = {ctor: 'MaximizeScore'};
+var _ckoster22$elm_genetic$Genetic$IntermediateValue = F3(
+	function (a, b, c) {
+		return {ctor: 'IntermediateValue', _0: a, _1: b, _2: c};
+	});
+var _ckoster22$elm_genetic$Genetic$executeStep = F2(
+	function (options, _p10) {
+		var _p11 = _p10;
+		var _p13 = _p11._0;
+		var sortedPopulation = A2(
+			_mgold$elm_nonempty_list$List_Nonempty$sortBy,
+			function (_) {
+				return _.points;
+			},
+			_p13);
+		var bestSolution = function () {
+			var _p12 = options.method;
+			if (_p12.ctor === 'MaximizeScore') {
+				return _mgold$elm_nonempty_list$List_Nonempty$head(
+					_mgold$elm_nonempty_list$List_Nonempty$reverse(sortedPopulation));
+			} else {
+				return _mgold$elm_nonempty_list$List_Nonempty$head(sortedPopulation);
+			}
+		}();
+		return A2(
+			_elm_lang$core$Random$map,
+			function (nextPopulation) {
+				return A3(_ckoster22$elm_genetic$Genetic$IntermediateValue, nextPopulation, bestSolution, _p11._2 + 1);
+			},
+			A2(_ckoster22$elm_genetic$Genetic$nextGenerationGenerator, options, _p13));
+	});
+var _ckoster22$elm_genetic$Genetic$recursivelyEvolve = F2(
+	function (options, stepValueGenerator) {
+		return A2(
+			_elm_lang$core$Random$andThen,
+			function (_p14) {
+				var _p15 = _p14;
+				var _p17 = _p15._2;
+				var _p16 = _p15._1;
+				return A3(options.isDoneEvolving, _p16.dna, _p16.points, _p17) ? stepValueGenerator : A2(
+					_ckoster22$elm_genetic$Genetic$recursivelyEvolve,
+					options,
+					A2(
+						_ckoster22$elm_genetic$Genetic$executeStep,
+						options,
+						A3(_ckoster22$elm_genetic$Genetic$IntermediateValue, _p15._0, _p16, _p17)));
+			},
+			stepValueGenerator);
+	});
+var _ckoster22$elm_genetic$Genetic$toStepValue = function (pointedDna) {
+	var _p18 = pointedDna;
+	if (_p18.ctor === '::') {
+		var _p19 = _p18._0;
+		return A3(
+			_ckoster22$elm_genetic$Genetic$IntermediateValue,
+			A2(_ckoster22$elm_genetic$NonemptyHelper$fromHeadRest, _p19, _p18._1),
+			_p19,
+			1);
+	} else {
+		return _elm_lang$core$Native_Utils.crashCase(
+			'Genetic',
+			{
+				start: {line: 187, column: 5},
+				end: {line: 196, column: 70}
+			},
+			_p18)('Empty DNA list. This shouldn\'t be possible!');
+	}
+};
+var _ckoster22$elm_genetic$Genetic$executeInitialStep = function (_p21) {
+	var _p22 = _p21;
+	return A2(
+		_elm_lang$core$Random$map,
+		function (randDnaList) {
+			return _ckoster22$elm_genetic$Genetic$toStepValue(
+				A2(
+					_elm_lang$core$List$map,
+					function (item) {
+						return {
+							dna: item,
+							points: _ckoster22$elm_genetic$Genetic$initialPoints(_p22.method)
+						};
+					},
+					randDnaList));
+		},
+		A2(_elm_lang$core$Random$list, _ckoster22$elm_genetic$Genetic$population_size, _p22.randomDnaGenerator));
+};
+var _ckoster22$elm_genetic$Genetic$solutionGenerator = function (options) {
+	return A2(
+		_elm_lang$core$Random$map,
+		function (_p23) {
+			var _p24 = _p23;
+			var _p25 = _p24._1;
+			return {ctor: '_Tuple2', _0: _p25.dna, _1: _p25.points};
+		},
+		A2(
+			_ckoster22$elm_genetic$Genetic$recursivelyEvolve,
+			options,
+			_ckoster22$elm_genetic$Genetic$executeInitialStep(options)));
+};
 var _elm_lang$core$Color$fmod = F2(
 	function (f, n) {
 		var integer = _elm_lang$core$Basics$floor(f);
@@ -6685,6 +7793,136 @@ var _elm_lang$core$Color$Linear = F3(
 		return {ctor: 'Linear', _0: a, _1: b, _2: c};
 	});
 var _elm_lang$core$Color$linear = _elm_lang$core$Color$Linear;
+var _elm_lang$core$Set$foldr = F3(
+	function (f, b, _p0) {
+		var _p1 = _p0;
+		return A3(
+			_elm_lang$core$Dict$foldr,
+			F3(
+				function (k, _p2, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p1._0);
+	});
+var _elm_lang$core$Set$foldl = F3(
+	function (f, b, _p3) {
+		var _p4 = _p3;
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			F3(
+				function (k, _p5, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p4._0);
+	});
+var _elm_lang$core$Set$toList = function (_p6) {
+	var _p7 = _p6;
+	return _elm_lang$core$Dict$keys(_p7._0);
+};
+var _elm_lang$core$Set$size = function (_p8) {
+	var _p9 = _p8;
+	return _elm_lang$core$Dict$size(_p9._0);
+};
+var _elm_lang$core$Set$member = F2(
+	function (k, _p10) {
+		var _p11 = _p10;
+		return A2(_elm_lang$core$Dict$member, k, _p11._0);
+	});
+var _elm_lang$core$Set$isEmpty = function (_p12) {
+	var _p13 = _p12;
+	return _elm_lang$core$Dict$isEmpty(_p13._0);
+};
+var _elm_lang$core$Set$Set_elm_builtin = function (a) {
+	return {ctor: 'Set_elm_builtin', _0: a};
+};
+var _elm_lang$core$Set$empty = _elm_lang$core$Set$Set_elm_builtin(_elm_lang$core$Dict$empty);
+var _elm_lang$core$Set$singleton = function (k) {
+	return _elm_lang$core$Set$Set_elm_builtin(
+		A2(
+			_elm_lang$core$Dict$singleton,
+			k,
+			{ctor: '_Tuple0'}));
+};
+var _elm_lang$core$Set$insert = F2(
+	function (k, _p14) {
+		var _p15 = _p14;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A3(
+				_elm_lang$core$Dict$insert,
+				k,
+				{ctor: '_Tuple0'},
+				_p15._0));
+	});
+var _elm_lang$core$Set$fromList = function (xs) {
+	return A3(_elm_lang$core$List$foldl, _elm_lang$core$Set$insert, _elm_lang$core$Set$empty, xs);
+};
+var _elm_lang$core$Set$map = F2(
+	function (f, s) {
+		return _elm_lang$core$Set$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				f,
+				_elm_lang$core$Set$toList(s)));
+	});
+var _elm_lang$core$Set$remove = F2(
+	function (k, _p16) {
+		var _p17 = _p16;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$remove, k, _p17._0));
+	});
+var _elm_lang$core$Set$union = F2(
+	function (_p19, _p18) {
+		var _p20 = _p19;
+		var _p21 = _p18;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$union, _p20._0, _p21._0));
+	});
+var _elm_lang$core$Set$intersect = F2(
+	function (_p23, _p22) {
+		var _p24 = _p23;
+		var _p25 = _p22;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$intersect, _p24._0, _p25._0));
+	});
+var _elm_lang$core$Set$diff = F2(
+	function (_p27, _p26) {
+		var _p28 = _p27;
+		var _p29 = _p26;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$diff, _p28._0, _p29._0));
+	});
+var _elm_lang$core$Set$filter = F2(
+	function (p, _p30) {
+		var _p31 = _p30;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(
+				_elm_lang$core$Dict$filter,
+				F2(
+					function (k, _p32) {
+						return p(k);
+					}),
+				_p31._0));
+	});
+var _elm_lang$core$Set$partition = F2(
+	function (p, _p33) {
+		var _p34 = _p33;
+		var _p35 = A2(
+			_elm_lang$core$Dict$partition,
+			F2(
+				function (k, _p36) {
+					return p(k);
+				}),
+			_p34._0);
+		var p1 = _p35._0;
+		var p2 = _p35._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Set$Set_elm_builtin(p1),
+			_1: _elm_lang$core$Set$Set_elm_builtin(p2)
+		};
+	});
 //import Maybe, Native.List //
 
 var _elm_lang$core$Native_Regex = function() {
@@ -11296,6 +12534,133 @@ var _evancz$elm_graphics$Collage$ngon = F2(
 				f,
 				A2(_elm_lang$core$List$range, 0, n - 1)));
 	});
+var _j1nma$genetic_spaceinvaders$GeneticHelper$updateSolution = F2(
+	function (newFitness, _p0) {
+		var _p1 = _p0;
+		return A3(
+			_ckoster22$elm_genetic$Genetic$IntermediateValue,
+			_p1._0,
+			{
+				dna: {genes: _p1._1.dna.genes, fitness: newFitness},
+				points: newFitness
+			},
+			_p1._2);
+	});
+var _j1nma$genetic_spaceinvaders$GeneticHelper$max_iterations = 3000;
+var _j1nma$genetic_spaceinvaders$GeneticHelper$isDoneEvolving = F3(
+	function (bestDna, bestDnaScore, numGenerations) {
+		return _elm_lang$core$Native_Utils.eq(
+			bestDnaScore,
+			_elm_lang$core$Basics$toFloat(_elm_lang$core$Random$maxInt)) || (_elm_lang$core$Native_Utils.cmp(numGenerations, _j1nma$genetic_spaceinvaders$GeneticHelper$max_iterations) > -1);
+	});
+var _j1nma$genetic_spaceinvaders$GeneticHelper$randomProbabilityGenerator = A2(
+	_elm_lang$core$Random$list,
+	2,
+	A2(_elm_lang$core$Random$float, 0, 1));
+var _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator = A2(
+	_elm_lang$core$Random$map,
+	function (randGenes) {
+		return {genes: randGenes, fitness: 0.0};
+	},
+	A3(
+		_elm_lang$core$Random$map2,
+		F2(
+			function (x, y) {
+				return A2(_elm_lang$core$Basics_ops['++'], x, y);
+			}),
+		_j1nma$genetic_spaceinvaders$GeneticHelper$randomProbabilityGenerator,
+		A2(
+			_elm_lang$core$Random$list,
+			2,
+			A2(_elm_lang$core$Random$float, -100, 100))));
+var _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution = function (dna) {
+	return dna.fitness;
+};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$indexWhereProbabilitiesEnd = 1;
+var _j1nma$genetic_spaceinvaders$GeneticHelper$numberOfGenes = 4;
+var _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index = _elm_lang$core$Basics$floor(
+	_elm_lang$core$Basics$toFloat(_j1nma$genetic_spaceinvaders$GeneticHelper$numberOfGenes) / 2);
+var _j1nma$genetic_spaceinvaders$GeneticHelper$crossoverDnas = F2(
+	function (dna1, dna2) {
+		var _p2 = {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$List$take, _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index, dna1.genes),
+			_1: A2(_elm_lang$core$List$drop, _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index, dna2.genes)
+		};
+		var dnaPart1 = _p2._0;
+		var dnaPart2 = _p2._1;
+		return {
+			genes: A2(_elm_lang$core$List$append, dnaPart1, dnaPart2),
+			fitness: (dna1.fitness + dna2.fitness) / 2
+		};
+	});
+var _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna = function (dna) {
+	var randomProbGenerator = A2(_elm_lang$core$Random$float, 0, 1);
+	var randomVelGenerator = A2(_elm_lang$core$Random$float, -100, 100);
+	var randomIndexGenerator = A2(_elm_lang$core$Random$int, 0, _j1nma$genetic_spaceinvaders$GeneticHelper$numberOfGenes - 1);
+	return A4(
+		_elm_lang$core$Random$map3,
+		F3(
+			function (randomIndex, randomVelGene, randomProbGene) {
+				return function (randGenes) {
+					return {genes: randGenes, fitness: dna.fitness + 1.0};
+				}(
+					A2(
+						_elm_lang$core$List$indexedMap,
+						F2(
+							function (index, gene) {
+								return _elm_lang$core$Native_Utils.eq(index, randomIndex) ? ((_elm_lang$core$Native_Utils.cmp(index, _j1nma$genetic_spaceinvaders$GeneticHelper$indexWhereProbabilitiesEnd) > -1) ? randomVelGene : randomProbGene) : gene;
+							}),
+						dna.genes));
+			}),
+		randomIndexGenerator,
+		randomVelGenerator,
+		randomProbGenerator);
+};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$myOptions = {randomDnaGenerator: _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator, evaluateSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution, crossoverDnas: _j1nma$genetic_spaceinvaders$GeneticHelper$crossoverDnas, mutateDna: _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna, isDoneEvolving: _j1nma$genetic_spaceinvaders$GeneticHelper$isDoneEvolving, method: _ckoster22$elm_genetic$Genetic$MaximizeScore};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve = function (seed) {
+	return A2(
+		_elm_lang$core$Random$step,
+		_ckoster22$elm_genetic$Genetic$executeInitialStep(_j1nma$genetic_spaceinvaders$GeneticHelper$myOptions),
+		seed);
+};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$initialDna = function (seed) {
+	return _ckoster22$elm_genetic$Genetic$dnaFromValue(
+		_elm_lang$core$Tuple$first(
+			_j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(seed)));
+};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$evolve = F2(
+	function (seed, intermediate) {
+		return A2(
+			_elm_lang$core$Random$step,
+			A2(_ckoster22$elm_genetic$Genetic$executeStep, _j1nma$genetic_spaceinvaders$GeneticHelper$myOptions, intermediate),
+			seed);
+	});
+var _j1nma$genetic_spaceinvaders$GeneticHelper$Dna = F2(
+	function (a, b) {
+		return {genes: a, fitness: b};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Game = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {keysDown: a, windowDimensions: b, state: c, spaceship: d, invaders: e, bullets: f, bestSolution: g, currentTime: h, hasSpawned: i, score: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _j1nma$genetic_spaceinvaders$Model$Spaceship = F4(
 	function (a, b, c, d) {
 		return {x: a, y: b, vx: c, vy: d};
@@ -11308,6 +12673,22 @@ var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
 	function (a, b, c, d, e, f, g, h, i) {
 		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h, wasHit: i};
 	});
+var _j1nma$genetic_spaceinvaders$Model$OnTime = function (a) {
+	return {ctor: 'OnTime', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$NoOp = {ctor: 'NoOp'};
+var _j1nma$genetic_spaceinvaders$Model$Tick = function (a) {
+	return {ctor: 'Tick', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$WindowResize = function (a) {
+	return {ctor: 'WindowResize', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$KeyUp = function (a) {
+	return {ctor: 'KeyUp', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$KeyDown = function (a) {
+	return {ctor: 'KeyDown', _0: a};
+};
 var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
@@ -11365,8 +12746,8 @@ var _j1nma$genetic_spaceinvaders$View$verticalLine = function (height) {
 			}
 		});
 };
-var _j1nma$genetic_spaceinvaders$View$invadersStatus = F2(
-	function (state, numberOfInvaders) {
+var _j1nma$genetic_spaceinvaders$View$scoreStatus = F2(
+	function (state, score) {
 		var _p1 = state;
 		if (_p1.ctor === 'Start') {
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
@@ -11376,21 +12757,36 @@ var _j1nma$genetic_spaceinvaders$View$invadersStatus = F2(
 				_elm_lang$core$Basics$identity,
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					'INVADERS:',
+					'SCORE: ',
+					_elm_lang$core$Basics$toString(score)));
+		}
+	});
+var _j1nma$genetic_spaceinvaders$View$invadersStatus = F2(
+	function (state, numberOfInvaders) {
+		var _p2 = state;
+		if (_p2.ctor === 'Start') {
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
+		} else {
+			return A2(
+				_j1nma$genetic_spaceinvaders$View$txt,
+				_elm_lang$core$Basics$identity,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'INVADERS: ',
 					_elm_lang$core$Basics$toString(numberOfInvaders)));
 		}
 	});
 var _j1nma$genetic_spaceinvaders$View$titleStatus = function (state) {
-	var _p2 = state;
-	if (_p2.ctor === 'Start') {
+	var _p3 = state;
+	if (_p3.ctor === 'Start') {
 		return A3(_evancz$elm_graphics$Element$image, 400, 340, '../res/mainTitle.png');
 	} else {
 		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 	}
 };
 var _j1nma$genetic_spaceinvaders$View$messageStatus = function (state) {
-	var _p3 = state;
-	switch (_p3.ctor) {
+	var _p4 = state;
+	switch (_p4.ctor) {
 		case 'Play':
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 		case 'Pause':

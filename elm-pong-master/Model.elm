@@ -1,6 +1,34 @@
 module Model exposing (..)
 
 import Random exposing (..)
+import Set exposing (Set)
+import Keyboard exposing (..)
+import Genetic exposing (..)
+import GeneticHelper exposing (..)
+import Time exposing (..)
+
+
+type Msg
+    = KeyDown KeyCode
+    | KeyUp KeyCode
+    | WindowResize ( Int, Int )
+    | Tick Float
+    | NoOp
+    | OnTime Time
+
+
+type alias Game =
+    { keysDown : Set KeyCode
+    , windowDimensions : ( Int, Int )
+    , state : State
+    , spaceship : Spaceship
+    , invaders : List Invader
+    , bullets : List Bullet
+    , bestSolution : ( IntermediateValue Dna, Seed )
+    , currentTime : Time
+    , hasSpawned : Bool
+    , score : Int
+    }
 
 
 type State

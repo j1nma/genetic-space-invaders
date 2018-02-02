@@ -7,7 +7,6 @@ import Window
 import Html exposing (..)
 import Keyboard exposing (..)
 import Set exposing (Set)
-import Task
 import AnimationFrame
 import Initial exposing (..)
 import Constants exposing (..)
@@ -20,19 +19,7 @@ import Genetic exposing (..)
 import Random exposing (..)
 
 
-main :
-    Program Never
-        { bestSolution : ( IntermediateValue Dna, Seed )
-        , bullets : List Bullet
-        , currentTime : Time
-        , invaders : List Invader
-        , keysDown : Set KeyCode
-        , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
-        , state : State
-        , windowDimensions : ( Int, Int )
-        , hasSpawned : Bool
-        }
-        Msg
+main : Program Never Game Msg
 main =
     program
         { init = ( initialGame, initialSizeCmd )
@@ -40,15 +27,6 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-
-
-type Msg
-    = KeyDown KeyCode
-    | KeyUp KeyCode
-    | WindowResize ( Int, Int )
-    | Tick Float
-    | NoOp
-    | OnTime Time
 
 
 getInput : Game -> Float -> Input
@@ -68,32 +46,7 @@ getInput game delta =
     }
 
 
-update :
-    Msg
-    ->
-        { bestSolution : ( IntermediateValue Dna, Seed )
-        , bullets : List Bullet
-        , currentTime : Time
-        , invaders : List Invader
-        , keysDown : Set KeyCode
-        , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
-        , state : State
-        , windowDimensions : ( Int, Int )
-        , hasSpawned : Bool
-        }
-    ->
-        ( { bestSolution : ( IntermediateValue Dna, Seed )
-          , bullets : List Bullet
-          , currentTime : Time
-          , invaders : List Invader
-          , keysDown : Set KeyCode
-          , spaceship : { vx : Float, vy : Float, x : Float, y : Float }
-          , state : State
-          , windowDimensions : ( Int, Int )
-          , hasSpawned : Bool
-          }
-        , Cmd Msg
-        )
+update : Msg -> Game -> ( Game, Cmd Msg )
 update msg game =
     case msg of
         KeyDown key ->
@@ -133,42 +86,8 @@ subscriptions _ =
         ]
 
 
-initialSizeCmd : Cmd Msg
-initialSizeCmd =
-    Task.perform sizeToMsg Window.size
-
-
-getTime : Cmd Msg
-getTime =
-    Task.perform OnTime Time.now
-
-
-
---initialCmd : Cmd Msg
---initialCmd =
---    Task.perform InitialSetup (Task.map2 (\size time -> { initialDim = size, initialTime = time }) (Window.size) (Time.now))
-
-
-sizeToMsg : Window.Size -> Msg
-sizeToMsg size =
-    WindowResize ( size.width, size.height )
-
-
 
 -- MODEL
-
-
-type alias Game =
-    { keysDown : Set KeyCode
-    , windowDimensions : ( Int, Int )
-    , state : State
-    , spaceship : Spaceship
-    , invaders : List Invader
-    , bullets : List Bullet
-    , bestSolution : ( IntermediateValue Dna, Seed )
-    , currentTime : Time
-    , hasSpawned : Bool
-    }
 
 
 type alias Input =
@@ -186,7 +105,7 @@ type alias Input =
 
 
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned } as game) =
+updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
     let
         newState =
             if start then
@@ -261,6 +180,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                 , bullets = newBullet ++ updateBullets delta bullets invaders
                                 , invaders = updatedInvaders
                                 , hasSpawned = False
+                                , score = score + ((List.length invaders) - (List.length updatedInvaders))
                             }
 
                 Pause ->
@@ -275,7 +195,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
 
 
 view : Game -> Html Msg
-view { windowDimensions, state, spaceship, invaders, bullets } =
+view { windowDimensions, state, spaceship, invaders, bullets, score } =
     div []
         [ let
             ( w, h ) =
@@ -288,7 +208,9 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                         ([ rect gameWidth gameHeight
                             |> filled blackBackground
                          , toForm (invadersStatus state (List.length invaders))
-                            |> move ( -halfWidth + 60, halfHeight - 20 )
+                            |> move ( -halfWidth + 140, halfHeight - 20 )
+                         , toForm (scoreStatus state score)
+                            |> move ( -halfWidth + 50, halfHeight - 20 )
                          ]
                             ++ (List.map (\o -> makeBullet o) bullets)
                             ++ (List.map (\o -> makeInvader o) invaders)

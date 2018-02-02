@@ -40,6 +40,16 @@ invadersStatus state numberOfInvaders =
             txt identity ("INVADERS: " ++ (toString numberOfInvaders))
 
 
+scoreStatus : State -> Int -> Element
+scoreStatus state score =
+    case state of
+        Start ->
+            txt identity ""
+
+        otherwise ->
+            txt identity ("SCORE: " ++ (toString score))
+
+
 verticalLine : Float -> Path
 verticalLine height =
     path [ ( 0, height ), ( 0, -height ) ]
