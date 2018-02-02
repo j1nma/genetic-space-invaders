@@ -43,7 +43,7 @@ initialGame :
 initialGame =
     { keysDown = Set.empty
     , windowDimensions = ( 0, 0 )
-    , state = Pause
+    , state = Start
     , spaceship = initialSpaceship
     , invaders = []
     , bullets = initialBullet

@@ -7,8 +7,8 @@ import Text
 import Element exposing (..)
 
 
-statusMessage : State -> Element
-statusMessage state =
+messageStatus : State -> Element
+messageStatus state =
     case state of
         Play ->
             txt identity ""
@@ -16,15 +16,31 @@ statusMessage state =
         Pause ->
             txt identity pauseMessage
 
+        Start ->
+            txt identity startMessage
 
-statusTitle : State -> Element
-statusTitle state =
+
+titleStatus : State -> Element
+titleStatus state =
     case state of
         Play ->
             txt identity ""
 
         Pause ->
+            txt identity ""
+
+        Start ->
             image 400 340 "../res/mainTitle.png"
+
+
+
+--statusScore : State -> Element
+--statusTitle state =
+--    case state of
+--        Play ->
+--            txt identity ""
+--        Pause ->
+--            image 400 340 "../res/mainTitle.png"
 
 
 verticalLine : Float -> Path
@@ -42,9 +58,14 @@ txt f =
     Text.fromString >> Text.color yellow >> Text.monospace >> f >> leftAligned
 
 
+startMessage : String
+startMessage =
+    "S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet"
+
+
 pauseMessage : String
 pauseMessage =
-    "S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet"
+    "PAUSE"
 
 
 make : { a | x : Float, y : Float } -> Shape -> Form

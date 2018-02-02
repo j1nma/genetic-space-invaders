@@ -4865,9 +4865,10 @@ var _j1nma$genetic_spaceinvaders$Model$Invader = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h};
 	});
+var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
-var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 5;
+var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 1;
 var _j1nma$genetic_spaceinvaders$Constants$outOfBounds = 1000;
 var _j1nma$genetic_spaceinvaders$Constants$_p0 = {ctor: '_Tuple2', _0: 600, _1: 400};
 var _j1nma$genetic_spaceinvaders$Constants$gameWidth = _j1nma$genetic_spaceinvaders$Constants$_p0._0;
@@ -4912,7 +4913,7 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
 	function (bullet, invader) {
-		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 20, bullet.y);
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 30, bullet.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 60, bullet.y);
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
 	function (b1, b2) {

@@ -198,7 +198,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
     in
         if reset then
             { game
-                | state = Pause
+                | state = Start
                 , spaceship = initialSpaceship
                 , invaders = []
                 , bullets = initialBullet
@@ -209,15 +209,6 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
             case state of
                 Play ->
                     let
-                        currentSolution =
-                            if List.length invaders == 0 then
-                                initialEvolve (initialSeed (round currentTime))
-                            else
-                                bestSolution
-
-                        originalInvaders =
-                            invaders
-
                         newBullet =
                             if space then
                                 craftBullet spaceship bullets
@@ -230,16 +221,16 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                         if (((round (inSeconds currentTime)) % 2) == 0) then
                             let
                                 newFitness =
-                                    calculateFitness (dnaFromValue (Tuple.first currentSolution)) updatedInvaders
+                                    calculateFitness (dnaFromValue (Tuple.first bestSolution)) updatedInvaders
 
                                 updatedSolutionForFitness =
-                                    updateSolution newFitness (Tuple.first (currentSolution))
+                                    updateSolution newFitness (Tuple.first (bestSolution))
 
                                 betterSolution =
                                     if not hasSpawned then
-                                        (GeneticHelper.evolve (Tuple.second (currentSolution)) (Tuple.first (currentSolution)))
+                                        (GeneticHelper.evolve (Tuple.second (bestSolution)) (Tuple.first (bestSolution)))
                                     else
-                                        currentSolution
+                                        bestSolution
 
                                 betterDna =
                                     dnaFromValue (Tuple.first betterSolution)
@@ -247,7 +238,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                 { game
                                     | state = newState
                                     , spaceship = updateSpaceship delta dir spaceship
-                                    , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                                    , bullets = newBullet ++ updateBullets delta bullets invaders
                                     , bestSolution = betterSolution
                                     , invaders =
                                         let
@@ -267,13 +258,16 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                             { game
                                 | state = newState
                                 , spaceship = updateSpaceship delta dir spaceship
-                                , bullets = newBullet ++ updateBullets delta bullets originalInvaders
+                                , bullets = newBullet ++ updateBullets delta bullets invaders
                                 , invaders = updatedInvaders
                                 , hasSpawned = False
                             }
 
                 Pause ->
                     { game | state = newState }
+
+                Start ->
+                    { game | state = newState, bestSolution = initialEvolve (initialSeed (round currentTime)) }
 
 
 
@@ -297,9 +291,9 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                             ++ (List.map (\o -> makeBullet o) bullets)
                             ++ (List.map (\o -> makeInvader o) invaders)
                             ++ [ makeSpaceship spaceship
-                               , toForm (statusTitle state)
+                               , toForm (titleStatus state)
                                     |> move ( 0, 30 )
-                               , toForm (statusMessage state)
+                               , toForm (messageStatus state)
                                     |> move ( 0, 80 - gameHeight / 2 )
                                ]
                         )

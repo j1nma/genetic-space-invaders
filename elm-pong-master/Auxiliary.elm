@@ -96,7 +96,7 @@ near k c n =
 
 within : { a | x : Float, y : Float } -> { b | x : Float, y : Float } -> Bool
 within bullet invader =
-    near invader.x 20 bullet.x && near invader.y 20 bullet.y
+    near invader.x 30 bullet.x && near invader.y 60 bullet.y
 
 
 withinBullet :

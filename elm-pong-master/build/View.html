@@ -11308,6 +11308,7 @@ var _j1nma$genetic_spaceinvaders$Model$Invader = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h};
 	});
+var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
 var _j1nma$genetic_spaceinvaders$View$makeInvader = function (obj) {
@@ -11338,7 +11339,8 @@ var _j1nma$genetic_spaceinvaders$View$make = F2(
 			{ctor: '_Tuple2', _0: obj.x, _1: obj.y},
 			A2(_evancz$elm_graphics$Collage$filled, _elm_lang$core$Color$white, shape));
 	});
-var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
+var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'PAUSE';
+var _j1nma$genetic_spaceinvaders$View$startMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
 var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
 	return function (_p0) {
 		return _evancz$elm_graphics$Element$leftAligned(
@@ -11363,20 +11365,26 @@ var _j1nma$genetic_spaceinvaders$View$verticalLine = function (height) {
 			}
 		});
 };
-var _j1nma$genetic_spaceinvaders$View$statusTitle = function (state) {
+var _j1nma$genetic_spaceinvaders$View$titleStatus = function (state) {
 	var _p1 = state;
-	if (_p1.ctor === 'Play') {
-		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
-	} else {
-		return A3(_evancz$elm_graphics$Element$image, 400, 340, '../res/mainTitle.png');
+	switch (_p1.ctor) {
+		case 'Play':
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
+		case 'Pause':
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
+		default:
+			return A3(_evancz$elm_graphics$Element$image, 400, 340, '../res/mainTitle.png');
 	}
 };
-var _j1nma$genetic_spaceinvaders$View$statusMessage = function (state) {
+var _j1nma$genetic_spaceinvaders$View$messageStatus = function (state) {
 	var _p2 = state;
-	if (_p2.ctor === 'Play') {
-		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
-	} else {
-		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$pauseMessage);
+	switch (_p2.ctor) {
+		case 'Play':
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
+		case 'Pause':
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$pauseMessage);
+		default:
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$startMessage);
 	}
 };
 var Elm = {};

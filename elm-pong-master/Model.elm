@@ -6,6 +6,7 @@ import Random exposing (..)
 type State
     = Play
     | Pause
+    | Start
 
 
 type alias Spaceship =
