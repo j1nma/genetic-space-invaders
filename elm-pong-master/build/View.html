@@ -11300,9 +11300,9 @@ var _j1nma$genetic_spaceinvaders$Model$Spaceship = F4(
 	function (a, b, c, d) {
 		return {x: a, y: b, vx: c, vy: d};
 	});
-var _j1nma$genetic_spaceinvaders$Model$Bullet = F4(
-	function (a, b, c, d) {
-		return {x: a, y: b, vx: c, vy: d};
+var _j1nma$genetic_spaceinvaders$Model$Bullet = F5(
+	function (a, b, c, d, e) {
+		return {x: a, y: b, vx: c, vy: d, hit: e};
 	});
 var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
 	function (a, b, c, d, e, f, g, h, i) {
@@ -11365,20 +11365,32 @@ var _j1nma$genetic_spaceinvaders$View$verticalLine = function (height) {
 			}
 		});
 };
+var _j1nma$genetic_spaceinvaders$View$invadersStatus = F2(
+	function (state, numberOfInvaders) {
+		var _p1 = state;
+		if (_p1.ctor === 'Start') {
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
+		} else {
+			return A2(
+				_j1nma$genetic_spaceinvaders$View$txt,
+				_elm_lang$core$Basics$identity,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'INVADERS:',
+					_elm_lang$core$Basics$toString(numberOfInvaders)));
+		}
+	});
 var _j1nma$genetic_spaceinvaders$View$titleStatus = function (state) {
-	var _p1 = state;
-	switch (_p1.ctor) {
-		case 'Play':
-			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
-		case 'Pause':
-			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
-		default:
-			return A3(_evancz$elm_graphics$Element$image, 400, 340, '../res/mainTitle.png');
+	var _p2 = state;
+	if (_p2.ctor === 'Start') {
+		return A3(_evancz$elm_graphics$Element$image, 400, 340, '../res/mainTitle.png');
+	} else {
+		return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 	}
 };
 var _j1nma$genetic_spaceinvaders$View$messageStatus = function (state) {
-	var _p2 = state;
-	switch (_p2.ctor) {
+	var _p3 = state;
+	switch (_p3.ctor) {
 		case 'Play':
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 		case 'Pause':

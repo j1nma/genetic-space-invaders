@@ -23,24 +23,21 @@ messageStatus state =
 titleStatus : State -> Element
 titleStatus state =
     case state of
-        Play ->
-            txt identity ""
-
-        Pause ->
-            txt identity ""
-
         Start ->
             image 400 340 "../res/mainTitle.png"
 
+        otherwise ->
+            txt identity ""
 
 
---statusScore : State -> Element
---statusTitle state =
---    case state of
---        Play ->
---            txt identity ""
---        Pause ->
---            image 400 340 "../res/mainTitle.png"
+invadersStatus : State -> Int -> Element
+invadersStatus state numberOfInvaders =
+    case state of
+        Start ->
+            txt identity ""
+
+        otherwise ->
+            txt identity ("INVADERS: " ++ (toString numberOfInvaders))
 
 
 verticalLine : Float -> Path

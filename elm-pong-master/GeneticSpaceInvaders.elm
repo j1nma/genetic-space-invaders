@@ -287,6 +287,8 @@ view { windowDimensions, state, spaceship, invaders, bullets } =
                         gameHeight
                         ([ rect gameWidth gameHeight
                             |> filled blackBackground
+                         , toForm (invadersStatus state (List.length invaders))
+                            |> move ( -halfWidth + 60, halfHeight - 20 )
                          ]
                             ++ (List.map (\o -> makeBullet o) bullets)
                             ++ (List.map (\o -> makeInvader o) invaders)
