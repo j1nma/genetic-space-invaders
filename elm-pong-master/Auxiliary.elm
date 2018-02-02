@@ -6,6 +6,24 @@ import Constants exposing (..)
 import Random exposing (..)
 
 
+randomMovement : Time -> Invader -> Invader
+randomMovement t invader =
+    let
+        changeX =
+            probDirChange invader.seedX invader.xProbChange
+
+        newVelX =
+            invader.vx * Tuple.first changeX
+
+        changeY =
+            probDirChange invader.seedY invader.yProbChange
+
+        newVelY =
+            invader.vy * Tuple.first changeY
+    in
+        physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = (Tuple.second changeX), seedY = (Tuple.second changeY) }
+
+
 stepV : number -> Bool -> Bool -> number
 stepV v negativeCollision positiveCollision =
     if negativeCollision then
@@ -34,7 +52,7 @@ decideMovement t invader =
         if leftCollision || rightCollision || upperCollision || lowerCollision then
             physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
         else
-            physicsUpdate t invader
+            randomMovement t invader
 
 
 probDirChange : Seed -> Float -> ( Float, Seed )

@@ -1,0 +1,20 @@
+var _ckoster22$elm_genetic$Genetic_StepValue$points = function (stepValue) {
+	var _p0 = stepValue;
+	return _p0._2;
+};
+var _ckoster22$elm_genetic$Genetic_StepValue$solution = function (stepValue) {
+	var _p1 = stepValue;
+	return _p1._1;
+};
+var _ckoster22$elm_genetic$Genetic_StepValue$solutions = function (stepValue) {
+	var _p2 = stepValue;
+	return _p2._0;
+};
+var _ckoster22$elm_genetic$Genetic_StepValue$StepValue = F3(
+	function (a, b, c) {
+		return {ctor: 'StepValue', _0: a, _1: b, _2: c};
+	});
+var _ckoster22$elm_genetic$Genetic_StepValue$new = F3(
+	function (solutions, best, bestPoints) {
+		return A3(_ckoster22$elm_genetic$Genetic_StepValue$StepValue, solutions, best, bestPoints);
+	});

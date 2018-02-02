@@ -39,7 +39,6 @@ initialGame :
     , bestSolution : ( Genetic.IntermediateValue Dna, Seed )
     , currentTime : Time
     , hasSpawned : Bool
-    , mainSeed : Seed
     }
 initialGame =
     { keysDown = Set.empty
@@ -51,5 +50,4 @@ initialGame =
     , bestSolution = initialEvolve (initialSeed 0)
     , currentTime = 0.0
     , hasSpawned = False
-    , mainSeed = initialSeed 0
     }

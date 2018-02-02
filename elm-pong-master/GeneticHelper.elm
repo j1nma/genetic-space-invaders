@@ -56,8 +56,8 @@ randDnaGenerator =
         |> Random.list 2
         |> Random.map2 (++) randomProbabilityGenerator
         |> Random.map
-            (\randDna ->
-                { genes = randDna
+            (\randGenes ->
+                { genes = randGenes
                 , fitness = 0.0
                 }
             )
@@ -118,8 +118,8 @@ mutateDna dna =
                             else
                                 gene
                         )
-                    |> (\randDna ->
-                            { genes = randDna
+                    |> (\randGenes ->
+                            { genes = randGenes
                             , fitness = dna.fitness + 1.0
                             }
                        )
@@ -156,3 +156,8 @@ initialDna seed =
 evolve : Seed -> IntermediateValue Dna -> ( IntermediateValue Dna, Seed )
 evolve seed intermediate =
     Random.step (Genetic.executeStep myOptions intermediate) seed
+
+
+updateSolution : Float -> IntermediateValue Dna -> IntermediateValue Dna
+updateSolution newFitness (IntermediateValue p pd ng) =
+    (IntermediateValue p { dna = { genes = pd.dna.genes, fitness = newFitness }, points = newFitness } ng)

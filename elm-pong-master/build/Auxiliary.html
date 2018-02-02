@@ -4900,8 +4900,8 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'Auxiliary',
 			{
-				start: {line: 94, column: 5},
-				end: {line: 99, column: 48}
+				start: {line: 112, column: 5},
+				end: {line: 117, column: 48}
 			},
 			_p2)('No value on dna list!');
 	}
@@ -4942,6 +4942,24 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$stepV = F3(
 	function (v, negativeCollision, positiveCollision) {
 		return negativeCollision ? _elm_lang$core$Basics$abs(v) : (positiveCollision ? (0 - _elm_lang$core$Basics$abs(v)) : v);
 	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$randomMovement = F2(
+	function (t, invader) {
+		var changeY = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedY, invader.yProbChange);
+		var newVelY = invader.vy * _elm_lang$core$Tuple$first(changeY);
+		var changeX = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedX, invader.xProbChange);
+		var newVelX = invader.vx * _elm_lang$core$Tuple$first(changeX);
+		return A2(
+			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
+			t,
+			_elm_lang$core$Native_Utils.update(
+				invader,
+				{
+					vx: newVelX,
+					vy: newVelY,
+					seedX: _elm_lang$core$Tuple$second(changeX),
+					seedY: _elm_lang$core$Tuple$second(changeY)
+				}));
+	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$decideMovement = F2(
 	function (t, invader) {
 		var lowerCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60);
@@ -4956,7 +4974,7 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$decideMovement = F2(
 				{
 					vx: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vx, leftCollision, rightCollision),
 					vy: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vy, lowerCollision, upperCollision)
-				})) : A2(_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate, t, invader);
+				})) : A2(_j1nma$genetic_spaceinvaders$Auxiliary$randomMovement, t, invader);
 	});
 var Elm = {};
 Elm['Auxiliary'] = Elm['Auxiliary'] || {};

@@ -31,7 +31,6 @@ main :
         , state : State
         , windowDimensions : ( Int, Int )
         , hasSpawned : Bool
-        , mainSeed : Seed
         }
         Msg
 main =
@@ -81,7 +80,6 @@ update :
         , state : State
         , windowDimensions : ( Int, Int )
         , hasSpawned : Bool
-        , mainSeed : Seed
         }
     ->
         ( { bestSolution : ( IntermediateValue Dna, Seed )
@@ -93,7 +91,6 @@ update :
           , state : State
           , windowDimensions : ( Int, Int )
           , hasSpawned : Bool
-          , mainSeed : Seed
           }
         , Cmd Msg
         )
@@ -121,8 +118,6 @@ update msg game =
         OnTime t ->
             ( { game
                 | currentTime = t
-                , mainSeed =
-                    initialSeed (round t)
               }
             , Cmd.none
             )
@@ -140,7 +135,18 @@ subscriptions _ =
 
 initialSizeCmd : Cmd Msg
 initialSizeCmd =
-    Task.perform sizeToMsg (Window.size)
+    Task.perform sizeToMsg Window.size
+
+
+getTime : Cmd Msg
+getTime =
+    Task.perform OnTime Time.now
+
+
+
+--initialCmd : Cmd Msg
+--initialCmd =
+--    Task.perform InitialSetup (Task.map2 (\size time -> { initialDim = size, initialTime = time }) (Window.size) (Time.now))
 
 
 sizeToMsg : Window.Size -> Msg
@@ -162,7 +168,6 @@ type alias Game =
     , bestSolution : ( IntermediateValue Dna, Seed )
     , currentTime : Time
     , hasSpawned : Bool
-    , mainSeed : Seed
     }
 
 
@@ -181,7 +186,7 @@ type alias Input =
 
 
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, mainSeed } as game) =
+updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned } as game) =
     let
         newState =
             if start then
@@ -197,14 +202,19 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                 , spaceship = initialSpaceship
                 , invaders = []
                 , bullets = initialBullet
-                , bestSolution = initialEvolve mainSeed
+                , bestSolution = initialEvolve (initialSeed (round currentTime))
                 , hasSpawned = False
-                , mainSeed = initialSeed (round currentTime)
             }
         else
             case state of
                 Play ->
                     let
+                        currentSolution =
+                            if List.length invaders == 0 then
+                                initialEvolve (initialSeed (round currentTime))
+                            else
+                                bestSolution
+
                         originalInvaders =
                             invaders
 
@@ -213,14 +223,26 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                 craftBullet spaceship bullets
                             else
                                 []
+
+                        updatedInvaders =
+                            updateInvaders delta invaders bullets
                     in
                         if (((round (inSeconds currentTime)) % 2) == 0) then
                             let
+                                newFitness =
+                                    calculateFitness (dnaFromValue (Tuple.first currentSolution)) updatedInvaders
+
+                                updatedSolutionForFitness =
+                                    updateSolution newFitness (Tuple.first (currentSolution))
+
                                 betterSolution =
                                     if not hasSpawned then
-                                        (GeneticHelper.evolve (Tuple.second (bestSolution)) (Tuple.first (bestSolution)))
+                                        (GeneticHelper.evolve (Tuple.second (currentSolution)) (Tuple.first (currentSolution)))
                                     else
-                                        bestSolution
+                                        currentSolution
+
+                                betterDna =
+                                    dnaFromValue (Tuple.first betterSolution)
                             in
                                 { game
                                     | state = newState
@@ -229,40 +251,29 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                     , bestSolution = betterSolution
                                     , invaders =
                                         let
-                                            updatedInvaders =
-                                                updateInvaders delta invaders bullets
-
                                             _ =
-                                                Debug.log "best" betterSolution
+                                                Debug.log "fitness" newFitness
 
-                                            betterDna =
-                                                dnaFromValue (Tuple.first betterSolution)
+                                            --_ =
+                                            --    Debug.log "best" updatedSolutionForFitness
                                         in
                                             if not hasSpawned then
-                                                updatedInvaders ++ spawnNewInvadersFromBestDna mainSeed newSpawnedInvaders betterDna
+                                                updatedInvaders ++ spawnNewInvadersFromBestDna (Tuple.second (betterSolution)) newSpawnedInvaders betterDna
                                             else
                                                 updatedInvaders
                                     , hasSpawned = True
-                                    , mainSeed = Tuple.second (betterSolution)
                                 }
                         else
                             { game
                                 | state = newState
                                 , spaceship = updateSpaceship delta dir spaceship
                                 , bullets = newBullet ++ updateBullets delta bullets originalInvaders
-                                , invaders = updateInvaders delta invaders bullets
+                                , invaders = updatedInvaders
                                 , hasSpawned = False
-                                , mainSeed = initialSeed (round currentTime)
                             }
 
                 Pause ->
                     { game | state = newState }
-
-
-getTime : Cmd Msg
-getTime =
-    Time.now
-        |> Task.perform OnTime
 
 
 

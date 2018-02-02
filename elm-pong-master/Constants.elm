@@ -30,4 +30,4 @@ outOfBounds =
 
 newSpawnedInvaders : Int
 newSpawnedInvaders =
-    5
+    1

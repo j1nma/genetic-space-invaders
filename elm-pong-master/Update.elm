@@ -90,8 +90,8 @@ spawnNewInvadersFromBestDna seed amount dna =
                 newY =
                     Tuple.second randomP
 
-                _ =
-                    Debug.log "genes" dna.genes
+                --_ =
+                --    Debug.log "genes" dna.genes
             in
                 { x = newX
                 , y = newY
@@ -103,3 +103,8 @@ spawnNewInvadersFromBestDna seed amount dna =
                 , seedY = newSeed
                 }
                     :: spawnNewInvadersFromBestDna newSeed (n - 1) dna
+
+
+calculateFitness : Dna -> List Invader -> Float
+calculateFitness dna invaders =
+    toFloat (List.length (List.filter (\invader -> invader.xProbChange == (getValue (Array.get 0 (Array.fromList dna.genes))) || invader.yProbChange == (getValue (Array.get 1 (Array.fromList dna.genes))) || invader.vx == (getValue (Array.get 2 (Array.fromList dna.genes))) || invader.vy == (getValue (Array.get 3 (Array.fromList dna.genes)))) invaders))
