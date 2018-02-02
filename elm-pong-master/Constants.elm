@@ -13,6 +13,11 @@ leftArrow =
     37
 
 
+gameOverInvaders : Int
+gameOverInvaders =
+    100
+
+
 
 -- MODEL
 
@@ -25,7 +30,7 @@ leftArrow =
 
 newSpawnedInvaders : Int
 newSpawnedInvaders =
-    1
+    100
 
 
 

@@ -8068,15 +8068,15 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'Auxiliary',
 			{
-				start: {line: 114, column: 5},
-				end: {line: 119, column: 48}
+				start: {line: 111, column: 5},
+				end: {line: 116, column: 48}
 			},
 			_p2)('No value on dna list!');
 	}
 };
 var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
 	function (k, c, n) {
-		return (_elm_lang$core$Native_Utils.cmp(n, k - c) > -1) && (_elm_lang$core$Native_Utils.cmp(n, k + c) < 1);
+		return (_elm_lang$core$Native_Utils.cmp(0 - (k - n), c) < 1) && (_elm_lang$core$Native_Utils.cmp(c, k - n) > -1);
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
 	function (bullet, invader) {
@@ -8254,7 +8254,7 @@ var _j1nma$genetic_spaceinvaders$Update$updateInvader = F3(
 			A2(
 				_elm_lang$core$List$filter,
 				function (b) {
-					return A2(_j1nma$genetic_spaceinvaders$Auxiliary$within, invader, b);
+					return A2(_j1nma$genetic_spaceinvaders$Auxiliary$within, b, invader);
 				},
 				bullets))) ? _elm_lang$core$Native_Utils.update(
 			invader,

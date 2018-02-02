@@ -19,6 +19,9 @@ messageStatus state =
         Start ->
             txt identity startMessage
 
+        Over ->
+            txt identity overMessage
+
 
 titleStatus : State -> Element
 titleStatus state =
@@ -73,6 +76,11 @@ startMessage =
 pauseMessage : String
 pauseMessage =
     "PAUSE"
+
+
+overMessage : String
+overMessage =
+    "Invaders reached 100! Game over!"
 
 
 make : { a | x : Float, y : Float } -> Shape -> Form

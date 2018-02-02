@@ -12689,6 +12689,7 @@ var _j1nma$genetic_spaceinvaders$Model$KeyUp = function (a) {
 var _j1nma$genetic_spaceinvaders$Model$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
+var _j1nma$genetic_spaceinvaders$Model$Over = {ctor: 'Over'};
 var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
@@ -12720,6 +12721,7 @@ var _j1nma$genetic_spaceinvaders$View$make = F2(
 			{ctor: '_Tuple2', _0: obj.x, _1: obj.y},
 			A2(_evancz$elm_graphics$Collage$filled, _elm_lang$core$Color$white, shape));
 	});
+var _j1nma$genetic_spaceinvaders$View$overMessage = 'Invaders reached 100! Game over!';
 var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'PAUSE';
 var _j1nma$genetic_spaceinvaders$View$startMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
 var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
@@ -12791,8 +12793,10 @@ var _j1nma$genetic_spaceinvaders$View$messageStatus = function (state) {
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 		case 'Pause':
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$pauseMessage);
-		default:
+		case 'Start':
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$startMessage);
+		default:
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$overMessage);
 	}
 };
 var Elm = {};

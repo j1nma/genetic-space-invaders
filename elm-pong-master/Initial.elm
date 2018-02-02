@@ -5,7 +5,6 @@ import Constants exposing (..)
 import Model exposing (..)
 import GeneticHelper exposing (..)
 import Update exposing (..)
-import Genetic exposing (..)
 import Time exposing (..)
 import Random exposing (..)
 import Task

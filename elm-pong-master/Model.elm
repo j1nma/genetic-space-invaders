@@ -35,6 +35,7 @@ type State
     = Play
     | Pause
     | Start
+    | Over
 
 
 type alias Spaceship =

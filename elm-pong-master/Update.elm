@@ -49,7 +49,7 @@ updateInvaders t invaders bullets =
 
 updateInvader : Time -> List Bullet -> Invader -> Invader
 updateInvader t bullets invader =
-    if not (List.isEmpty (List.filter (\b -> within invader b) bullets)) then
+    if not (List.isEmpty (List.filter (\b -> within b invader) bullets)) then
         { invader | wasHit = True }
     else
         decideMovement t invader

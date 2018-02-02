@@ -12972,16 +12972,18 @@ var _j1nma$genetic_spaceinvaders$Model$KeyUp = function (a) {
 var _j1nma$genetic_spaceinvaders$Model$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
+var _j1nma$genetic_spaceinvaders$Model$Over = {ctor: 'Over'};
 var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
-var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 1;
+var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 100;
 var _j1nma$genetic_spaceinvaders$Constants$_p0 = {ctor: '_Tuple2', _0: 600, _1: 400};
 var _j1nma$genetic_spaceinvaders$Constants$gameWidth = _j1nma$genetic_spaceinvaders$Constants$_p0._0;
 var _j1nma$genetic_spaceinvaders$Constants$gameHeight = _j1nma$genetic_spaceinvaders$Constants$_p0._1;
 var _j1nma$genetic_spaceinvaders$Constants$_p1 = {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Constants$gameWidth / 2, _1: _j1nma$genetic_spaceinvaders$Constants$gameHeight / 2};
 var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvaders$Constants$_p1._0;
 var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
+var _j1nma$genetic_spaceinvaders$Constants$gameOverInvaders = 100;
 var _j1nma$genetic_spaceinvaders$Constants$leftArrow = 37;
 var _j1nma$genetic_spaceinvaders$Constants$rightArrow = 39;
 var _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition = function (seed) {
@@ -13007,19 +13009,19 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'Auxiliary',
 			{
-				start: {line: 114, column: 5},
-				end: {line: 119, column: 48}
+				start: {line: 111, column: 5},
+				end: {line: 116, column: 48}
 			},
 			_p2)('No value on dna list!');
 	}
 };
 var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
 	function (k, c, n) {
-		return (_elm_lang$core$Native_Utils.cmp(n, k - c) > -1) && (_elm_lang$core$Native_Utils.cmp(n, k + c) < 1);
+		return (_elm_lang$core$Native_Utils.cmp(0 - (k - n), c) < 1) && (_elm_lang$core$Native_Utils.cmp(c, k - n) > -1);
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
 	function (bullet, invader) {
-		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 60, bullet.y);
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && (_elm_lang$core$Native_Utils.cmp(invader.y - bullet.y, 40) < 1);
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
 	function (b1, b2) {
@@ -13193,7 +13195,7 @@ var _j1nma$genetic_spaceinvaders$Update$updateInvader = F3(
 			A2(
 				_elm_lang$core$List$filter,
 				function (b) {
-					return A2(_j1nma$genetic_spaceinvaders$Auxiliary$within, invader, b);
+					return A2(_j1nma$genetic_spaceinvaders$Auxiliary$within, b, invader);
 				},
 				bullets))) ? _elm_lang$core$Native_Utils.update(
 			invader,
@@ -13299,6 +13301,7 @@ var _j1nma$genetic_spaceinvaders$View$make = F2(
 			{ctor: '_Tuple2', _0: obj.x, _1: obj.y},
 			A2(_evancz$elm_graphics$Collage$filled, _elm_lang$core$Color$white, shape));
 	});
+var _j1nma$genetic_spaceinvaders$View$overMessage = 'Invaders reached 100! Game over!';
 var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'PAUSE';
 var _j1nma$genetic_spaceinvaders$View$startMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
 var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
@@ -13370,8 +13373,10 @@ var _j1nma$genetic_spaceinvaders$View$messageStatus = function (state) {
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, '');
 		case 'Pause':
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$pauseMessage);
-		default:
+		case 'Start':
 			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$startMessage);
+		default:
+			return A2(_j1nma$genetic_spaceinvaders$View$txt, _elm_lang$core$Basics$identity, _j1nma$genetic_spaceinvaders$View$overMessage);
 	}
 };
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view = function (_p0) {
@@ -13470,21 +13475,21 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$view = function (_p0) {
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame = F2(
 	function (_p6, _p5) {
 		var _p7 = _p6;
-		var _p20 = _p7.dir;
-		var _p19 = _p7.delta;
+		var _p21 = _p7.dir;
+		var _p20 = _p7.delta;
 		var _p8 = _p5;
-		var _p18 = _p8.state;
-		var _p17 = _p8.spaceship;
-		var _p16 = _p8.invaders;
-		var _p15 = _p8.hasSpawned;
-		var _p14 = _p8;
-		var _p13 = _p8.currentTime;
-		var _p12 = _p8.bullets;
-		var _p11 = _p8.bestSolution;
-		var newState = _p7.start ? _j1nma$genetic_spaceinvaders$Model$Play : (_p7.pause ? _j1nma$genetic_spaceinvaders$Model$Pause : _p18);
+		var _p19 = _p8.state;
+		var _p18 = _p8.spaceship;
+		var _p17 = _p8.invaders;
+		var _p16 = _p8.hasSpawned;
+		var _p15 = _p8;
+		var _p14 = _p8.currentTime;
+		var _p13 = _p8.bullets;
+		var _p12 = _p8.bestSolution;
+		var newState = _p7.start ? _j1nma$genetic_spaceinvaders$Model$Play : (_p7.pause ? _j1nma$genetic_spaceinvaders$Model$Pause : _p19);
 		if (_p7.reset) {
 			return _elm_lang$core$Native_Utils.update(
-				_p14,
+				_p15,
 				{
 					state: _j1nma$genetic_spaceinvaders$Model$Start,
 					spaceship: _j1nma$genetic_spaceinvaders$Initial$initialSpaceship,
@@ -13492,50 +13497,53 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame = F2(
 					bullets: _j1nma$genetic_spaceinvaders$Initial$initialBullet,
 					bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(
 						_elm_lang$core$Random$initialSeed(
-							_elm_lang$core$Basics$round(_p13))),
+							_elm_lang$core$Basics$round(_p14))),
 					hasSpawned: false
 				});
 		} else {
-			var _p9 = _p18;
+			var _p9 = _p19;
 			switch (_p9.ctor) {
 				case 'Play':
-					var updatedInvaders = A3(_j1nma$genetic_spaceinvaders$Update$updateInvaders, _p19, _p16, _p12);
-					var newBullet = _p7.space ? A2(_j1nma$genetic_spaceinvaders$Update$craftBullet, _p17, _p12) : {ctor: '[]'};
+					var updatedInvaders = A3(_j1nma$genetic_spaceinvaders$Update$updateInvaders, _p20, _p17, _p13);
+					var gameOver = _elm_lang$core$Native_Utils.eq(
+						_elm_lang$core$List$length(updatedInvaders),
+						_j1nma$genetic_spaceinvaders$Constants$gameOverInvaders);
+					var newBullet = _p7.space ? A2(_j1nma$genetic_spaceinvaders$Update$craftBullet, _p18, _p13) : {ctor: '[]'};
 					if (_elm_lang$core$Native_Utils.eq(
 						A2(
 							_elm_lang$core$Basics_ops['%'],
 							_elm_lang$core$Basics$round(
-								_elm_lang$core$Time$inSeconds(_p13)),
+								_elm_lang$core$Time$inSeconds(_p14)),
 							2),
 						0)) {
-						var betterSolution = (!_p15) ? A2(
+						var betterSolution = (!_p16) ? A2(
 							_j1nma$genetic_spaceinvaders$GeneticHelper$evolve,
-							_elm_lang$core$Tuple$second(_p11),
-							_elm_lang$core$Tuple$first(_p11)) : _p11;
+							_elm_lang$core$Tuple$second(_p12),
+							_elm_lang$core$Tuple$first(_p12)) : _p12;
 						var betterDna = _ckoster22$elm_genetic$Genetic$dnaFromValue(
 							_elm_lang$core$Tuple$first(betterSolution));
 						var newFitness = A2(
 							_j1nma$genetic_spaceinvaders$Update$calculateFitness,
 							_ckoster22$elm_genetic$Genetic$dnaFromValue(
-								_elm_lang$core$Tuple$first(_p11)),
+								_elm_lang$core$Tuple$first(_p12)),
 							updatedInvaders);
 						var updatedSolutionForFitness = A2(
 							_j1nma$genetic_spaceinvaders$GeneticHelper$updateSolution,
 							newFitness,
-							_elm_lang$core$Tuple$first(_p11));
+							_elm_lang$core$Tuple$first(_p12));
 						return _elm_lang$core$Native_Utils.update(
-							_p14,
+							_p15,
 							{
-								state: newState,
-								spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p19, _p20, _p17),
+								state: gameOver ? _j1nma$genetic_spaceinvaders$Model$Over : newState,
+								spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p20, _p21, _p18),
 								bullets: A2(
 									_elm_lang$core$Basics_ops['++'],
 									newBullet,
-									A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p19, _p12, _p16)),
+									A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p20, _p13, _p17)),
 								bestSolution: betterSolution,
 								invaders: function () {
 									var _p10 = A2(_elm_lang$core$Debug$log, 'fitness', newFitness);
-									return (!_p15) ? A2(
+									return (!_p16) ? A2(
 										_elm_lang$core$Basics_ops['++'],
 										updatedInvaders,
 										A3(
@@ -13548,36 +13556,54 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame = F2(
 							});
 					} else {
 						return _elm_lang$core$Native_Utils.update(
-							_p14,
+							_p15,
 							{
 								state: newState,
-								spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p19, _p20, _p17),
+								spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p20, _p21, _p18),
 								bullets: A2(
 									_elm_lang$core$Basics_ops['++'],
 									newBullet,
-									A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p19, _p12, _p16)),
+									A3(_j1nma$genetic_spaceinvaders$Update$updateBullets, _p20, _p13, _p17)),
 								invaders: updatedInvaders,
 								hasSpawned: false,
-								score: _p8.score + (_elm_lang$core$List$length(_p16) - _elm_lang$core$List$length(updatedInvaders))
+								score: _p8.score + (_elm_lang$core$List$length(_p17) - _elm_lang$core$List$length(updatedInvaders))
 							});
 					}
 				case 'Pause':
 					return _elm_lang$core$Native_Utils.update(
-						_p14,
+						_p15,
 						{state: newState});
-				default:
+				case 'Start':
 					return _elm_lang$core$Native_Utils.update(
-						_p14,
+						_p15,
 						{
 							state: newState,
 							bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(
 								_elm_lang$core$Random$initialSeed(
-									_elm_lang$core$Basics$round(_p13)))
+									_elm_lang$core$Basics$round(_p14)))
+						});
+				default:
+					return _elm_lang$core$Native_Utils.update(
+						_p15,
+						{
+							state: function () {
+								var _p11 = newState;
+								switch (_p11.ctor) {
+									case 'Play':
+										return _j1nma$genetic_spaceinvaders$Model$Over;
+									case 'Pause':
+										return _j1nma$genetic_spaceinvaders$Model$Over;
+									case 'Start':
+										return _j1nma$genetic_spaceinvaders$Model$Start;
+									default:
+										return newState;
+								}
+							}()
 						});
 			}
 		}
 	});
-var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$subscriptions = function (_p21) {
+var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$subscriptions = function (_p22) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
@@ -13626,15 +13652,15 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput = F2(
 	});
 var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 	function (msg, game) {
-		var _p22 = msg;
-		switch (_p22.ctor) {
+		var _p23 = msg;
+		switch (_p23.ctor) {
 			case 'KeyDown':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
 						{
-							keysDown: A2(_elm_lang$core$Set$insert, _p22._0, game.keysDown)
+							keysDown: A2(_elm_lang$core$Set$insert, _p23._0, game.keysDown)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -13644,12 +13670,12 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
 						{
-							keysDown: A2(_elm_lang$core$Set$remove, _p22._0, game.keysDown)
+							keysDown: A2(_elm_lang$core$Set$remove, _p23._0, game.keysDown)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'Tick':
-				var input = A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput, game, _p22._0 * 2);
+				var input = A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$getInput, game, _p23._0 * 2);
 				return {
 					ctor: '_Tuple2',
 					_0: A2(_j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateGame, input, game),
@@ -13660,7 +13686,7 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
-						{windowDimensions: _p22._0}),
+						{windowDimensions: _p23._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'NoOp':
@@ -13670,7 +13696,7 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						game,
-						{currentTime: _p22._0}),
+						{currentTime: _p23._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}

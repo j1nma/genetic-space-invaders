@@ -4191,6 +4191,835 @@ var _elm_lang$core$Dict$diff = F2(
 			t1,
 			t2);
 	});
+//import Maybe, Native.Array, Native.List, Native.Utils, Result //
+
+var _elm_lang$core$Native_Json = function() {
+
+
+// CORE DECODERS
+
+function succeed(msg)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'succeed',
+		msg: msg
+	};
+}
+
+function fail(msg)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'fail',
+		msg: msg
+	};
+}
+
+function decodePrimitive(tag)
+{
+	return {
+		ctor: '<decoder>',
+		tag: tag
+	};
+}
+
+function decodeContainer(tag, decoder)
+{
+	return {
+		ctor: '<decoder>',
+		tag: tag,
+		decoder: decoder
+	};
+}
+
+function decodeNull(value)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'null',
+		value: value
+	};
+}
+
+function decodeField(field, decoder)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'field',
+		field: field,
+		decoder: decoder
+	};
+}
+
+function decodeIndex(index, decoder)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'index',
+		index: index,
+		decoder: decoder
+	};
+}
+
+function decodeKeyValuePairs(decoder)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'key-value',
+		decoder: decoder
+	};
+}
+
+function mapMany(f, decoders)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'map-many',
+		func: f,
+		decoders: decoders
+	};
+}
+
+function andThen(callback, decoder)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'andThen',
+		decoder: decoder,
+		callback: callback
+	};
+}
+
+function oneOf(decoders)
+{
+	return {
+		ctor: '<decoder>',
+		tag: 'oneOf',
+		decoders: decoders
+	};
+}
+
+
+// DECODING OBJECTS
+
+function map1(f, d1)
+{
+	return mapMany(f, [d1]);
+}
+
+function map2(f, d1, d2)
+{
+	return mapMany(f, [d1, d2]);
+}
+
+function map3(f, d1, d2, d3)
+{
+	return mapMany(f, [d1, d2, d3]);
+}
+
+function map4(f, d1, d2, d3, d4)
+{
+	return mapMany(f, [d1, d2, d3, d4]);
+}
+
+function map5(f, d1, d2, d3, d4, d5)
+{
+	return mapMany(f, [d1, d2, d3, d4, d5]);
+}
+
+function map6(f, d1, d2, d3, d4, d5, d6)
+{
+	return mapMany(f, [d1, d2, d3, d4, d5, d6]);
+}
+
+function map7(f, d1, d2, d3, d4, d5, d6, d7)
+{
+	return mapMany(f, [d1, d2, d3, d4, d5, d6, d7]);
+}
+
+function map8(f, d1, d2, d3, d4, d5, d6, d7, d8)
+{
+	return mapMany(f, [d1, d2, d3, d4, d5, d6, d7, d8]);
+}
+
+
+// DECODE HELPERS
+
+function ok(value)
+{
+	return { tag: 'ok', value: value };
+}
+
+function badPrimitive(type, value)
+{
+	return { tag: 'primitive', type: type, value: value };
+}
+
+function badIndex(index, nestedProblems)
+{
+	return { tag: 'index', index: index, rest: nestedProblems };
+}
+
+function badField(field, nestedProblems)
+{
+	return { tag: 'field', field: field, rest: nestedProblems };
+}
+
+function badIndex(index, nestedProblems)
+{
+	return { tag: 'index', index: index, rest: nestedProblems };
+}
+
+function badOneOf(problems)
+{
+	return { tag: 'oneOf', problems: problems };
+}
+
+function bad(msg)
+{
+	return { tag: 'fail', msg: msg };
+}
+
+function badToString(problem)
+{
+	var context = '_';
+	while (problem)
+	{
+		switch (problem.tag)
+		{
+			case 'primitive':
+				return 'Expecting ' + problem.type
+					+ (context === '_' ? '' : ' at ' + context)
+					+ ' but instead got: ' + jsToString(problem.value);
+
+			case 'index':
+				context += '[' + problem.index + ']';
+				problem = problem.rest;
+				break;
+
+			case 'field':
+				context += '.' + problem.field;
+				problem = problem.rest;
+				break;
+
+			case 'oneOf':
+				var problems = problem.problems;
+				for (var i = 0; i < problems.length; i++)
+				{
+					problems[i] = badToString(problems[i]);
+				}
+				return 'I ran into the following problems'
+					+ (context === '_' ? '' : ' at ' + context)
+					+ ':\n\n' + problems.join('\n');
+
+			case 'fail':
+				return 'I ran into a `fail` decoder'
+					+ (context === '_' ? '' : ' at ' + context)
+					+ ': ' + problem.msg;
+		}
+	}
+}
+
+function jsToString(value)
+{
+	return value === undefined
+		? 'undefined'
+		: JSON.stringify(value);
+}
+
+
+// DECODE
+
+function runOnString(decoder, string)
+{
+	var json;
+	try
+	{
+		json = JSON.parse(string);
+	}
+	catch (e)
+	{
+		return _elm_lang$core$Result$Err('Given an invalid JSON: ' + e.message);
+	}
+	return run(decoder, json);
+}
+
+function run(decoder, value)
+{
+	var result = runHelp(decoder, value);
+	return (result.tag === 'ok')
+		? _elm_lang$core$Result$Ok(result.value)
+		: _elm_lang$core$Result$Err(badToString(result));
+}
+
+function runHelp(decoder, value)
+{
+	switch (decoder.tag)
+	{
+		case 'bool':
+			return (typeof value === 'boolean')
+				? ok(value)
+				: badPrimitive('a Bool', value);
+
+		case 'int':
+			if (typeof value !== 'number') {
+				return badPrimitive('an Int', value);
+			}
+
+			if (-2147483647 < value && value < 2147483647 && (value | 0) === value) {
+				return ok(value);
+			}
+
+			if (isFinite(value) && !(value % 1)) {
+				return ok(value);
+			}
+
+			return badPrimitive('an Int', value);
+
+		case 'float':
+			return (typeof value === 'number')
+				? ok(value)
+				: badPrimitive('a Float', value);
+
+		case 'string':
+			return (typeof value === 'string')
+				? ok(value)
+				: (value instanceof String)
+					? ok(value + '')
+					: badPrimitive('a String', value);
+
+		case 'null':
+			return (value === null)
+				? ok(decoder.value)
+				: badPrimitive('null', value);
+
+		case 'value':
+			return ok(value);
+
+		case 'list':
+			if (!(value instanceof Array))
+			{
+				return badPrimitive('a List', value);
+			}
+
+			var list = _elm_lang$core$Native_List.Nil;
+			for (var i = value.length; i--; )
+			{
+				var result = runHelp(decoder.decoder, value[i]);
+				if (result.tag !== 'ok')
+				{
+					return badIndex(i, result)
+				}
+				list = _elm_lang$core$Native_List.Cons(result.value, list);
+			}
+			return ok(list);
+
+		case 'array':
+			if (!(value instanceof Array))
+			{
+				return badPrimitive('an Array', value);
+			}
+
+			var len = value.length;
+			var array = new Array(len);
+			for (var i = len; i--; )
+			{
+				var result = runHelp(decoder.decoder, value[i]);
+				if (result.tag !== 'ok')
+				{
+					return badIndex(i, result);
+				}
+				array[i] = result.value;
+			}
+			return ok(_elm_lang$core$Native_Array.fromJSArray(array));
+
+		case 'maybe':
+			var result = runHelp(decoder.decoder, value);
+			return (result.tag === 'ok')
+				? ok(_elm_lang$core$Maybe$Just(result.value))
+				: ok(_elm_lang$core$Maybe$Nothing);
+
+		case 'field':
+			var field = decoder.field;
+			if (typeof value !== 'object' || value === null || !(field in value))
+			{
+				return badPrimitive('an object with a field named `' + field + '`', value);
+			}
+
+			var result = runHelp(decoder.decoder, value[field]);
+			return (result.tag === 'ok') ? result : badField(field, result);
+
+		case 'index':
+			var index = decoder.index;
+			if (!(value instanceof Array))
+			{
+				return badPrimitive('an array', value);
+			}
+			if (index >= value.length)
+			{
+				return badPrimitive('a longer array. Need index ' + index + ' but there are only ' + value.length + ' entries', value);
+			}
+
+			var result = runHelp(decoder.decoder, value[index]);
+			return (result.tag === 'ok') ? result : badIndex(index, result);
+
+		case 'key-value':
+			if (typeof value !== 'object' || value === null || value instanceof Array)
+			{
+				return badPrimitive('an object', value);
+			}
+
+			var keyValuePairs = _elm_lang$core$Native_List.Nil;
+			for (var key in value)
+			{
+				var result = runHelp(decoder.decoder, value[key]);
+				if (result.tag !== 'ok')
+				{
+					return badField(key, result);
+				}
+				var pair = _elm_lang$core$Native_Utils.Tuple2(key, result.value);
+				keyValuePairs = _elm_lang$core$Native_List.Cons(pair, keyValuePairs);
+			}
+			return ok(keyValuePairs);
+
+		case 'map-many':
+			var answer = decoder.func;
+			var decoders = decoder.decoders;
+			for (var i = 0; i < decoders.length; i++)
+			{
+				var result = runHelp(decoders[i], value);
+				if (result.tag !== 'ok')
+				{
+					return result;
+				}
+				answer = answer(result.value);
+			}
+			return ok(answer);
+
+		case 'andThen':
+			var result = runHelp(decoder.decoder, value);
+			return (result.tag !== 'ok')
+				? result
+				: runHelp(decoder.callback(result.value), value);
+
+		case 'oneOf':
+			var errors = [];
+			var temp = decoder.decoders;
+			while (temp.ctor !== '[]')
+			{
+				var result = runHelp(temp._0, value);
+
+				if (result.tag === 'ok')
+				{
+					return result;
+				}
+
+				errors.push(result);
+
+				temp = temp._1;
+			}
+			return badOneOf(errors);
+
+		case 'fail':
+			return bad(decoder.msg);
+
+		case 'succeed':
+			return ok(decoder.msg);
+	}
+}
+
+
+// EQUALITY
+
+function equality(a, b)
+{
+	if (a === b)
+	{
+		return true;
+	}
+
+	if (a.tag !== b.tag)
+	{
+		return false;
+	}
+
+	switch (a.tag)
+	{
+		case 'succeed':
+		case 'fail':
+			return a.msg === b.msg;
+
+		case 'bool':
+		case 'int':
+		case 'float':
+		case 'string':
+		case 'value':
+			return true;
+
+		case 'null':
+			return a.value === b.value;
+
+		case 'list':
+		case 'array':
+		case 'maybe':
+		case 'key-value':
+			return equality(a.decoder, b.decoder);
+
+		case 'field':
+			return a.field === b.field && equality(a.decoder, b.decoder);
+
+		case 'index':
+			return a.index === b.index && equality(a.decoder, b.decoder);
+
+		case 'map-many':
+			if (a.func !== b.func)
+			{
+				return false;
+			}
+			return listEquality(a.decoders, b.decoders);
+
+		case 'andThen':
+			return a.callback === b.callback && equality(a.decoder, b.decoder);
+
+		case 'oneOf':
+			return listEquality(a.decoders, b.decoders);
+	}
+}
+
+function listEquality(aDecoders, bDecoders)
+{
+	var len = aDecoders.length;
+	if (len !== bDecoders.length)
+	{
+		return false;
+	}
+	for (var i = 0; i < len; i++)
+	{
+		if (!equality(aDecoders[i], bDecoders[i]))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+// ENCODE
+
+function encode(indentLevel, value)
+{
+	return JSON.stringify(value, null, indentLevel);
+}
+
+function identity(value)
+{
+	return value;
+}
+
+function encodeObject(keyValuePairs)
+{
+	var obj = {};
+	while (keyValuePairs.ctor !== '[]')
+	{
+		var pair = keyValuePairs._0;
+		obj[pair._0] = pair._1;
+		keyValuePairs = keyValuePairs._1;
+	}
+	return obj;
+}
+
+return {
+	encode: F2(encode),
+	runOnString: F2(runOnString),
+	run: F2(run),
+
+	decodeNull: decodeNull,
+	decodePrimitive: decodePrimitive,
+	decodeContainer: F2(decodeContainer),
+
+	decodeField: F2(decodeField),
+	decodeIndex: F2(decodeIndex),
+
+	map1: F2(map1),
+	map2: F3(map2),
+	map3: F4(map3),
+	map4: F5(map4),
+	map5: F6(map5),
+	map6: F7(map6),
+	map7: F8(map7),
+	map8: F9(map8),
+	decodeKeyValuePairs: decodeKeyValuePairs,
+
+	andThen: F2(andThen),
+	fail: fail,
+	succeed: succeed,
+	oneOf: oneOf,
+
+	identity: identity,
+	encodeNull: null,
+	encodeArray: _elm_lang$core$Native_Array.toJSArray,
+	encodeList: _elm_lang$core$Native_List.toArray,
+	encodeObject: encodeObject,
+
+	equality: equality
+};
+
+}();
+var _elm_lang$core$Json_Encode$list = _elm_lang$core$Native_Json.encodeList;
+var _elm_lang$core$Json_Encode$array = _elm_lang$core$Native_Json.encodeArray;
+var _elm_lang$core$Json_Encode$object = _elm_lang$core$Native_Json.encodeObject;
+var _elm_lang$core$Json_Encode$null = _elm_lang$core$Native_Json.encodeNull;
+var _elm_lang$core$Json_Encode$bool = _elm_lang$core$Native_Json.identity;
+var _elm_lang$core$Json_Encode$float = _elm_lang$core$Native_Json.identity;
+var _elm_lang$core$Json_Encode$int = _elm_lang$core$Native_Json.identity;
+var _elm_lang$core$Json_Encode$string = _elm_lang$core$Native_Json.identity;
+var _elm_lang$core$Json_Encode$encode = _elm_lang$core$Native_Json.encode;
+var _elm_lang$core$Json_Encode$Value = {ctor: 'Value'};
+var _elm_lang$core$Json_Decode$null = _elm_lang$core$Native_Json.decodeNull;
+var _elm_lang$core$Json_Decode$value = _elm_lang$core$Native_Json.decodePrimitive('value');
+var _elm_lang$core$Json_Decode$andThen = _elm_lang$core$Native_Json.andThen;
+var _elm_lang$core$Json_Decode$fail = _elm_lang$core$Native_Json.fail;
+var _elm_lang$core$Json_Decode$succeed = _elm_lang$core$Native_Json.succeed;
+var _elm_lang$core$Json_Decode$lazy = function (thunk) {
+	return A2(
+		_elm_lang$core$Json_Decode$andThen,
+		thunk,
+		_elm_lang$core$Json_Decode$succeed(
+			{ctor: '_Tuple0'}));
+};
+var _elm_lang$core$Json_Decode$decodeValue = _elm_lang$core$Native_Json.run;
+var _elm_lang$core$Json_Decode$decodeString = _elm_lang$core$Native_Json.runOnString;
+var _elm_lang$core$Json_Decode$map8 = _elm_lang$core$Native_Json.map8;
+var _elm_lang$core$Json_Decode$map7 = _elm_lang$core$Native_Json.map7;
+var _elm_lang$core$Json_Decode$map6 = _elm_lang$core$Native_Json.map6;
+var _elm_lang$core$Json_Decode$map5 = _elm_lang$core$Native_Json.map5;
+var _elm_lang$core$Json_Decode$map4 = _elm_lang$core$Native_Json.map4;
+var _elm_lang$core$Json_Decode$map3 = _elm_lang$core$Native_Json.map3;
+var _elm_lang$core$Json_Decode$map2 = _elm_lang$core$Native_Json.map2;
+var _elm_lang$core$Json_Decode$map = _elm_lang$core$Native_Json.map1;
+var _elm_lang$core$Json_Decode$oneOf = _elm_lang$core$Native_Json.oneOf;
+var _elm_lang$core$Json_Decode$maybe = function (decoder) {
+	return A2(_elm_lang$core$Native_Json.decodeContainer, 'maybe', decoder);
+};
+var _elm_lang$core$Json_Decode$index = _elm_lang$core$Native_Json.decodeIndex;
+var _elm_lang$core$Json_Decode$field = _elm_lang$core$Native_Json.decodeField;
+var _elm_lang$core$Json_Decode$at = F2(
+	function (fields, decoder) {
+		return A3(_elm_lang$core$List$foldr, _elm_lang$core$Json_Decode$field, decoder, fields);
+	});
+var _elm_lang$core$Json_Decode$keyValuePairs = _elm_lang$core$Native_Json.decodeKeyValuePairs;
+var _elm_lang$core$Json_Decode$dict = function (decoder) {
+	return A2(
+		_elm_lang$core$Json_Decode$map,
+		_elm_lang$core$Dict$fromList,
+		_elm_lang$core$Json_Decode$keyValuePairs(decoder));
+};
+var _elm_lang$core$Json_Decode$array = function (decoder) {
+	return A2(_elm_lang$core$Native_Json.decodeContainer, 'array', decoder);
+};
+var _elm_lang$core$Json_Decode$list = function (decoder) {
+	return A2(_elm_lang$core$Native_Json.decodeContainer, 'list', decoder);
+};
+var _elm_lang$core$Json_Decode$nullable = function (decoder) {
+	return _elm_lang$core$Json_Decode$oneOf(
+		{
+			ctor: '::',
+			_0: _elm_lang$core$Json_Decode$null(_elm_lang$core$Maybe$Nothing),
+			_1: {
+				ctor: '::',
+				_0: A2(_elm_lang$core$Json_Decode$map, _elm_lang$core$Maybe$Just, decoder),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _elm_lang$core$Json_Decode$float = _elm_lang$core$Native_Json.decodePrimitive('float');
+var _elm_lang$core$Json_Decode$int = _elm_lang$core$Native_Json.decodePrimitive('int');
+var _elm_lang$core$Json_Decode$bool = _elm_lang$core$Native_Json.decodePrimitive('bool');
+var _elm_lang$core$Json_Decode$string = _elm_lang$core$Native_Json.decodePrimitive('string');
+var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
+var _elm_lang$dom$Native_Dom = function() {
+
+var fakeNode = {
+	addEventListener: function() {},
+	removeEventListener: function() {}
+};
+
+var onDocument = on(typeof document !== 'undefined' ? document : fakeNode);
+var onWindow = on(typeof window !== 'undefined' ? window : fakeNode);
+
+function on(node)
+{
+	return function(eventName, decoder, toTask)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+
+			function performTask(event)
+			{
+				var result = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, event);
+				if (result.ctor === 'Ok')
+				{
+					_elm_lang$core$Native_Scheduler.rawSpawn(toTask(result._0));
+				}
+			}
+
+			node.addEventListener(eventName, performTask);
+
+			return function()
+			{
+				node.removeEventListener(eventName, performTask);
+			};
+		});
+	};
+}
+
+var rAF = typeof requestAnimationFrame !== 'undefined'
+	? requestAnimationFrame
+	: function(callback) { callback(); };
+
+function withNode(id, doStuff)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		rAF(function()
+		{
+			var node = document.getElementById(id);
+			if (node === null)
+			{
+				callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'NotFound', _0: id }));
+				return;
+			}
+			callback(_elm_lang$core$Native_Scheduler.succeed(doStuff(node)));
+		});
+	});
+}
+
+
+// FOCUS
+
+function focus(id)
+{
+	return withNode(id, function(node) {
+		node.focus();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function blur(id)
+{
+	return withNode(id, function(node) {
+		node.blur();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SCROLLING
+
+function getScrollTop(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollTop;
+	});
+}
+
+function setScrollTop(id, desiredScrollTop)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = desiredScrollTop;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toBottom(id)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = node.scrollHeight;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function getScrollLeft(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollLeft;
+	});
+}
+
+function setScrollLeft(id, desiredScrollLeft)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = desiredScrollLeft;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toRight(id)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = node.scrollWidth;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SIZE
+
+function width(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollWidth;
+			case 'VisibleContent':
+				return node.clientWidth;
+			case 'VisibleContentWithBorders':
+				return node.offsetWidth;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.right - rect.left;
+		}
+	});
+}
+
+function height(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollHeight;
+			case 'VisibleContent':
+				return node.clientHeight;
+			case 'VisibleContentWithBorders':
+				return node.offsetHeight;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.bottom - rect.top;
+		}
+	});
+}
+
+return {
+	onDocument: F3(onDocument),
+	onWindow: F3(onWindow),
+
+	focus: focus,
+	blur: blur,
+
+	getScrollTop: getScrollTop,
+	setScrollTop: F2(setScrollTop),
+	getScrollLeft: getScrollLeft,
+	setScrollLeft: F2(setScrollLeft),
+	toBottom: toBottom,
+	toRight: toRight,
+
+	height: F2(height),
+	width: F2(width)
+};
+
+}();
 //import Native.Utils //
 
 var _elm_lang$core$Native_Scheduler = function() {
@@ -5282,6 +6111,8 @@ var _elm_lang$core$Tuple$first = function (_p6) {
 	var _p7 = _p6;
 	return _p7._0;
 };
+var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
+var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
 //import Native.Scheduler //
 
 var _elm_lang$core$Native_Time = function() {
@@ -5495,6 +6326,177 @@ var _elm_lang$core$Time$subMap = F2(
 			});
 	});
 _elm_lang$core$Native_Platform.effectManagers['Time'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Time$init, onEffects: _elm_lang$core$Time$onEffects, onSelfMsg: _elm_lang$core$Time$onSelfMsg, tag: 'sub', subMap: _elm_lang$core$Time$subMap};
+var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
+var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
+var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+var _elm_lang$keyboard$Keyboard$onSelfMsg = F3(
+	function (router, _p0, state) {
+		var _p1 = _p0;
+		var _p2 = A2(_elm_lang$core$Dict$get, _p1.category, state);
+		if (_p2.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var send = function (tagger) {
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					tagger(_p1.keyCode));
+			};
+			return A2(
+				_elm_lang$core$Task$andThen,
+				function (_p3) {
+					return _elm_lang$core$Task$succeed(state);
+				},
+				_elm_lang$core$Task$sequence(
+					A2(_elm_lang$core$List$map, send, _p2._0.taggers)));
+		}
+	});
+var _elm_lang$keyboard$Keyboard_ops = _elm_lang$keyboard$Keyboard_ops || {};
+_elm_lang$keyboard$Keyboard_ops['&>'] = F2(
+	function (task1, task2) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (_p4) {
+				return task2;
+			},
+			task1);
+	});
+var _elm_lang$keyboard$Keyboard$init = _elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty);
+var _elm_lang$keyboard$Keyboard$categorizeHelpHelp = F2(
+	function (value, maybeValues) {
+		var _p5 = maybeValues;
+		if (_p5.ctor === 'Nothing') {
+			return _elm_lang$core$Maybe$Just(
+				{
+					ctor: '::',
+					_0: value,
+					_1: {ctor: '[]'}
+				});
+		} else {
+			return _elm_lang$core$Maybe$Just(
+				{ctor: '::', _0: value, _1: _p5._0});
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorizeHelp = F2(
+	function (subs, subDict) {
+		categorizeHelp:
+		while (true) {
+			var _p6 = subs;
+			if (_p6.ctor === '[]') {
+				return subDict;
+			} else {
+				var _v4 = _p6._1,
+					_v5 = A3(
+					_elm_lang$core$Dict$update,
+					_p6._0._0,
+					_elm_lang$keyboard$Keyboard$categorizeHelpHelp(_p6._0._1),
+					subDict);
+				subs = _v4;
+				subDict = _v5;
+				continue categorizeHelp;
+			}
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorize = function (subs) {
+	return A2(_elm_lang$keyboard$Keyboard$categorizeHelp, subs, _elm_lang$core$Dict$empty);
+};
+var _elm_lang$keyboard$Keyboard$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$keyboard$Keyboard$subscription = _elm_lang$core$Native_Platform.leaf('Keyboard');
+var _elm_lang$keyboard$Keyboard$Watcher = F2(
+	function (a, b) {
+		return {taggers: a, pid: b};
+	});
+var _elm_lang$keyboard$Keyboard$Msg = F2(
+	function (a, b) {
+		return {category: a, keyCode: b};
+	});
+var _elm_lang$keyboard$Keyboard$onEffects = F3(
+	function (router, newSubs, oldState) {
+		var rightStep = F3(
+			function (category, taggers, task) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (state) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (pid) {
+								return _elm_lang$core$Task$succeed(
+									A3(
+										_elm_lang$core$Dict$insert,
+										category,
+										A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, pid),
+										state));
+							},
+							_elm_lang$core$Process$spawn(
+								A3(
+									_elm_lang$dom$Dom_LowLevel$onDocument,
+									category,
+									_elm_lang$keyboard$Keyboard$keyCode,
+									function (_p7) {
+										return A2(
+											_elm_lang$core$Platform$sendToSelf,
+											router,
+											A2(_elm_lang$keyboard$Keyboard$Msg, category, _p7));
+									})));
+					},
+					task);
+			});
+		var bothStep = F4(
+			function (category, _p8, taggers, task) {
+				var _p9 = _p8;
+				return A2(
+					_elm_lang$core$Task$map,
+					A2(
+						_elm_lang$core$Dict$insert,
+						category,
+						A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, _p9.pid)),
+					task);
+			});
+		var leftStep = F3(
+			function (category, _p10, task) {
+				var _p11 = _p10;
+				return A2(
+					_elm_lang$keyboard$Keyboard_ops['&>'],
+					_elm_lang$core$Process$kill(_p11.pid),
+					task);
+			});
+		return A6(
+			_elm_lang$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			oldState,
+			_elm_lang$keyboard$Keyboard$categorize(newSubs),
+			_elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty));
+	});
+var _elm_lang$keyboard$Keyboard$MySub = F2(
+	function (a, b) {
+		return {ctor: 'MySub', _0: a, _1: b};
+	});
+var _elm_lang$keyboard$Keyboard$presses = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keypress', tagger));
+};
+var _elm_lang$keyboard$Keyboard$downs = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keydown', tagger));
+};
+var _elm_lang$keyboard$Keyboard$ups = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keyup', tagger));
+};
+var _elm_lang$keyboard$Keyboard$subMap = F2(
+	function (func, _p12) {
+		var _p13 = _p12;
+		return A2(
+			_elm_lang$keyboard$Keyboard$MySub,
+			_p13._0,
+			function (_p14) {
+				return func(
+					_p13._1(_p14));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Keyboard'] = {pkg: 'elm-lang/keyboard', init: _elm_lang$keyboard$Keyboard$init, onEffects: _elm_lang$keyboard$Keyboard$onEffects, onSelfMsg: _elm_lang$keyboard$Keyboard$onSelfMsg, tag: 'sub', subMap: _elm_lang$keyboard$Keyboard$subMap};
 var _elm_lang$core$Random$onSelfMsg = F3(
 	function (_p1, _p0, seed) {
 		return _elm_lang$core$Task$succeed(seed);
@@ -6626,129 +7628,135 @@ var _ckoster22$elm_genetic$Genetic$solutionGenerator = function (options) {
 			options,
 			_ckoster22$elm_genetic$Genetic$executeInitialStep(options)));
 };
-var _j1nma$genetic_spaceinvaders$Model$Spaceship = F4(
-	function (a, b, c, d) {
-		return {x: a, y: b, vx: c, vy: d};
+var _elm_lang$core$Set$foldr = F3(
+	function (f, b, _p0) {
+		var _p1 = _p0;
+		return A3(
+			_elm_lang$core$Dict$foldr,
+			F3(
+				function (k, _p2, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p1._0);
 	});
-var _j1nma$genetic_spaceinvaders$Model$Bullet = F5(
-	function (a, b, c, d, e) {
-		return {x: a, y: b, vx: c, vy: d, hit: e};
+var _elm_lang$core$Set$foldl = F3(
+	function (f, b, _p3) {
+		var _p4 = _p3;
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			F3(
+				function (k, _p5, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p4._0);
 	});
-var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h, wasHit: i};
-	});
-var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
-var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
-var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
-var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 1;
-var _j1nma$genetic_spaceinvaders$Constants$_p0 = {ctor: '_Tuple2', _0: 600, _1: 400};
-var _j1nma$genetic_spaceinvaders$Constants$gameWidth = _j1nma$genetic_spaceinvaders$Constants$_p0._0;
-var _j1nma$genetic_spaceinvaders$Constants$gameHeight = _j1nma$genetic_spaceinvaders$Constants$_p0._1;
-var _j1nma$genetic_spaceinvaders$Constants$_p1 = {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Constants$gameWidth / 2, _1: _j1nma$genetic_spaceinvaders$Constants$gameHeight / 2};
-var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvaders$Constants$_p1._0;
-var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
-var _j1nma$genetic_spaceinvaders$Constants$leftArrow = 37;
-var _j1nma$genetic_spaceinvaders$Constants$rightArrow = 39;
-var _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition = function (seed) {
-	var randomHeightGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
-	var randomWidthGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
-	var _p0 = A2(_elm_lang$core$Random$step, randomWidthGenerator, seed);
-	var w = _p0._0;
-	var seedY = _p0._1;
-	var _p1 = A2(_elm_lang$core$Random$step, randomHeightGenerator, seedY);
-	var h = _p1._0;
-	var newSeed = _p1._1;
-	return {
-		ctor: '_Tuple2',
-		_0: {ctor: '_Tuple2', _0: w, _1: h},
-		_1: newSeed
-	};
+var _elm_lang$core$Set$toList = function (_p6) {
+	var _p7 = _p6;
+	return _elm_lang$core$Dict$keys(_p7._0);
 };
-var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
-	var _p2 = m;
-	if (_p2.ctor === 'Just') {
-		return _p2._0;
-	} else {
-		return _elm_lang$core$Native_Utils.crashCase(
-			'Auxiliary',
-			{
-				start: {line: 114, column: 5},
-				end: {line: 119, column: 48}
-			},
-			_p2)('No value on dna list!');
-	}
+var _elm_lang$core$Set$size = function (_p8) {
+	var _p9 = _p8;
+	return _elm_lang$core$Dict$size(_p9._0);
 };
-var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
-	function (k, c, n) {
-		return (_elm_lang$core$Native_Utils.cmp(n, k - c) > -1) && (_elm_lang$core$Native_Utils.cmp(n, k + c) < 1);
+var _elm_lang$core$Set$member = F2(
+	function (k, _p10) {
+		var _p11 = _p10;
+		return A2(_elm_lang$core$Dict$member, k, _p11._0);
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
-	function (bullet, invader) {
-		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 60, bullet.y);
-	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
-	function (b1, b2) {
-		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.x, 30, b2.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.y, 30, b2.y);
-	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$filterBulletHit = function (bullet) {
-	return !bullet.hit;
+var _elm_lang$core$Set$isEmpty = function (_p12) {
+	var _p13 = _p12;
+	return _elm_lang$core$Dict$isEmpty(_p13._0);
 };
-var _j1nma$genetic_spaceinvaders$Auxiliary$filterInvaderHit = function (invader) {
-	return !invader.wasHit;
+var _elm_lang$core$Set$Set_elm_builtin = function (a) {
+	return {ctor: 'Set_elm_builtin', _0: a};
 };
-var _j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate = F2(
-	function (t, _p4) {
-		var _p5 = _p4;
-		return _elm_lang$core$Native_Utils.update(
-			_p5,
-			{x: _p5.x + (_p5.vx * t), y: _p5.y + (_p5.vy * t)});
+var _elm_lang$core$Set$empty = _elm_lang$core$Set$Set_elm_builtin(_elm_lang$core$Dict$empty);
+var _elm_lang$core$Set$singleton = function (k) {
+	return _elm_lang$core$Set$Set_elm_builtin(
+		A2(
+			_elm_lang$core$Dict$singleton,
+			k,
+			{ctor: '_Tuple0'}));
+};
+var _elm_lang$core$Set$insert = F2(
+	function (k, _p14) {
+		var _p15 = _p14;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A3(
+				_elm_lang$core$Dict$insert,
+				k,
+				{ctor: '_Tuple0'},
+				_p15._0));
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$probDirChange = F2(
-	function (seed, p) {
-		var generator = A2(_elm_lang$core$Random$float, 0, 1);
-		var _p6 = A2(_elm_lang$core$Random$step, generator, seed);
-		var addProbability = _p6._0;
-		var s = _p6._1;
-		return (_elm_lang$core$Native_Utils.cmp(p, addProbability) > 0) ? {ctor: '_Tuple2', _0: -1, _1: s} : {ctor: '_Tuple2', _0: 1, _1: s};
+var _elm_lang$core$Set$fromList = function (xs) {
+	return A3(_elm_lang$core$List$foldl, _elm_lang$core$Set$insert, _elm_lang$core$Set$empty, xs);
+};
+var _elm_lang$core$Set$map = F2(
+	function (f, s) {
+		return _elm_lang$core$Set$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				f,
+				_elm_lang$core$Set$toList(s)));
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$stepV = F3(
-	function (v, negativeCollision, positiveCollision) {
-		return negativeCollision ? _elm_lang$core$Basics$abs(v) : (positiveCollision ? (0 - _elm_lang$core$Basics$abs(v)) : v);
+var _elm_lang$core$Set$remove = F2(
+	function (k, _p16) {
+		var _p17 = _p16;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$remove, k, _p17._0));
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$randomMovement = F2(
-	function (t, invader) {
-		var changeY = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedY, invader.yProbChange);
-		var newVelY = invader.vy * _elm_lang$core$Tuple$first(changeY);
-		var changeX = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedX, invader.xProbChange);
-		var newVelX = invader.vx * _elm_lang$core$Tuple$first(changeX);
-		return A2(
-			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
-			t,
-			_elm_lang$core$Native_Utils.update(
-				invader,
-				{
-					vx: newVelX,
-					vy: newVelY,
-					seedX: _elm_lang$core$Tuple$second(changeX),
-					seedY: _elm_lang$core$Tuple$second(changeY)
-				}));
+var _elm_lang$core$Set$union = F2(
+	function (_p19, _p18) {
+		var _p20 = _p19;
+		var _p21 = _p18;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$union, _p20._0, _p21._0));
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$decideMovement = F2(
-	function (t, invader) {
-		var lowerCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60);
-		var upperCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
-		var rightCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
-		var leftCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20);
-		return (leftCollision || (rightCollision || (upperCollision || lowerCollision))) ? A2(
-			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
-			t,
-			_elm_lang$core$Native_Utils.update(
-				invader,
-				{
-					vx: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vx, leftCollision, rightCollision),
-					vy: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vy, lowerCollision, upperCollision)
-				})) : A2(_j1nma$genetic_spaceinvaders$Auxiliary$randomMovement, t, invader);
+var _elm_lang$core$Set$intersect = F2(
+	function (_p23, _p22) {
+		var _p24 = _p23;
+		var _p25 = _p22;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$intersect, _p24._0, _p25._0));
+	});
+var _elm_lang$core$Set$diff = F2(
+	function (_p27, _p26) {
+		var _p28 = _p27;
+		var _p29 = _p26;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$diff, _p28._0, _p29._0));
+	});
+var _elm_lang$core$Set$filter = F2(
+	function (p, _p30) {
+		var _p31 = _p30;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(
+				_elm_lang$core$Dict$filter,
+				F2(
+					function (k, _p32) {
+						return p(k);
+					}),
+				_p31._0));
+	});
+var _elm_lang$core$Set$partition = F2(
+	function (p, _p33) {
+		var _p34 = _p33;
+		var _p35 = A2(
+			_elm_lang$core$Dict$partition,
+			F2(
+				function (k, _p36) {
+					return p(k);
+				}),
+			_p34._0);
+		var p1 = _p35._0;
+		var p2 = _p35._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Set$Set_elm_builtin(p1),
+			_1: _elm_lang$core$Set$Set_elm_builtin(p2)
+		};
 	});
 var _j1nma$genetic_spaceinvaders$GeneticHelper$updateSolution = F2(
 	function (newFitness, _p0) {
@@ -6855,6 +7863,167 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$evolve = F2(
 var _j1nma$genetic_spaceinvaders$GeneticHelper$Dna = F2(
 	function (a, b) {
 		return {genes: a, fitness: b};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Game = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {keysDown: a, windowDimensions: b, state: c, spaceship: d, invaders: e, bullets: f, bestSolution: g, currentTime: h, hasSpawned: i, score: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var _j1nma$genetic_spaceinvaders$Model$Spaceship = F4(
+	function (a, b, c, d) {
+		return {x: a, y: b, vx: c, vy: d};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Bullet = F5(
+	function (a, b, c, d, e) {
+		return {x: a, y: b, vx: c, vy: d, hit: e};
+	});
+var _j1nma$genetic_spaceinvaders$Model$Invader = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {x: a, y: b, vx: c, vy: d, xProbChange: e, yProbChange: f, seedX: g, seedY: h, wasHit: i};
+	});
+var _j1nma$genetic_spaceinvaders$Model$OnTime = function (a) {
+	return {ctor: 'OnTime', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$NoOp = {ctor: 'NoOp'};
+var _j1nma$genetic_spaceinvaders$Model$Tick = function (a) {
+	return {ctor: 'Tick', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$WindowResize = function (a) {
+	return {ctor: 'WindowResize', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$KeyUp = function (a) {
+	return {ctor: 'KeyUp', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$KeyDown = function (a) {
+	return {ctor: 'KeyDown', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
+var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
+var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
+var _j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders = 1;
+var _j1nma$genetic_spaceinvaders$Constants$_p0 = {ctor: '_Tuple2', _0: 600, _1: 400};
+var _j1nma$genetic_spaceinvaders$Constants$gameWidth = _j1nma$genetic_spaceinvaders$Constants$_p0._0;
+var _j1nma$genetic_spaceinvaders$Constants$gameHeight = _j1nma$genetic_spaceinvaders$Constants$_p0._1;
+var _j1nma$genetic_spaceinvaders$Constants$_p1 = {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Constants$gameWidth / 2, _1: _j1nma$genetic_spaceinvaders$Constants$gameHeight / 2};
+var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvaders$Constants$_p1._0;
+var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
+var _j1nma$genetic_spaceinvaders$Constants$leftArrow = 37;
+var _j1nma$genetic_spaceinvaders$Constants$rightArrow = 39;
+var _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition = function (seed) {
+	var randomHeightGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
+	var randomWidthGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
+	var _p0 = A2(_elm_lang$core$Random$step, randomWidthGenerator, seed);
+	var w = _p0._0;
+	var seedY = _p0._1;
+	var _p1 = A2(_elm_lang$core$Random$step, randomHeightGenerator, seedY);
+	var h = _p1._0;
+	var newSeed = _p1._1;
+	return {
+		ctor: '_Tuple2',
+		_0: {ctor: '_Tuple2', _0: w, _1: h},
+		_1: newSeed
+	};
+};
+var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
+	var _p2 = m;
+	if (_p2.ctor === 'Just') {
+		return _p2._0;
+	} else {
+		return _elm_lang$core$Native_Utils.crashCase(
+			'Auxiliary',
+			{
+				start: {line: 111, column: 5},
+				end: {line: 116, column: 48}
+			},
+			_p2)('No value on dna list!');
+	}
+};
+var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
+	function (k, c, n) {
+		return (_elm_lang$core$Native_Utils.cmp(n, k - c) > -1) && (_elm_lang$core$Native_Utils.cmp(n, k + c) < 1);
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
+	function (bullet, invader) {
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 60, bullet.y);
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
+	function (b1, b2) {
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.x, 30, b2.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.y, 30, b2.y);
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$filterBulletHit = function (bullet) {
+	return !bullet.hit;
+};
+var _j1nma$genetic_spaceinvaders$Auxiliary$filterInvaderHit = function (invader) {
+	return !invader.wasHit;
+};
+var _j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate = F2(
+	function (t, _p4) {
+		var _p5 = _p4;
+		return _elm_lang$core$Native_Utils.update(
+			_p5,
+			{x: _p5.x + (_p5.vx * t), y: _p5.y + (_p5.vy * t)});
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$probDirChange = F2(
+	function (seed, p) {
+		var generator = A2(_elm_lang$core$Random$float, 0, 1);
+		var _p6 = A2(_elm_lang$core$Random$step, generator, seed);
+		var addProbability = _p6._0;
+		var s = _p6._1;
+		return (_elm_lang$core$Native_Utils.cmp(p, addProbability) > 0) ? {ctor: '_Tuple2', _0: -1, _1: s} : {ctor: '_Tuple2', _0: 1, _1: s};
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$stepV = F3(
+	function (v, negativeCollision, positiveCollision) {
+		return negativeCollision ? _elm_lang$core$Basics$abs(v) : (positiveCollision ? (0 - _elm_lang$core$Basics$abs(v)) : v);
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$randomMovement = F2(
+	function (t, invader) {
+		var changeY = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedY, invader.yProbChange);
+		var newVelY = invader.vy * _elm_lang$core$Tuple$first(changeY);
+		var changeX = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedX, invader.xProbChange);
+		var newVelX = invader.vx * _elm_lang$core$Tuple$first(changeX);
+		return A2(
+			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
+			t,
+			_elm_lang$core$Native_Utils.update(
+				invader,
+				{
+					vx: newVelX,
+					vy: newVelY,
+					seedX: _elm_lang$core$Tuple$second(changeX),
+					seedY: _elm_lang$core$Tuple$second(changeY)
+				}));
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$decideMovement = F2(
+	function (t, invader) {
+		var lowerCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60);
+		var upperCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
+		var rightCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
+		var leftCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20);
+		return (leftCollision || (rightCollision || (upperCollision || lowerCollision))) ? A2(
+			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
+			t,
+			_elm_lang$core$Native_Utils.update(
+				invader,
+				{
+					vx: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vx, leftCollision, rightCollision),
+					vy: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vy, lowerCollision, upperCollision)
+				})) : A2(_j1nma$genetic_spaceinvaders$Auxiliary$randomMovement, t, invader);
 	});
 var _j1nma$genetic_spaceinvaders$Update$calculateFitness = F2(
 	function (dna, invaders) {
@@ -6965,7 +8134,7 @@ var _j1nma$genetic_spaceinvaders$Update$updateInvader = F3(
 			A2(
 				_elm_lang$core$List$filter,
 				function (b) {
-					return A2(_j1nma$genetic_spaceinvaders$Auxiliary$within, invader, b);
+					return A2(_j1nma$genetic_spaceinvaders$Auxiliary$within, b, invader);
 				},
 				bullets))) ? _elm_lang$core$Native_Utils.update(
 			invader,

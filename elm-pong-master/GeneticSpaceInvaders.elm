@@ -110,7 +110,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
         newState =
             if start then
                 Play
-            else if (pause) then
+            else if pause then
                 Pause
             else
                 state
@@ -136,6 +136,9 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
 
                         updatedInvaders =
                             updateInvaders delta invaders bullets
+
+                        gameOver =
+                            (List.length updatedInvaders == gameOverInvaders)
                     in
                         if (((round (inSeconds currentTime)) % 2) == 0) then
                             let
@@ -155,7 +158,11 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                     dnaFromValue (Tuple.first betterSolution)
                             in
                                 { game
-                                    | state = newState
+                                    | state =
+                                        if gameOver then
+                                            Over
+                                        else
+                                            newState
                                     , spaceship = updateSpaceship delta dir spaceship
                                     , bullets = newBullet ++ updateBullets delta bullets invaders
                                     , bestSolution = betterSolution
@@ -188,6 +195,23 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
 
                 Start ->
                     { game | state = newState, bestSolution = initialEvolve (initialSeed (round currentTime)) }
+
+                Over ->
+                    { game
+                        | state =
+                            case newState of
+                                Play ->
+                                    Over
+
+                                Pause ->
+                                    Over
+
+                                Start ->
+                                    Start
+
+                                otherwise ->
+                                    newState
+                    }
 
 
 

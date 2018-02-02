@@ -24,7 +24,7 @@ randomMovement t invader =
         physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = (Tuple.second changeX), seedY = (Tuple.second changeY) }
 
 
-stepV : number -> Bool -> Bool -> number
+stepV : Float -> Bool -> Bool -> Float
 stepV v negativeCollision positiveCollision =
     if negativeCollision then
         abs v
@@ -93,18 +93,15 @@ filterBulletHit bullet =
 
 near : Float -> Float -> Float -> Bool
 near k c n =
-    n >= k - c && n <= k + c
+    -(k - n) <= c && c >= k - n
 
 
-within : { a | x : Float, y : Float } -> { b | x : Float, y : Float } -> Bool
+within : Bullet -> Invader -> Bool
 within bullet invader =
-    near invader.x 20 bullet.x && near invader.y 60 bullet.y
+    near invader.x 20 bullet.x && (invader.y - bullet.y) <= 40
 
 
-withinBullet :
-    { a | x : Float, y : Float }
-    -> { b | x : Float, y : Float }
-    -> Bool
+withinBullet : Bullet -> Bullet -> Bool
 withinBullet b1 b2 =
     near b1.x 30 b2.x && near b1.y 30 b2.y
 
