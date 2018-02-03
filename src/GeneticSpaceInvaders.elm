@@ -113,27 +113,30 @@ updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state
                             updateInvaders delta invaders bullets
 
                         gameOver =
-                            (List.length updatedInvaders >= gameOverInvaders)
+                            (List.length updatedInvaders) >= gameOverInvaders
 
                         newScore =
-                            ((List.length invaders) - (List.length updatedInvaders))
+                            List.length invaders - List.length updatedInvaders
+
+                        newFitness =
+                            calculateFitness (dnaFromValue (Tuple.first bestSolution)) updatedInvaders
+
+                        updatedSolutionForFitness =
+                            updateSolution newFitness bestSolution
                     in
                         if (((round (inSeconds currentTime)) % 2) == 0) then
                             let
-                                newFitness =
-                                    calculateFitness (dnaFromValue (Tuple.first bestSolution)) updatedInvaders
-
-                                updatedSolutionForFitness =
-                                    updateSolution newFitness (Tuple.first (bestSolution))
-
                                 betterSolution =
                                     if not hasSpawned then
-                                        (GeneticHelper.evolve (Tuple.second (bestSolution)) (Tuple.first (bestSolution)))
+                                        GeneticHelper.evolve updatedSolutionForFitness
                                     else
-                                        bestSolution
+                                        updatedSolutionForFitness
 
-                                betterDna =
-                                    dnaFromValue (Tuple.first betterSolution)
+                                newInvaders =
+                                    if not hasSpawned then
+                                        updatedInvaders ++ spawnNewInvadersFromBestDna betterSolution newSpawnedInvaders
+                                    else
+                                        updatedInvaders
                             in
                                 { game
                                     | state =
@@ -144,18 +147,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state
                                     , spaceship = updateSpaceship delta dir spaceship
                                     , bullets = newBullet ++ updateBullets delta bullets invaders
                                     , bestSolution = betterSolution
-                                    , invaders =
-                                        let
-                                            _ =
-                                                Debug.log "fitness" newFitness
-
-                                            --_ =
-                                            --    Debug.log "best" updatedSolutionForFitness
-                                        in
-                                            if not hasSpawned then
-                                                updatedInvaders ++ spawnNewInvadersFromBestDna (Tuple.second (betterSolution)) newSpawnedInvaders betterDna
-                                            else
-                                                updatedInvaders
+                                    , invaders = newInvaders
                                     , hasSpawned = True
                                     , score = score + newScore
                                 }
@@ -168,6 +160,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state
                                         newState
                                 , spaceship = updateSpaceship delta dir spaceship
                                 , bullets = newBullet ++ updateBullets delta bullets invaders
+                                , bestSolution = updatedSolutionForFitness
                                 , invaders = updatedInvaders
                                 , hasSpawned = False
                                 , score = score + newScore
@@ -207,7 +200,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state
 
 
 view : Game -> Html Msg
-view { windowDimensions, state, spaceship, invaders, bullets, score } =
+view { windowDimensions, state, spaceship, invaders, bullets, score, currentTime } =
     div []
         [ let
             ( w, h ) =
@@ -227,8 +220,10 @@ view { windowDimensions, state, spaceship, invaders, bullets, score } =
                             ++ (List.map (\o -> makeBullet o) bullets)
                             ++ (List.map (\o -> makeInvader o) invaders)
                             ++ [ makeSpaceship spaceship
-                               , toForm (titleStatus state)
-                                    |> move ( 0, 30 )
+                               , toForm (titleStatus state currentTime)
+                                    |> move ( 0, 0 )
+                               , toForm (shuttleTitleStatus state currentTime)
+                                    |> move ( 0, halfHeight - 90 )
                                , toForm (messageStatus state)
                                     |> move ( 0, 80 - gameHeight / 2 )
                                ]

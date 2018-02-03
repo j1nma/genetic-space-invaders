@@ -8,12 +8,24 @@ import Random exposing (..)
 import Tuple exposing (..)
 
 
-{-| Order: [x direction change probability, y direction change probability, x velocity, y velocity]
--}
+type alias Genes =
+    { vx : Float
+    , vy : Float
+    , xProbChange : Float
+    , yProbChange : Float
+    }
+
+
 type alias Dna =
-    { genes : List Float
+    { genes :
+        Genes
     , fitness : Float
     }
+
+
+numberOfGenes : Int
+numberOfGenes =
+    4
 
 
 myOptions : Options Dna
@@ -25,16 +37,6 @@ myOptions =
     , isDoneEvolving = isDoneEvolving
     , method = MaximizeScore
     }
-
-
-numberOfGenes : Int
-numberOfGenes =
-    4
-
-
-indexWhereProbabilitiesEnd : Int
-indexWhereProbabilitiesEnd =
-    1
 
 
 invaderVelocity : Float
@@ -55,43 +57,47 @@ evaluateSolution dna =
 -- Dna generator
 
 
+randGeneGenerator : Generator Genes
+randGeneGenerator =
+    Random.map4
+        (\randXVel randYVel randXProb randYProb ->
+            { vx = randXVel
+            , vy = randYVel
+            , xProbChange = randXProb
+            , yProbChange = randYProb
+            }
+        )
+        (Random.float -invaderVelocity invaderVelocity)
+        (Random.float -invaderVelocity invaderVelocity)
+        (Random.float 0 1)
+        (Random.float 0 1)
+
+
 randDnaGenerator : Generator Dna
 randDnaGenerator =
-    Random.float -invaderVelocity invaderVelocity
-        |> Random.list 2
-        |> Random.map2 (++) randomProbabilityGenerator
-        |> Random.map
-            (\randGenes ->
-                { genes = randGenes
-                , fitness = 0.0
-                }
-            )
-
-
-randomProbabilityGenerator : Generator (List Float)
-randomProbabilityGenerator =
-    Random.float 0 1
-        |> Random.list 2
+    Random.map
+        (\randGenes ->
+            { genes = randGenes
+            , fitness = 0.0
+            }
+        )
+        randGeneGenerator
 
 
 
 -- Crossover
 
 
-crossover_split_index : Int
-crossover_split_index =
-    floor (toFloat numberOfGenes / 2)
-
-
 crossoverDnas : Dna -> Dna -> Dna
 crossoverDnas dna1 dna2 =
-    let
-        ( dnaPart1, dnaPart2 ) =
-            ( List.take crossover_split_index dna1.genes, List.drop crossover_split_index dna2.genes )
-    in
-        { genes = List.append dnaPart1 dnaPart2
-        , fitness = (dna1.fitness + dna2.fitness) / 2
+    { genes =
+        { vx = dna1.genes.vx
+        , vy = dna2.genes.vy
+        , xProbChange = dna1.genes.xProbChange
+        , yProbChange = dna2.genes.yProbChange
         }
+    , fitness = (dna1.fitness + dna2.fitness) / 2
+    }
 
 
 
@@ -112,22 +118,30 @@ mutateDna dna =
     in
         Random.map3
             (\randomIndex randomVelGene randomProbGene ->
-                dna.genes
-                    |> List.indexedMap
-                        (\index gene ->
-                            if index == randomIndex then
-                                if index >= indexWhereProbabilitiesEnd then
-                                    randomVelGene
-                                else
-                                    randomProbGene
-                            else
-                                gene
-                        )
-                    |> (\randGenes ->
-                            { genes = randGenes
-                            , fitness = dna.fitness + 1.0
-                            }
-                       )
+                let
+                    genes =
+                        dna.genes
+
+                    mutatedGenes =
+                        case randomIndex of
+                            0 ->
+                                { genes | vx = randomVelGene }
+
+                            1 ->
+                                { genes | vy = randomVelGene }
+
+                            2 ->
+                                { genes | xProbChange = randomProbGene }
+
+                            3 ->
+                                { genes | yProbChange = randomProbGene }
+
+                            otherwise ->
+                                genes
+                in
+                    { genes = mutatedGenes
+                    , fitness = dna.fitness
+                    }
             )
             randomIndexGenerator
             randomVelGenerator
@@ -158,6 +172,6 @@ initialDna seed =
     dnaFromValue (Tuple.first (initialEvolve seed))
 
 
-evolve : Seed -> IntermediateValue Dna -> ( IntermediateValue Dna, Seed )
-evolve seed intermediate =
+evolve : ( IntermediateValue Dna, Seed ) -> ( IntermediateValue Dna, Seed )
+evolve ( intermediate, seed ) =
     Random.step (Genetic.executeStep myOptions intermediate) seed

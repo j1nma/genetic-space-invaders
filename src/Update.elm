@@ -5,7 +5,6 @@ import Time exposing (..)
 import Constants exposing (..)
 import Random exposing (..)
 import GeneticHelper exposing (Dna)
-import Array exposing (..)
 import Auxiliary exposing (..)
 import Genetic exposing (..)
 
@@ -69,14 +68,17 @@ updateBullet t invaders bullet =
         physicsUpdate t bullet
 
 
-spawnNewInvadersFromBestDna : Seed -> Int -> Dna -> List Invader
-spawnNewInvadersFromBestDna seed amount dna =
+spawnNewInvadersFromBestDna : ( IntermediateValue Dna, Seed ) -> Int -> List Invader
+spawnNewInvadersFromBestDna ( intermediate, seed ) amount =
     case amount of
         0 ->
             []
 
         n ->
             let
+                dna =
+                    dnaFromValue intermediate
+
                 newX =
                     randomXCoordinate seed
 
@@ -97,22 +99,37 @@ spawnNewInvadersFromBestDna seed amount dna =
             in
                 { x = newXCoordinate
                 , y = newYCoordinate
-                , vx = getValue (Array.get 2 (Array.fromList dna.genes))
-                , vy = getValue (Array.get 3 (Array.fromList dna.genes))
-                , xProbChange = getValue (Array.get 0 (Array.fromList dna.genes))
-                , yProbChange = getValue (Array.get 1 (Array.fromList dna.genes))
+                , vx = dna.genes.vx
+                , vy = dna.genes.vy
+                , xProbChange = dna.genes.xProbChange
+                , yProbChange = dna.genes.yProbChange
                 , seedX = newSeed
                 , seedY = newestSeed
                 , wasHit = False
                 }
-                    :: spawnNewInvadersFromBestDna newestSeed (n - 1) dna
+                    :: spawnNewInvadersFromBestDna ( intermediate, newestSeed ) (n - 1)
 
 
 calculateFitness : Dna -> List Invader -> Float
 calculateFitness dna invaders =
-    toFloat (List.length (List.filter (\invader -> invader.xProbChange == (getValue (Array.get 0 (Array.fromList dna.genes))) || invader.yProbChange == (getValue (Array.get 1 (Array.fromList dna.genes))) || invader.vx == (getValue (Array.get 2 (Array.fromList dna.genes))) || invader.vy == (getValue (Array.get 3 (Array.fromList dna.genes)))) invaders))
+    toFloat
+        (List.length
+            (List.filter
+                (\invader ->
+                    invader.xProbChange
+                        == dna.genes.xProbChange
+                        || invader.yProbChange
+                        == dna.genes.yProbChange
+                        || invader.vx
+                        == dna.genes.vx
+                        || invader.vy
+                        == dna.genes.vy
+                )
+                invaders
+            )
+        )
 
 
-updateSolution : Float -> IntermediateValue Dna -> IntermediateValue Dna
-updateSolution newFitness (IntermediateValue p pd ng) =
-    (IntermediateValue p { dna = { genes = pd.dna.genes, fitness = newFitness }, points = newFitness } ng)
+updateSolution : Float -> ( IntermediateValue Dna, Seed ) -> ( IntermediateValue Dna, Seed )
+updateSolution newFitness ( IntermediateValue p pd ng, seed ) =
+    ( IntermediateValue p { dna = { genes = pd.dna.genes, fitness = newFitness }, points = newFitness } ng, seed )
