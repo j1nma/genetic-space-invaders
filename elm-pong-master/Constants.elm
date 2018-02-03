@@ -30,7 +30,7 @@ gameOverInvaders =
 
 newSpawnedInvaders : Int
 newSpawnedInvaders =
-    100
+    1
 
 
 

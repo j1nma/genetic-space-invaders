@@ -7913,6 +7913,7 @@ var _j1nma$genetic_spaceinvaders$Model$KeyUp = function (a) {
 var _j1nma$genetic_spaceinvaders$Model$KeyDown = function (a) {
 	return {ctor: 'KeyDown', _0: a};
 };
+var _j1nma$genetic_spaceinvaders$Model$Over = {ctor: 'Over'};
 var _j1nma$genetic_spaceinvaders$Model$Start = {ctor: 'Start'};
 var _j1nma$genetic_spaceinvaders$Model$Pause = {ctor: 'Pause'};
 var _j1nma$genetic_spaceinvaders$Model$Play = {ctor: 'Play'};
@@ -7923,6 +7924,7 @@ var _j1nma$genetic_spaceinvaders$Constants$gameHeight = _j1nma$genetic_spaceinva
 var _j1nma$genetic_spaceinvaders$Constants$_p1 = {ctor: '_Tuple2', _0: _j1nma$genetic_spaceinvaders$Constants$gameWidth / 2, _1: _j1nma$genetic_spaceinvaders$Constants$gameHeight / 2};
 var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvaders$Constants$_p1._0;
 var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
+var _j1nma$genetic_spaceinvaders$Constants$gameOverInvaders = 100;
 var _j1nma$genetic_spaceinvaders$Constants$leftArrow = 37;
 var _j1nma$genetic_spaceinvaders$Constants$rightArrow = 39;
 var _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition = function (seed) {
@@ -7948,30 +7950,27 @@ var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
 		return _elm_lang$core$Native_Utils.crashCase(
 			'Auxiliary',
 			{
-				start: {line: 111, column: 5},
-				end: {line: 116, column: 48}
+				start: {line: 105, column: 5},
+				end: {line: 110, column: 48}
 			},
 			_p2)('No value on dna list!');
 	}
 };
 var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
 	function (k, c, n) {
-		return (_elm_lang$core$Native_Utils.cmp(0 - (k - n), c) < 1) && (_elm_lang$core$Native_Utils.cmp(c, k - n) > -1);
+		return _elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$Basics$abs(k - n),
+			c) < 1;
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
 	function (bullet, invader) {
-		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && (_elm_lang$core$Native_Utils.cmp(invader.y - bullet.y, 40) < 1);
+		var diff = invader.y - bullet.y;
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && ((_elm_lang$core$Native_Utils.cmp(0, diff) < 1) && (_elm_lang$core$Native_Utils.cmp(diff, 40) < 1));
 	});
 var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
 	function (b1, b2) {
 		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.x, 30, b2.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.y, 30, b2.y);
 	});
-var _j1nma$genetic_spaceinvaders$Auxiliary$filterBulletHit = function (bullet) {
-	return !bullet.hit;
-};
-var _j1nma$genetic_spaceinvaders$Auxiliary$filterInvaderHit = function (invader) {
-	return !invader.wasHit;
-};
 var _j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate = F2(
 	function (t, _p4) {
 		var _p5 = _p4;

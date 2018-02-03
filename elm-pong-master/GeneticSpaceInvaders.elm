@@ -179,6 +179,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                             else
                                                 updatedInvaders
                                     , hasSpawned = True
+                                    , score = score + ((List.length invaders) - (List.length updatedInvaders))
                                 }
                         else
                             { game

@@ -44,12 +44,12 @@ updateSpaceship t dir spaceship =
 
 updateInvaders : Time -> List Invader -> List Bullet -> List Invader
 updateInvaders t invaders bullets =
-    List.filter filterInvaderHit (List.map (\i -> updateInvader t bullets i) invaders)
+    List.filter (\i -> not i.wasHit) (List.map (\i -> updateInvader t bullets i) invaders)
 
 
 updateInvader : Time -> List Bullet -> Invader -> Invader
 updateInvader t bullets invader =
-    if not (List.isEmpty (List.filter (\b -> within b invader) bullets)) then
+    if List.any (\b -> within b invader) bullets then
         { invader | wasHit = True }
     else
         decideMovement t invader
@@ -57,12 +57,12 @@ updateInvader t bullets invader =
 
 updateBullets : Time -> List Bullet -> List Invader -> List Bullet
 updateBullets t bullets invaders =
-    List.filter filterBulletHit (List.map (\b -> updateBullet t invaders b) bullets)
+    List.filter (\b -> not b.hit) (List.map (\b -> updateBullet t invaders b) bullets)
 
 
 updateBullet : Time -> List Invader -> Bullet -> Bullet
 updateBullet t invaders bullet =
-    if (not (bullet.y |> near 0 halfHeight)) || (not (List.isEmpty (List.filter (\i -> within bullet i) invaders))) then
+    if (bullet.y >= (halfHeight - 40)) || (List.any (\i -> within bullet i) invaders) then
         { bullet | hit = True }
     else
         physicsUpdate t bullet

@@ -81,24 +81,18 @@ physicsUpdate t ({ x, y, vx, vy } as obj) =
     }
 
 
-filterInvaderHit : Invader -> Bool
-filterInvaderHit invader =
-    not invader.wasHit
-
-
-filterBulletHit : Bullet -> Bool
-filterBulletHit bullet =
-    not bullet.hit
-
-
 near : Float -> Float -> Float -> Bool
 near k c n =
-    -(k - n) <= c && c >= k - n
+    abs (k - n) <= c
 
 
 within : Bullet -> Invader -> Bool
 within bullet invader =
-    near invader.x 20 bullet.x && (invader.y - bullet.y) <= 40
+    let
+        diff =
+            (invader.y - bullet.y)
+    in
+        near invader.x 20 bullet.x && 0 <= diff && diff <= 40
 
 
 withinBullet : Bullet -> Bullet -> Bool
