@@ -5,6 +5,8 @@ import Color exposing (..)
 import Collage exposing (..)
 import Text
 import Element exposing (..)
+import Time exposing (..)
+import Constants exposing (..)
 
 
 messageStatus : State -> Element
@@ -14,20 +16,33 @@ messageStatus state =
             txt identity ""
 
         Pause ->
-            txt identity pauseMessage
+            txt (Text.italic >> Text.color yellow) pauseMessage
 
         Start ->
-            txt identity startMessage
+            txt (Text.italic >> Text.height 12 >> Text.color yellow) startMessage
 
         Over ->
-            txt identity overMessage
+            txt (Text.italic >> Text.bold >> Text.color red >> Text.height 18) overMessage
 
 
-titleStatus : State -> Element
-titleStatus state =
+titleStatus : State -> Float -> Element
+titleStatus state currentTime =
     case state of
         Start ->
-            image 400 340 "../res/mainTitle.png"
+            if (((round (inSeconds currentTime)) % 2) == 0) then
+                image 600 400 "../res/mainTitle.png"
+            else
+                image 600 400 "../res/mainTitle2.png"
+
+        otherwise ->
+            txt identity ""
+
+
+shuttleTitleStatus : State -> Float -> Element
+shuttleTitleStatus state currentTime =
+    case state of
+        Start ->
+            image 150 150 "../res/lambdaSpaceshuttleTitle.png"
 
         otherwise ->
             txt identity ""
@@ -40,7 +55,7 @@ invadersStatus state numberOfInvaders =
             txt identity ""
 
         otherwise ->
-            txt identity ("INVADERS: " ++ (toString numberOfInvaders))
+            txt (Text.color yellow) ("INVADERS: " ++ (toString numberOfInvaders))
 
 
 scoreStatus : State -> Int -> Element
@@ -50,7 +65,7 @@ scoreStatus state score =
             txt identity ""
 
         otherwise ->
-            txt identity ("SCORE: " ++ (toString score))
+            txt (Text.color yellow) ("SCORE: " ++ (toString score))
 
 
 verticalLine : Float -> Path
@@ -65,7 +80,7 @@ blackBackground =
 
 txt : (Text.Text -> Text.Text) -> String -> Element
 txt f =
-    Text.fromString >> Text.color yellow >> Text.monospace >> f >> leftAligned
+    Text.fromString >> Text.monospace >> f >> leftAligned
 
 
 startMessage : String
@@ -80,7 +95,7 @@ pauseMessage =
 
 overMessage : String
 overMessage =
-    "Invaders reached 100! Game over!"
+    "Invaders reached " ++ toString gameOverInvaders ++ "! Game over!"
 
 
 make : { a | x : Float, y : Float } -> Shape -> Form
