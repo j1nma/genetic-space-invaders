@@ -23,5 +23,13 @@
         "mdgriffith/elm-style-animation": "3.5.5 <= v < 4.0.0",
         "mgold/elm-nonempty-list": "3.1.0 <= v < 4.0.0"
     },
-    "elm-version": "0.18.0 <= v < 0.19.0"
+    "elm-version": "0.18.0 <= v < 0.19.0",
+    "sublime-build": {
+        "output": {
+            "components": {
+                "ext": "html",
+                "dir": "./"
+            }
+        }
+    }
 }

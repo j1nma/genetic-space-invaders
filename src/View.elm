@@ -30,9 +30,9 @@ titleStatus state currentTime =
     case state of
         Start ->
             if (((round (inSeconds currentTime)) % 2) == 0) then
-                image 600 400 "../res/mainTitle.png"
+                image 600 400 "src/res/mainTitle.png"
             else
-                image 600 400 "../res/mainTitle2.png"
+                image 600 400 "src/res/mainTitle2.png"
 
         otherwise ->
             txt identity ""
@@ -42,7 +42,7 @@ shuttleTitleStatus : State -> Float -> Element
 shuttleTitleStatus state currentTime =
     case state of
         Start ->
-            image 150 150 "../res/lambdaSpaceshuttleTitle.png"
+            image 150 150 "src/res/lambdaSpaceshuttleTitle.png"
 
         otherwise ->
             txt identity ""
@@ -107,20 +107,20 @@ make obj shape =
 
 makeSpaceship : { a | x : Float, y : Float } -> Form
 makeSpaceship obj =
-    image 40 40 "../res/lambdaSpaceshuttle0.png"
+    image 40 40 "src/res/lambdaSpaceshuttle0.png"
         |> toForm
         |> move ( obj.x, obj.y + 20 )
 
 
 makeBullet : { a | x : Float, y : Float } -> Form
 makeBullet obj =
-    image 12 30 "../res/missile.png"
+    image 12 30 "src/res/missile.png"
         |> toForm
         |> move ( obj.x, obj.y + 40 )
 
 
 makeInvader : { a | x : Float, y : Float } -> Form
 makeInvader obj =
-    image 40 40 "../res/javaInvader0.png"
+    image 40 40 "src/res/javaInvader0.png"
         |> toForm
         |> move ( obj.x, obj.y )
