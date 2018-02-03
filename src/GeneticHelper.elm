@@ -161,8 +161,3 @@ initialDna seed =
 evolve : Seed -> IntermediateValue Dna -> ( IntermediateValue Dna, Seed )
 evolve seed intermediate =
     Random.step (Genetic.executeStep myOptions intermediate) seed
-
-
-updateSolution : Float -> IntermediateValue Dna -> IntermediateValue Dna
-updateSolution newFitness (IntermediateValue p pd ng) =
-    (IntermediateValue p { dna = { genes = pd.dna.genes, fitness = newFitness }, points = newFitness } ng)

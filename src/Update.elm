@@ -7,6 +7,7 @@ import Random exposing (..)
 import GeneticHelper exposing (Dna)
 import Array exposing (..)
 import Auxiliary exposing (..)
+import Genetic exposing (..)
 
 
 craftBullet : Spaceship -> List Bullet -> List Bullet
@@ -110,3 +111,8 @@ spawnNewInvadersFromBestDna seed amount dna =
 calculateFitness : Dna -> List Invader -> Float
 calculateFitness dna invaders =
     toFloat (List.length (List.filter (\invader -> invader.xProbChange == (getValue (Array.get 0 (Array.fromList dna.genes))) || invader.yProbChange == (getValue (Array.get 1 (Array.fromList dna.genes))) || invader.vx == (getValue (Array.get 2 (Array.fromList dna.genes))) || invader.vy == (getValue (Array.get 3 (Array.fromList dna.genes)))) invaders))
+
+
+updateSolution : Float -> IntermediateValue Dna -> IntermediateValue Dna
+updateSolution newFitness (IntermediateValue p pd ng) =
+    (IntermediateValue p { dna = { genes = pd.dna.genes, fitness = newFitness }, points = newFitness } ng)
