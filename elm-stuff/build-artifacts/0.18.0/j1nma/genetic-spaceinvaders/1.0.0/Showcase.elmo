@@ -1,0 +1,576 @@
+var _j1nma$genetic_spaceinvaders$Showcase$viewWidget = function (widget) {
+	return A2(
+		_elm_lang$html$Html$div,
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_mdgriffith$elm_style_animation$Animation$render(widget.style),
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$style(
+					{
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'text-align', _1: 'center'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'cursor', _1: 'pointer'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'border-style', _1: 'solid'},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'vertical-align', _1: 'middle'},
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onMouseOver(widget.action),
+					_1: {ctor: '[]'}
+				}
+			}),
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(widget.label),
+			_1: {ctor: '[]'}
+		});
+};
+var _j1nma$genetic_spaceinvaders$Showcase$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$style(
+				{
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'left', _1: '0px'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'top', _1: '0px'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'height', _1: '100%'},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#f0f0f0'},
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					}
+				}),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'display', _1: 'flex'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'flex-direction', _1: 'row'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'flex-wrap', _1: 'wrap'},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'justify-content', _1: 'center'},
+										_1: {
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
+											_1: {
+												ctor: '::',
+												_0: {ctor: '_Tuple2', _0: 'left', _1: '0px'},
+												_1: {
+													ctor: '::',
+													_0: {ctor: '_Tuple2', _0: 'top', _1: '0px'},
+													_1: {
+														ctor: '::',
+														_0: {ctor: '_Tuple2', _0: 'width', _1: '100%'},
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}),
+					_1: {ctor: '[]'}
+				},
+				A2(_elm_lang$core$List$map, _j1nma$genetic_spaceinvaders$Showcase$viewWidget, model.widgets)),
+			_1: {ctor: '[]'}
+		});
+};
+var _j1nma$genetic_spaceinvaders$Showcase$onIndex = F3(
+	function (i, list, fn) {
+		return A2(
+			_elm_lang$core$List$indexedMap,
+			F2(
+				function (j, val) {
+					return _elm_lang$core$Native_Utils.eq(i, j) ? fn(val) : val;
+				}),
+			list);
+	});
+var _j1nma$genetic_spaceinvaders$Showcase$onStyle = F2(
+	function (styleFn, widget) {
+		return _elm_lang$core$Native_Utils.update(
+			widget,
+			{
+				style: styleFn(widget.style)
+			});
+	});
+var _j1nma$genetic_spaceinvaders$Showcase$onWidgetStyle = F3(
+	function (model, index, fn) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				widgets: A3(
+					_j1nma$genetic_spaceinvaders$Showcase$onIndex,
+					index,
+					model.widgets,
+					_j1nma$genetic_spaceinvaders$Showcase$onStyle(fn))
+			});
+	});
+var _j1nma$genetic_spaceinvaders$Showcase$update = F2(
+	function (action, model) {
+		var _p0 = action;
+		switch (_p0.ctor) {
+			case 'RotateAllAxis':
+				return {
+					ctor: '_Tuple2',
+					_0: A3(
+						_j1nma$genetic_spaceinvaders$Showcase$onWidgetStyle,
+						model,
+						_p0._0,
+						_mdgriffith$elm_style_animation$Animation$interrupt(
+							{
+								ctor: '::',
+								_0: _mdgriffith$elm_style_animation$Animation$to(
+									{
+										ctor: '::',
+										_0: A3(
+											_mdgriffith$elm_style_animation$Animation$rotate3d,
+											_mdgriffith$elm_style_animation$Animation$turn(1),
+											_mdgriffith$elm_style_animation$Animation$turn(1),
+											_mdgriffith$elm_style_animation$Animation$turn(1)),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _mdgriffith$elm_style_animation$Animation$set(
+										{
+											ctor: '::',
+											_0: A3(
+												_mdgriffith$elm_style_animation$Animation$rotate3d,
+												_mdgriffith$elm_style_animation$Animation$turn(0),
+												_mdgriffith$elm_style_animation$Animation$turn(0),
+												_mdgriffith$elm_style_animation$Animation$turn(0)),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ChangeColors':
+				return {
+					ctor: '_Tuple2',
+					_0: A3(
+						_j1nma$genetic_spaceinvaders$Showcase$onWidgetStyle,
+						model,
+						_p0._0,
+						_mdgriffith$elm_style_animation$Animation$interrupt(
+							{
+								ctor: '::',
+								_0: _mdgriffith$elm_style_animation$Animation$to(
+									{
+										ctor: '::',
+										_0: _mdgriffith$elm_style_animation$Animation$backgroundColor(
+											A4(_elm_lang$core$Color$rgba, 100, 100, 100, 1.0)),
+										_1: {
+											ctor: '::',
+											_0: _mdgriffith$elm_style_animation$Animation$borderColor(
+												A4(_elm_lang$core$Color$rgba, 100, 100, 100, 1.0)),
+											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _mdgriffith$elm_style_animation$Animation$to(
+										{
+											ctor: '::',
+											_0: _mdgriffith$elm_style_animation$Animation$backgroundColor(_elm_lang$core$Color$white),
+											_1: {
+												ctor: '::',
+												_0: _mdgriffith$elm_style_animation$Animation$borderColor(_elm_lang$core$Color$white),
+												_1: {ctor: '[]'}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}
+							})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ChangeMultipleColors':
+				return {
+					ctor: '_Tuple2',
+					_0: A3(
+						_j1nma$genetic_spaceinvaders$Showcase$onWidgetStyle,
+						model,
+						_p0._0,
+						_mdgriffith$elm_style_animation$Animation$interrupt(
+							A2(
+								_elm_lang$core$List$map,
+								function (color) {
+									return _mdgriffith$elm_style_animation$Animation$to(
+										{
+											ctor: '::',
+											_0: _mdgriffith$elm_style_animation$Animation$backgroundColor(color),
+											_1: {
+												ctor: '::',
+												_0: _mdgriffith$elm_style_animation$Animation$borderColor(color),
+												_1: {ctor: '[]'}
+											}
+										});
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$core$Color$red,
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$core$Color$orange,
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$core$Color$yellow,
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$core$Color$green,
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$core$Color$blue,
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$core$Color$purple,
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$core$Color$white,
+															_1: {ctor: '[]'}
+														}
+													}
+												}
+											}
+										}
+									}
+								}))),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'FadeOutFadeIn':
+				return {
+					ctor: '_Tuple2',
+					_0: A3(
+						_j1nma$genetic_spaceinvaders$Showcase$onWidgetStyle,
+						model,
+						_p0._0,
+						_mdgriffith$elm_style_animation$Animation$interrupt(
+							{
+								ctor: '::',
+								_0: _mdgriffith$elm_style_animation$Animation$to(
+									{
+										ctor: '::',
+										_0: _mdgriffith$elm_style_animation$Animation$opacity(0),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _mdgriffith$elm_style_animation$Animation$to(
+										{
+											ctor: '::',
+											_0: _mdgriffith$elm_style_animation$Animation$opacity(1),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Shadow':
+				return {
+					ctor: '_Tuple2',
+					_0: A3(
+						_j1nma$genetic_spaceinvaders$Showcase$onWidgetStyle,
+						model,
+						_p0._0,
+						_mdgriffith$elm_style_animation$Animation$interrupt(
+							{
+								ctor: '::',
+								_0: _mdgriffith$elm_style_animation$Animation$to(
+									{
+										ctor: '::',
+										_0: A2(
+											_mdgriffith$elm_style_animation$Animation$translate,
+											_mdgriffith$elm_style_animation$Animation$px(100),
+											_mdgriffith$elm_style_animation$Animation$px(100)),
+										_1: {
+											ctor: '::',
+											_0: _mdgriffith$elm_style_animation$Animation$scale(1.2),
+											_1: {
+												ctor: '::',
+												_0: _mdgriffith$elm_style_animation$Animation$shadow(
+													{
+														offsetX: 50,
+														offsetY: 55,
+														blur: 15,
+														size: 0,
+														color: A4(_elm_lang$core$Color$rgba, 0, 0, 0, 0.1)
+													}),
+												_1: {ctor: '[]'}
+											}
+										}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _mdgriffith$elm_style_animation$Animation$to(
+										{
+											ctor: '::',
+											_0: A2(
+												_mdgriffith$elm_style_animation$Animation$translate,
+												_mdgriffith$elm_style_animation$Animation$px(0),
+												_mdgriffith$elm_style_animation$Animation$px(0)),
+											_1: {
+												ctor: '::',
+												_0: _mdgriffith$elm_style_animation$Animation$scale(1),
+												_1: {
+													ctor: '::',
+													_0: _mdgriffith$elm_style_animation$Animation$shadow(
+														{
+															offsetX: 0,
+															offsetY: 1,
+															size: 0,
+															blur: 2,
+															color: A4(_elm_lang$core$Color$rgba, 0, 0, 0, 0.1)
+														}),
+													_1: {ctor: '[]'}
+												}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}
+							})),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							widgets: A2(
+								_elm_lang$core$List$map,
+								_j1nma$genetic_spaceinvaders$Showcase$onStyle(
+									_mdgriffith$elm_style_animation$Animation$update(_p0._0)),
+								model.widgets)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _j1nma$genetic_spaceinvaders$Showcase$Model = function (a) {
+	return {widgets: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$Widget = F3(
+	function (a, b, c) {
+		return {label: a, action: b, style: c};
+	});
+var _j1nma$genetic_spaceinvaders$Showcase$Animate = function (a) {
+	return {ctor: 'Animate', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$subscriptions = function (model) {
+	return A2(
+		_mdgriffith$elm_style_animation$Animation$subscription,
+		_j1nma$genetic_spaceinvaders$Showcase$Animate,
+		A2(
+			_elm_lang$core$List$map,
+			function (_) {
+				return _.style;
+			},
+			model.widgets));
+};
+var _j1nma$genetic_spaceinvaders$Showcase$Shadow = function (a) {
+	return {ctor: 'Shadow', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$FadeOutFadeIn = function (a) {
+	return {ctor: 'FadeOutFadeIn', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$ChangeMultipleColors = function (a) {
+	return {ctor: 'ChangeMultipleColors', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$ChangeColors = function (a) {
+	return {ctor: 'ChangeColors', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$RotateAllAxis = function (a) {
+	return {ctor: 'RotateAllAxis', _0: a};
+};
+var _j1nma$genetic_spaceinvaders$Showcase$init = function () {
+	var initialWidgetStyle = _mdgriffith$elm_style_animation$Animation$style(
+		{
+			ctor: '::',
+			_0: _mdgriffith$elm_style_animation$Animation$display(_mdgriffith$elm_style_animation$Animation$inlineBlock),
+			_1: {
+				ctor: '::',
+				_0: _mdgriffith$elm_style_animation$Animation$width(
+					_mdgriffith$elm_style_animation$Animation$px(100)),
+				_1: {
+					ctor: '::',
+					_0: _mdgriffith$elm_style_animation$Animation$height(
+						_mdgriffith$elm_style_animation$Animation$px(100)),
+					_1: {
+						ctor: '::',
+						_0: _mdgriffith$elm_style_animation$Animation$margin(
+							_mdgriffith$elm_style_animation$Animation$px(50)),
+						_1: {
+							ctor: '::',
+							_0: _mdgriffith$elm_style_animation$Animation$padding(
+								_mdgriffith$elm_style_animation$Animation$px(25)),
+							_1: {
+								ctor: '::',
+								_0: _mdgriffith$elm_style_animation$Animation$rotate(
+									_mdgriffith$elm_style_animation$Animation$turn(0.0)),
+								_1: {
+									ctor: '::',
+									_0: A3(
+										_mdgriffith$elm_style_animation$Animation$rotate3d,
+										_mdgriffith$elm_style_animation$Animation$turn(0.0),
+										_mdgriffith$elm_style_animation$Animation$turn(0.0),
+										_mdgriffith$elm_style_animation$Animation$turn(0.0)),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_mdgriffith$elm_style_animation$Animation$translate,
+											_mdgriffith$elm_style_animation$Animation$px(0),
+											_mdgriffith$elm_style_animation$Animation$px(0)),
+										_1: {
+											ctor: '::',
+											_0: _mdgriffith$elm_style_animation$Animation$opacity(1),
+											_1: {
+												ctor: '::',
+												_0: _mdgriffith$elm_style_animation$Animation$backgroundColor(_elm_lang$core$Color$white),
+												_1: {
+													ctor: '::',
+													_0: _mdgriffith$elm_style_animation$Animation$color(_elm_lang$core$Color$black),
+													_1: {
+														ctor: '::',
+														_0: _mdgriffith$elm_style_animation$Animation$scale(1.0),
+														_1: {
+															ctor: '::',
+															_0: _mdgriffith$elm_style_animation$Animation$borderColor(_elm_lang$core$Color$white),
+															_1: {
+																ctor: '::',
+																_0: _mdgriffith$elm_style_animation$Animation$borderWidth(
+																	_mdgriffith$elm_style_animation$Animation$px(4)),
+																_1: {
+																	ctor: '::',
+																	_0: _mdgriffith$elm_style_animation$Animation$borderRadius(
+																		_mdgriffith$elm_style_animation$Animation$px(8)),
+																	_1: {
+																		ctor: '::',
+																		_0: A3(
+																			_mdgriffith$elm_style_animation$Animation$translate3d,
+																			_mdgriffith$elm_style_animation$Animation$percent(0),
+																			_mdgriffith$elm_style_animation$Animation$percent(0),
+																			_mdgriffith$elm_style_animation$Animation$px(0)),
+																		_1: {
+																			ctor: '::',
+																			_0: _mdgriffith$elm_style_animation$Animation$shadow(
+																				{
+																					offsetX: 0,
+																					offsetY: 1,
+																					size: 0,
+																					blur: 2,
+																					color: A4(_elm_lang$core$Color$rgba, 0, 0, 0, 0.1)
+																				}),
+																			_1: {ctor: '[]'}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+	return {
+		ctor: '_Tuple2',
+		_0: {
+			widgets: {
+				ctor: '::',
+				_0: {
+					label: 'Rotate in All Kinds of Ways',
+					action: _j1nma$genetic_spaceinvaders$Showcase$RotateAllAxis(1),
+					style: initialWidgetStyle
+				},
+				_1: {
+					ctor: '::',
+					_0: {
+						label: 'Change Colors',
+						action: _j1nma$genetic_spaceinvaders$Showcase$ChangeColors(2),
+						style: initialWidgetStyle
+					},
+					_1: {
+						ctor: '::',
+						_0: {
+							label: 'Change Through Multiple Colors',
+							action: _j1nma$genetic_spaceinvaders$Showcase$ChangeMultipleColors(3),
+							style: initialWidgetStyle
+						},
+						_1: {
+							ctor: '::',
+							_0: {
+								label: 'Fade Out Fade In',
+								action: _j1nma$genetic_spaceinvaders$Showcase$FadeOutFadeIn(4),
+								style: initialWidgetStyle
+							},
+							_1: {
+								ctor: '::',
+								_0: {
+									label: 'Have a Shadow',
+									action: _j1nma$genetic_spaceinvaders$Showcase$Shadow(5),
+									style: initialWidgetStyle
+								},
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			}
+		},
+		_1: _elm_lang$core$Platform_Cmd$none
+	};
+}();
+var _j1nma$genetic_spaceinvaders$Showcase$main = _elm_lang$html$Html$program(
+	{init: _j1nma$genetic_spaceinvaders$Showcase$init, view: _j1nma$genetic_spaceinvaders$Showcase$view, update: _j1nma$genetic_spaceinvaders$Showcase$update, subscriptions: _j1nma$genetic_spaceinvaders$Showcase$subscriptions})();

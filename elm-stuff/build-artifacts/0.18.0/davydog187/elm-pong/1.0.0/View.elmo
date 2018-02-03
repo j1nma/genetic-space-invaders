@@ -1,0 +1,41 @@
+var _davydog187$elm_pong$View$make = F2(
+	function (obj, shape) {
+		return A2(
+			_evancz$elm_graphics$Collage$move,
+			{ctor: '_Tuple2', _0: obj.x, _1: obj.y},
+			A2(_evancz$elm_graphics$Collage$filled, _elm_lang$core$Color$white, shape));
+	});
+var _davydog187$elm_pong$View$pauseMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
+var _davydog187$elm_pong$View$textGreen = A3(_elm_lang$core$Color$rgb, 160, 200, 160);
+var _davydog187$elm_pong$View$txt = function (f) {
+	return function (_p0) {
+		return _evancz$elm_graphics$Element$leftAligned(
+			f(
+				_evancz$elm_graphics$Text$monospace(
+					A2(
+						_evancz$elm_graphics$Text$color,
+						_davydog187$elm_pong$View$textGreen,
+						_evancz$elm_graphics$Text$fromString(_p0)))));
+	};
+};
+var _davydog187$elm_pong$View$pongGreen = A3(_elm_lang$core$Color$rgb, 60, 100, 60);
+var _davydog187$elm_pong$View$verticalLine = function (height) {
+	return _evancz$elm_graphics$Collage$path(
+		{
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 0, _1: height},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 0, _1: 0 - height},
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _davydog187$elm_pong$View$statusMessage = function (state) {
+	var _p1 = state;
+	if (_p1.ctor === 'Play') {
+		return A2(_davydog187$elm_pong$View$txt, _elm_lang$core$Basics$identity, '');
+	} else {
+		return A2(_davydog187$elm_pong$View$txt, _elm_lang$core$Basics$identity, _davydog187$elm_pong$View$pauseMessage);
+	}
+};

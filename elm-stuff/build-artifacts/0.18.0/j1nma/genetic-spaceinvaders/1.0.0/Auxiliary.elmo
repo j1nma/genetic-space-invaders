@@ -1,0 +1,97 @@
+var _j1nma$genetic_spaceinvaders$Auxiliary$randomPosition = function (seed) {
+	var randomHeightGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
+	var randomWidthGenerator = A2(_elm_lang$core$Random$float, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
+	var _p0 = A2(_elm_lang$core$Random$step, randomWidthGenerator, seed);
+	var w = _p0._0;
+	var seedY = _p0._1;
+	var _p1 = A2(_elm_lang$core$Random$step, randomHeightGenerator, seedY);
+	var h = _p1._0;
+	var newSeed = _p1._1;
+	return {
+		ctor: '_Tuple2',
+		_0: {ctor: '_Tuple2', _0: w, _1: h},
+		_1: newSeed
+	};
+};
+var _j1nma$genetic_spaceinvaders$Auxiliary$getValue = function (m) {
+	var _p2 = m;
+	if (_p2.ctor === 'Just') {
+		return _p2._0;
+	} else {
+		return _elm_lang$core$Native_Utils.crashCase(
+			'Auxiliary',
+			{
+				start: {line: 105, column: 5},
+				end: {line: 110, column: 48}
+			},
+			_p2)('No value on dna list!');
+	}
+};
+var _j1nma$genetic_spaceinvaders$Auxiliary$near = F3(
+	function (k, c, n) {
+		return _elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$Basics$abs(k - n),
+			c) < 1;
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$within = F2(
+	function (bullet, invader) {
+		var diff = invader.y - bullet.y;
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 20, bullet.x) && ((_elm_lang$core$Native_Utils.cmp(0, diff) < 1) && (_elm_lang$core$Native_Utils.cmp(diff, 40) < 1));
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$withinBullet = F2(
+	function (b1, b2) {
+		return A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.x, 30, b2.x) && A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, b1.y, 30, b2.y);
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate = F2(
+	function (t, _p4) {
+		var _p5 = _p4;
+		return _elm_lang$core$Native_Utils.update(
+			_p5,
+			{x: _p5.x + (_p5.vx * t), y: _p5.y + (_p5.vy * t)});
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$probDirChange = F2(
+	function (seed, p) {
+		var generator = A2(_elm_lang$core$Random$float, 0, 1);
+		var _p6 = A2(_elm_lang$core$Random$step, generator, seed);
+		var addProbability = _p6._0;
+		var s = _p6._1;
+		return (_elm_lang$core$Native_Utils.cmp(p, addProbability) > 0) ? {ctor: '_Tuple2', _0: -1, _1: s} : {ctor: '_Tuple2', _0: 1, _1: s};
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$stepV = F3(
+	function (v, negativeCollision, positiveCollision) {
+		return negativeCollision ? _elm_lang$core$Basics$abs(v) : (positiveCollision ? (0 - _elm_lang$core$Basics$abs(v)) : v);
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$randomMovement = F2(
+	function (t, invader) {
+		var changeY = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedY, invader.yProbChange);
+		var newVelY = invader.vy * _elm_lang$core$Tuple$first(changeY);
+		var changeX = A2(_j1nma$genetic_spaceinvaders$Auxiliary$probDirChange, invader.seedX, invader.xProbChange);
+		var newVelX = invader.vx * _elm_lang$core$Tuple$first(changeX);
+		return A2(
+			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
+			t,
+			_elm_lang$core$Native_Utils.update(
+				invader,
+				{
+					vx: newVelX,
+					vy: newVelY,
+					seedX: _elm_lang$core$Tuple$second(changeX),
+					seedY: _elm_lang$core$Tuple$second(changeY)
+				}));
+	});
+var _j1nma$genetic_spaceinvaders$Auxiliary$decideMovement = F2(
+	function (t, invader) {
+		var lowerCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight) + 60);
+		var upperCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.y, 2, _j1nma$genetic_spaceinvaders$Constants$halfHeight - 20);
+		var rightCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, _j1nma$genetic_spaceinvaders$Constants$halfWidth - 20);
+		var leftCollision = A3(_j1nma$genetic_spaceinvaders$Auxiliary$near, invader.x, 2, (0 - _j1nma$genetic_spaceinvaders$Constants$halfWidth) + 20);
+		return (leftCollision || (rightCollision || (upperCollision || lowerCollision))) ? A2(
+			_j1nma$genetic_spaceinvaders$Auxiliary$physicsUpdate,
+			t,
+			_elm_lang$core$Native_Utils.update(
+				invader,
+				{
+					vx: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vx, leftCollision, rightCollision),
+					vy: A3(_j1nma$genetic_spaceinvaders$Auxiliary$stepV, invader.vy, lowerCollision, upperCollision)
+				})) : A2(_j1nma$genetic_spaceinvaders$Auxiliary$randomMovement, t, invader);
+	});

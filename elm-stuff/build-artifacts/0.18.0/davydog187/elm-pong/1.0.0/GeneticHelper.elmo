@@ -1,0 +1,80 @@
+var _davydog187$elm_pong$GeneticHelper$population_size = 7;
+var _davydog187$elm_pong$GeneticHelper$initialPopulation = 4;
+var _davydog187$elm_pong$GeneticHelper$randomProbabilityGenerator = A2(
+	_elm_lang$core$Random$list,
+	2,
+	A2(_elm_lang$core$Random$float, 0, 1));
+var _davydog187$elm_pong$GeneticHelper$randomDnaGenerator = A3(
+	_elm_lang$core$Random$map2,
+	F2(
+		function (x, y) {
+			return A2(_elm_lang$core$Basics_ops['++'], x, y);
+		}),
+	_davydog187$elm_pong$GeneticHelper$randomProbabilityGenerator,
+	A2(
+		_elm_lang$core$Random$list,
+		2,
+		A2(_elm_lang$core$Random$float, -100, 100)));
+var _davydog187$elm_pong$GeneticHelper$runDnaGenerator = function (time) {
+	return _elm_lang$core$Tuple$first(
+		A2(
+			_elm_lang$core$Random$step,
+			_davydog187$elm_pong$GeneticHelper$randomDnaGenerator,
+			_elm_lang$core$Random$initialSeed(time)));
+};
+var _davydog187$elm_pong$GeneticHelper$indexWhereProbabilitiesEnd = 1;
+var _davydog187$elm_pong$GeneticHelper$numberOfGenes = 4;
+var _davydog187$elm_pong$GeneticHelper$crossover_split_index = _elm_lang$core$Basics$floor(
+	_elm_lang$core$Basics$toFloat(_davydog187$elm_pong$GeneticHelper$numberOfGenes) / 2);
+var _davydog187$elm_pong$GeneticHelper$crossoverDnas = F2(
+	function (dna1, dna2) {
+		var _p0 = {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$List$take, _davydog187$elm_pong$GeneticHelper$crossover_split_index, dna1),
+			_1: A2(_elm_lang$core$List$drop, _davydog187$elm_pong$GeneticHelper$crossover_split_index, dna2)
+		};
+		var dnaPart1 = _p0._0;
+		var dnaPart2 = _p0._1;
+		return A2(_elm_lang$core$List$append, dnaPart1, dnaPart2);
+	});
+var _davydog187$elm_pong$GeneticHelper$mutateDna = function (dna) {
+	var randomProbGenerator = A2(_elm_lang$core$Random$float, 0, 1);
+	var randomVelGenerator = A2(_elm_lang$core$Random$float, -100, 100);
+	var randomIndexGenerator = A2(_elm_lang$core$Random$int, 0, _davydog187$elm_pong$GeneticHelper$numberOfGenes - 1);
+	return A4(
+		_elm_lang$core$Random$map3,
+		F3(
+			function (randomIndex, randomVelGene, randomProbGene) {
+				return A2(
+					_elm_lang$core$List$indexedMap,
+					F2(
+						function (index, gene) {
+							return _elm_lang$core$Native_Utils.eq(index, randomIndex) ? ((_elm_lang$core$Native_Utils.cmp(index, _davydog187$elm_pong$GeneticHelper$indexWhereProbabilitiesEnd) > -1) ? randomVelGene : randomProbGene) : gene;
+						}),
+					dna);
+			}),
+		randomIndexGenerator,
+		randomVelGenerator,
+		randomProbGenerator);
+};
+var _davydog187$elm_pong$GeneticHelper$runMutatedDnaGenerator = F2(
+	function (time, dna) {
+		return _elm_lang$core$Tuple$first(
+			A2(
+				_elm_lang$core$Random$step,
+				_davydog187$elm_pong$GeneticHelper$mutateDna(dna),
+				_elm_lang$core$Random$initialSeed(time)));
+	});
+var _davydog187$elm_pong$GeneticHelper$main = _elm_lang$virtual_dom$Native_VirtualDom.staticProgram(
+	_elm_lang$html$Html$text(
+		_elm_lang$core$Basics$toString(
+			A2(
+				_davydog187$elm_pong$GeneticHelper$runMutatedDnaGenerator,
+				30,
+				_davydog187$elm_pong$GeneticHelper$runDnaGenerator(30)))));
+var _davydog187$elm_pong$GeneticHelper$Options = F6(
+	function (a, b, c, d, e, f) {
+		return {randomDnaGenerator: a, evaluateSolution: b, crossoverDnas: c, mutateDna: d, isDoneEvolving: e, method: f};
+	});
+var _davydog187$elm_pong$GeneticHelper$MinimizePenalty = {ctor: 'MinimizePenalty'};
+var _davydog187$elm_pong$GeneticHelper$MaximizeScore = {ctor: 'MaximizeScore'};

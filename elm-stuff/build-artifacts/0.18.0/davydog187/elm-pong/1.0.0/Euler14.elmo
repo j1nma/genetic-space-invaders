@@ -1,0 +1,110 @@
+var _davydog187$elm_pong$Euler14$alternative = F2(
+	function (a, b) {
+		var _p0 = a;
+		if (_p0.ctor === 'Just') {
+			return _elm_lang$core$Maybe$Just(_p0._0);
+		} else {
+			return b;
+		}
+	});
+var _davydog187$elm_pong$Euler14$predicate = F3(
+	function (key, value, accum) {
+		var size = _elm_lang$core$List$length(value);
+		return A2(
+			_davydog187$elm_pong$Euler14$alternative,
+			_elm_lang$core$Maybe$Just(size),
+			A2(
+				_elm_lang$core$Maybe$map,
+				_elm_lang$core$Basics$max(size),
+				accum));
+	});
+var _davydog187$elm_pong$Euler14$folder = F4(
+	function (upper, key, value, accum) {
+		if (_elm_lang$core$Native_Utils.cmp(key, upper) < 1) {
+			var size = _elm_lang$core$List$length(value);
+			var _p1 = accum;
+			if (_p1.ctor === 'Nothing') {
+				return _elm_lang$core$Maybe$Just(
+					{ctor: '_Tuple2', _0: key, _1: size});
+			} else {
+				return (_elm_lang$core$Native_Utils.cmp(size, _p1._0._1) > 0) ? _elm_lang$core$Maybe$Just(
+					{ctor: '_Tuple2', _0: key, _1: size}) : accum;
+			}
+		} else {
+			return accum;
+		}
+	});
+var _davydog187$elm_pong$Euler14$upper = 500000;
+var _davydog187$elm_pong$Euler14$generateIfMissing = F2(
+	function (generator, key) {
+		var modifyWith = F2(
+			function (f, value) {
+				return A2(
+					_folkertdev$elm_state$State$map,
+					function (_p2) {
+						return value;
+					},
+					_folkertdev$elm_state$State$modify(
+						f(value)));
+			});
+		var updateIfNeeded = function (cache) {
+			var _p3 = A2(_elm_lang$core$Dict$get, key, cache);
+			if (_p3.ctor === 'Just') {
+				return _folkertdev$elm_state$State$state(_p3._0);
+			} else {
+				var result = generator(key);
+				return A2(
+					_folkertdev$elm_state$State$andThen,
+					modifyWith(
+						_elm_lang$core$Dict$insert(key)),
+					generator(key));
+			}
+		};
+		return A2(_folkertdev$elm_state$State$andThen, updateIfNeeded, _folkertdev$elm_state$State$get);
+	});
+var _davydog187$elm_pong$Euler14$step = function (n) {
+	return _elm_lang$core$Native_Utils.eq(
+		A2(_elm_lang$core$Basics_ops['%'], n, 2),
+		0) ? ((n / 2) | 0) : ((3 * n) + 1);
+};
+var _davydog187$elm_pong$Euler14$increment = function (n) {
+	return A2(
+		_folkertdev$elm_state$State$map,
+		function (rest) {
+			return {ctor: '::', _0: n, _1: rest};
+		},
+		_davydog187$elm_pong$Euler14$generate(
+			_davydog187$elm_pong$Euler14$step(n)));
+};
+var _davydog187$elm_pong$Euler14$generate = function (n) {
+	return A2(_davydog187$elm_pong$Euler14$generateIfMissing, _davydog187$elm_pong$Euler14$increment, n);
+};
+var _davydog187$elm_pong$Euler14$generates = _folkertdev$elm_state$State$traverse(_davydog187$elm_pong$Euler14$generate);
+var _davydog187$elm_pong$Euler14$largest = function (upper) {
+	return A3(
+		_elm_lang$core$Dict$foldr,
+		_davydog187$elm_pong$Euler14$folder(upper),
+		_elm_lang$core$Maybe$Nothing,
+		A2(
+			_folkertdev$elm_state$State$finalState,
+			_elm_lang$core$Dict$fromList(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 1,
+						_1: {
+							ctor: '::',
+							_0: 1,
+							_1: {ctor: '[]'}
+						}
+					},
+					_1: {ctor: '[]'}
+				}),
+			_davydog187$elm_pong$Euler14$generates(
+				A2(_elm_lang$core$List$range, 1, upper))));
+};
+var _davydog187$elm_pong$Euler14$main = _elm_lang$virtual_dom$Native_VirtualDom.staticProgram(
+	_elm_lang$html$Html$text(
+		_elm_lang$core$Basics$toString(
+			_davydog187$elm_pong$Euler14$largest(_davydog187$elm_pong$Euler14$upper))));

@@ -1,0 +1,248 @@
+var _ckoster22$elm_genetic$Genetic$constantGen = function (val) {
+	return A2(
+		_elm_lang$core$Random$map,
+		_elm_lang$core$Basics$always(val),
+		_elm_lang$core$Random$bool);
+};
+var _ckoster22$elm_genetic$Genetic$initialPoints = function (method) {
+	var _p0 = method;
+	if (_p0.ctor === 'MinimizePenalty') {
+		return _elm_lang$core$Basics$toFloat(_elm_lang$core$Random$maxInt);
+	} else {
+		return _elm_lang$core$Basics$toFloat(_elm_lang$core$Random$minInt);
+	}
+};
+var _ckoster22$elm_genetic$Genetic$getPopulation = function (_p1) {
+	var _p2 = _p1;
+	return _p2._0;
+};
+var _ckoster22$elm_genetic$Genetic$numGenerationsFromValue = function (_p3) {
+	var _p4 = _p3;
+	return _p4._2;
+};
+var _ckoster22$elm_genetic$Genetic$dnaFromValue = function (_p5) {
+	var _p6 = _p5;
+	return _p6._1.dna;
+};
+var _ckoster22$elm_genetic$Genetic$population_size = 20;
+var _ckoster22$elm_genetic$Genetic$half_population_size = (_ckoster22$elm_genetic$Genetic$population_size / 2) | 0;
+var _ckoster22$elm_genetic$Genetic$PointedDna = F2(
+	function (a, b) {
+		return {dna: a, points: b};
+	});
+var _ckoster22$elm_genetic$Genetic$childGenerator = F3(
+	function (options, parent1, parent2) {
+		return A2(
+			_elm_lang$core$Random$map,
+			function (childDna) {
+				return A2(
+					_ckoster22$elm_genetic$Genetic$PointedDna,
+					childDna,
+					options.evaluateSolution(childDna));
+			},
+			A2(
+				_elm_lang$core$Random$andThen,
+				options.mutateDna,
+				A2(
+					_elm_lang$core$Random$map,
+					function (dna1IsFirst) {
+						return dna1IsFirst ? A2(options.crossoverDnas, parent1.dna, parent2.dna) : A2(options.crossoverDnas, parent2.dna, parent1.dna);
+					},
+					_elm_lang$core$Random$bool)));
+	});
+var _ckoster22$elm_genetic$Genetic$familyGenerator = F3(
+	function (options, parent1, parent2) {
+		var bestParent = function () {
+			var _p7 = options.method;
+			if (_p7.ctor === 'MaximizeScore') {
+				return (_elm_lang$core$Native_Utils.cmp(parent1.points, parent2.points) > 0) ? parent1 : parent2;
+			} else {
+				return (_elm_lang$core$Native_Utils.cmp(parent1.points, parent2.points) < 0) ? parent1 : parent2;
+			}
+		}();
+		return A4(
+			_elm_lang$core$Random$map3,
+			F3(
+				function (child1, child2, child3) {
+					return {
+						ctor: '::',
+						_0: child1,
+						_1: {
+							ctor: '::',
+							_0: child2,
+							_1: {
+								ctor: '::',
+								_0: child3,
+								_1: {
+									ctor: '::',
+									_0: bestParent,
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					};
+				}),
+			A3(_ckoster22$elm_genetic$Genetic$childGenerator, options, parent1, parent2),
+			A3(_ckoster22$elm_genetic$Genetic$childGenerator, options, parent1, parent2),
+			A3(_ckoster22$elm_genetic$Genetic$childGenerator, options, parent1, parent2));
+	});
+var _ckoster22$elm_genetic$Genetic$bestOrganismsGenerator = F2(
+	function (options, bestHalfOfPopulation) {
+		var _p8 = bestHalfOfPopulation;
+		if (_p8.ctor === '[]') {
+			return _ckoster22$elm_genetic$Genetic$constantGen(
+				{ctor: '[]'});
+		} else {
+			if (_p8._1.ctor === '[]') {
+				return _ckoster22$elm_genetic$Genetic$constantGen(
+					{
+						ctor: '::',
+						_0: _p8._0,
+						_1: {ctor: '[]'}
+					});
+			} else {
+				return A2(
+					_elm_lang$core$Random$andThen,
+					function (family) {
+						return A2(
+							_elm_lang$core$Random$map,
+							function (organisms) {
+								return A2(_elm_lang$core$List$append, organisms, family);
+							},
+							A2(_ckoster22$elm_genetic$Genetic$bestOrganismsGenerator, options, _p8._1._1));
+					},
+					A3(_ckoster22$elm_genetic$Genetic$familyGenerator, options, _p8._0, _p8._1._0));
+			}
+		}
+	});
+var _ckoster22$elm_genetic$Genetic$nextGenerationGenerator = F2(
+	function (options, currPopulation) {
+		var sortedPopulation = _mgold$elm_nonempty_list$List_Nonempty$toList(
+			A2(
+				_mgold$elm_nonempty_list$List_Nonempty$sortBy,
+				function (_) {
+					return _.points;
+				},
+				currPopulation));
+		var bestHalfOfPopulation = function () {
+			var _p9 = options.method;
+			if (_p9.ctor === 'MaximizeScore') {
+				return A2(_elm_lang$core$List$drop, _ckoster22$elm_genetic$Genetic$half_population_size, sortedPopulation);
+			} else {
+				return A2(_elm_lang$core$List$take, _ckoster22$elm_genetic$Genetic$half_population_size, sortedPopulation);
+			}
+		}();
+		return A2(
+			_elm_lang$core$Random$map,
+			function (organismList) {
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					currPopulation,
+					_mgold$elm_nonempty_list$List_Nonempty$fromList(organismList));
+			},
+			A2(_ckoster22$elm_genetic$Genetic$bestOrganismsGenerator, options, bestHalfOfPopulation));
+	});
+var _ckoster22$elm_genetic$Genetic$Options = F6(
+	function (a, b, c, d, e, f) {
+		return {randomDnaGenerator: a, evaluateSolution: b, crossoverDnas: c, mutateDna: d, isDoneEvolving: e, method: f};
+	});
+var _ckoster22$elm_genetic$Genetic$MinimizePenalty = {ctor: 'MinimizePenalty'};
+var _ckoster22$elm_genetic$Genetic$MaximizeScore = {ctor: 'MaximizeScore'};
+var _ckoster22$elm_genetic$Genetic$IntermediateValue = F3(
+	function (a, b, c) {
+		return {ctor: 'IntermediateValue', _0: a, _1: b, _2: c};
+	});
+var _ckoster22$elm_genetic$Genetic$executeStep = F2(
+	function (options, _p10) {
+		var _p11 = _p10;
+		var _p13 = _p11._0;
+		var sortedPopulation = A2(
+			_mgold$elm_nonempty_list$List_Nonempty$sortBy,
+			function (_) {
+				return _.points;
+			},
+			_p13);
+		var bestSolution = function () {
+			var _p12 = options.method;
+			if (_p12.ctor === 'MaximizeScore') {
+				return _mgold$elm_nonempty_list$List_Nonempty$head(
+					_mgold$elm_nonempty_list$List_Nonempty$reverse(sortedPopulation));
+			} else {
+				return _mgold$elm_nonempty_list$List_Nonempty$head(sortedPopulation);
+			}
+		}();
+		return A2(
+			_elm_lang$core$Random$map,
+			function (nextPopulation) {
+				return A3(_ckoster22$elm_genetic$Genetic$IntermediateValue, nextPopulation, bestSolution, _p11._2 + 1);
+			},
+			A2(_ckoster22$elm_genetic$Genetic$nextGenerationGenerator, options, _p13));
+	});
+var _ckoster22$elm_genetic$Genetic$recursivelyEvolve = F2(
+	function (options, stepValueGenerator) {
+		return A2(
+			_elm_lang$core$Random$andThen,
+			function (_p14) {
+				var _p15 = _p14;
+				var _p17 = _p15._2;
+				var _p16 = _p15._1;
+				return A3(options.isDoneEvolving, _p16.dna, _p16.points, _p17) ? stepValueGenerator : A2(
+					_ckoster22$elm_genetic$Genetic$recursivelyEvolve,
+					options,
+					A2(
+						_ckoster22$elm_genetic$Genetic$executeStep,
+						options,
+						A3(_ckoster22$elm_genetic$Genetic$IntermediateValue, _p15._0, _p16, _p17)));
+			},
+			stepValueGenerator);
+	});
+var _ckoster22$elm_genetic$Genetic$toStepValue = function (pointedDna) {
+	var _p18 = pointedDna;
+	if (_p18.ctor === '::') {
+		var _p19 = _p18._0;
+		return A3(
+			_ckoster22$elm_genetic$Genetic$IntermediateValue,
+			A2(_ckoster22$elm_genetic$NonemptyHelper$fromHeadRest, _p19, _p18._1),
+			_p19,
+			1);
+	} else {
+		return _elm_lang$core$Native_Utils.crashCase(
+			'Genetic',
+			{
+				start: {line: 187, column: 5},
+				end: {line: 196, column: 70}
+			},
+			_p18)('Empty DNA list. This shouldn\'t be possible!');
+	}
+};
+var _ckoster22$elm_genetic$Genetic$executeInitialStep = function (_p21) {
+	var _p22 = _p21;
+	return A2(
+		_elm_lang$core$Random$map,
+		function (randDnaList) {
+			return _ckoster22$elm_genetic$Genetic$toStepValue(
+				A2(
+					_elm_lang$core$List$map,
+					function (item) {
+						return {
+							dna: item,
+							points: _ckoster22$elm_genetic$Genetic$initialPoints(_p22.method)
+						};
+					},
+					randDnaList));
+		},
+		A2(_elm_lang$core$Random$list, _ckoster22$elm_genetic$Genetic$population_size, _p22.randomDnaGenerator));
+};
+var _ckoster22$elm_genetic$Genetic$solutionGenerator = function (options) {
+	return A2(
+		_elm_lang$core$Random$map,
+		function (_p23) {
+			var _p24 = _p23;
+			var _p25 = _p24._1;
+			return {ctor: '_Tuple2', _0: _p25.dna, _1: _p25.points};
+		},
+		A2(
+			_ckoster22$elm_genetic$Genetic$recursivelyEvolve,
+			options,
+			_ckoster22$elm_genetic$Genetic$executeInitialStep(options)));
+};

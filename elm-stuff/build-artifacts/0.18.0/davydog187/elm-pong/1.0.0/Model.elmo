@@ -1,0 +1,31 @@
+var _davydog187$elm_pong$Model$Spaceship = F4(
+	function (a, b, c, d) {
+		return {x: a, y: b, vx: c, vy: d};
+	});
+var _davydog187$elm_pong$Model$Bullet = F4(
+	function (a, b, c, d) {
+		return {x: a, y: b, vx: c, vy: d};
+	});
+var _davydog187$elm_pong$Model$Invader = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {x: a, y: b, vx: c, vy: d, scale: e, xProbChange: f, yProbChange: g, seedX: h, seedY: i, fitness: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var _davydog187$elm_pong$Model$Pause = {ctor: 'Pause'};
+var _davydog187$elm_pong$Model$Play = {ctor: 'Play'};

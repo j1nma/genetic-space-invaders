@@ -1,0 +1,28 @@
+var _j1nma$genetic_spaceinvaders$Initial$sizeToMsg = function (size) {
+	return _j1nma$genetic_spaceinvaders$Model$WindowResize(
+		{ctor: '_Tuple2', _0: size.width, _1: size.height});
+};
+var _j1nma$genetic_spaceinvaders$Initial$getTime = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$Model$OnTime, _elm_lang$core$Time$now);
+var _j1nma$genetic_spaceinvaders$Initial$initialSizeCmd = A2(_elm_lang$core$Task$perform, _j1nma$genetic_spaceinvaders$Initial$sizeToMsg, _elm_lang$window$Window$size);
+var _j1nma$genetic_spaceinvaders$Initial$initialInvaders = function (seed) {
+	return A3(
+		_j1nma$genetic_spaceinvaders$Update$spawnNewInvadersFromBestDna,
+		seed,
+		_j1nma$genetic_spaceinvaders$Constants$newSpawnedInvaders,
+		_j1nma$genetic_spaceinvaders$GeneticHelper$initialDna(seed));
+};
+var _j1nma$genetic_spaceinvaders$Initial$initialBullet = {ctor: '[]'};
+var _j1nma$genetic_spaceinvaders$Initial$initialSpaceship = {x: 0, y: 0 - _j1nma$genetic_spaceinvaders$Constants$halfHeight, vx: 0, vy: 0};
+var _j1nma$genetic_spaceinvaders$Initial$initialGame = {
+	keysDown: _elm_lang$core$Set$empty,
+	windowDimensions: {ctor: '_Tuple2', _0: 0, _1: 0},
+	state: _j1nma$genetic_spaceinvaders$Model$Start,
+	spaceship: _j1nma$genetic_spaceinvaders$Initial$initialSpaceship,
+	invaders: {ctor: '[]'},
+	bullets: _j1nma$genetic_spaceinvaders$Initial$initialBullet,
+	bestSolution: _j1nma$genetic_spaceinvaders$GeneticHelper$initialEvolve(
+		_elm_lang$core$Random$initialSeed(0)),
+	currentTime: 0.0,
+	hasSpawned: false,
+	score: 0
+};

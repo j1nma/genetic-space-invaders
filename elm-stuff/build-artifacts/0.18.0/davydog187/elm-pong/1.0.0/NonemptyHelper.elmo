@@ -1,0 +1,39 @@
+var _davydog187$elm_pong$NonemptyHelper$fromHeadRest = F2(
+	function (head, rest) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (item, nonemptyList) {
+					return A2(_mgold$elm_nonempty_list$List_Nonempty$cons, item, nonemptyList);
+				}),
+			_mgold$elm_nonempty_list$List_Nonempty$fromElement(head),
+			rest);
+	});
+var _davydog187$elm_pong$NonemptyHelper$constructNonemptyFromHead = F3(
+	function (thing, size, _p0) {
+		var _p1 = _p0;
+		var headList = _mgold$elm_nonempty_list$List_Nonempty$fromElement(thing);
+		var entireList = A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (item, nonemptyList) {
+					return A2(_mgold$elm_nonempty_list$List_Nonempty$cons, item, nonemptyList);
+				}),
+			headList,
+			_p1._0);
+		return {ctor: '_Tuple2', _0: entireList, _1: _p1._1};
+	});
+var _davydog187$elm_pong$NonemptyHelper$randomNonemptyList = F3(
+	function (size, seed, generator) {
+		var _p2 = A2(_elm_lang$core$Random$step, generator, seed);
+		var head = _p2._0;
+		var seed2 = _p2._1;
+		return A3(
+			_davydog187$elm_pong$NonemptyHelper$constructNonemptyFromHead,
+			head,
+			size,
+			A2(
+				_elm_lang$core$Random$step,
+				A2(_elm_lang$core$Random$list, size - 1, generator),
+				seed2));
+	});

@@ -1,0 +1,8 @@
+var _davydog187$elm_pong$GeneticState$initialValueState = A2(
+	_folkertdev$elm_state$State$run,
+	0,
+	_folkertdev$elm_state$State$state(
+		{ctor: '[]'}));
+var _davydog187$elm_pong$GeneticState$main = _elm_lang$virtual_dom$Native_VirtualDom.staticProgram(
+	_elm_lang$html$Html$text(
+		_elm_lang$core$Basics$toString(_davydog187$elm_pong$GeneticState$initialValueState)));
