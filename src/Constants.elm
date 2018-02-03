@@ -31,8 +31,3 @@ gameOverInvaders =
 newSpawnedInvaders : Int
 newSpawnedInvaders =
     1
-
-
-
--- UPDATE
--- VIEW

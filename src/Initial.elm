@@ -4,7 +4,6 @@ import Set exposing (Set)
 import Constants exposing (..)
 import Model exposing (..)
 import GeneticHelper exposing (..)
-import Update exposing (..)
 import Time exposing (..)
 import Random exposing (..)
 import Task
@@ -18,10 +17,25 @@ initialGame =
     , state = Start
     , spaceship = initialSpaceship
     , invaders = []
-    , bullets = initialBullet
+    , bullets = []
     , bestSolution = initialEvolve (initialSeed 0)
     , currentTime = 0.0
     , hasSpawned = False
+    , score = 0
+    }
+
+
+resetGame : Time -> ( Int, Int ) -> Game
+resetGame currentTime windowDimensions =
+    { keysDown = Set.empty
+    , windowDimensions = windowDimensions
+    , state = Start
+    , spaceship = initialSpaceship
+    , invaders = []
+    , bullets = []
+    , bestSolution = initialEvolve (initialSeed (round currentTime))
+    , hasSpawned = False
+    , currentTime = currentTime
     , score = 0
     }
 
@@ -33,16 +47,6 @@ initialSpaceship =
     , vx = 0
     , vy = 0
     }
-
-
-initialBullet : List a
-initialBullet =
-    []
-
-
-initialInvaders : Seed -> List Invader
-initialInvaders seed =
-    spawnNewInvadersFromBestDna seed newSpawnedInvaders (initialDna seed)
 
 
 initialSizeCmd : Cmd Msg

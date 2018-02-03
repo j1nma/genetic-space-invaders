@@ -5629,6 +5629,10 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$randomProbabilityGenerator = A2(
 	_elm_lang$core$Random$list,
 	2,
 	A2(_elm_lang$core$Random$float, 0, 1));
+var _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution = function (dna) {
+	return dna.fitness;
+};
+var _j1nma$genetic_spaceinvaders$GeneticHelper$invaderVelocity = 150.0;
 var _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator = A2(
 	_elm_lang$core$Random$map,
 	function (randGenes) {
@@ -5644,10 +5648,7 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$randDnaGenerator = A2(
 		A2(
 			_elm_lang$core$Random$list,
 			2,
-			A2(_elm_lang$core$Random$float, -100, 100))));
-var _j1nma$genetic_spaceinvaders$GeneticHelper$evaluateSolution = function (dna) {
-	return dna.fitness;
-};
+			A2(_elm_lang$core$Random$float, 0 - _j1nma$genetic_spaceinvaders$GeneticHelper$invaderVelocity, _j1nma$genetic_spaceinvaders$GeneticHelper$invaderVelocity))));
 var _j1nma$genetic_spaceinvaders$GeneticHelper$indexWhereProbabilitiesEnd = 1;
 var _j1nma$genetic_spaceinvaders$GeneticHelper$numberOfGenes = 4;
 var _j1nma$genetic_spaceinvaders$GeneticHelper$crossover_split_index = _elm_lang$core$Basics$floor(
@@ -5668,7 +5669,7 @@ var _j1nma$genetic_spaceinvaders$GeneticHelper$crossoverDnas = F2(
 	});
 var _j1nma$genetic_spaceinvaders$GeneticHelper$mutateDna = function (dna) {
 	var randomProbGenerator = A2(_elm_lang$core$Random$float, 0, 1);
-	var randomVelGenerator = A2(_elm_lang$core$Random$float, -100, 100);
+	var randomVelGenerator = A2(_elm_lang$core$Random$float, 0 - _j1nma$genetic_spaceinvaders$GeneticHelper$invaderVelocity, _j1nma$genetic_spaceinvaders$GeneticHelper$invaderVelocity);
 	var randomIndexGenerator = A2(_elm_lang$core$Random$int, 0, _j1nma$genetic_spaceinvaders$GeneticHelper$numberOfGenes - 1);
 	return A4(
 		_elm_lang$core$Random$map3,

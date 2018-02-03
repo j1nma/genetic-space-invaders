@@ -17,6 +17,16 @@ type Msg
     | OnTime Time
 
 
+type alias Input =
+    { space : Bool
+    , reset : Bool
+    , pause : Bool
+    , start : Bool
+    , dir : Int
+    , delta : Time
+    }
+
+
 type alias Game =
     { keysDown : Set KeyCode
     , windowDimensions : ( Int, Int )

@@ -86,26 +86,8 @@ subscriptions _ =
         ]
 
 
-
--- MODEL
-
-
-type alias Input =
-    { space : Bool
-    , reset : Bool
-    , pause : Bool
-    , start : Bool
-    , dir : Int
-    , delta : Time
-    }
-
-
-
--- UPDATE
-
-
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
+updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
     let
         newState =
             if start then
@@ -116,14 +98,7 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                 state
     in
         if reset then
-            { game
-                | state = Start
-                , spaceship = initialSpaceship
-                , invaders = []
-                , bullets = initialBullet
-                , bestSolution = initialEvolve (initialSeed (round currentTime))
-                , hasSpawned = False
-            }
+            resetGame currentTime windowDimensions
         else
             case state of
                 Play ->
@@ -138,7 +113,10 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                             updateInvaders delta invaders bullets
 
                         gameOver =
-                            (List.length updatedInvaders == gameOverInvaders)
+                            (List.length updatedInvaders >= gameOverInvaders)
+
+                        newScore =
+                            ((List.length invaders) - (List.length updatedInvaders))
                     in
                         if (((round (inSeconds currentTime)) % 2) == 0) then
                             let
@@ -179,16 +157,20 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                             else
                                                 updatedInvaders
                                     , hasSpawned = True
-                                    , score = score + ((List.length invaders) - (List.length updatedInvaders))
+                                    , score = score + newScore
                                 }
                         else
                             { game
-                                | state = newState
+                                | state =
+                                    if gameOver then
+                                        Over
+                                    else
+                                        newState
                                 , spaceship = updateSpaceship delta dir spaceship
                                 , bullets = newBullet ++ updateBullets delta bullets invaders
                                 , invaders = updatedInvaders
                                 , hasSpawned = False
-                                , score = score + ((List.length invaders) - (List.length updatedInvaders))
+                                , score = score + newScore
                             }
 
                 Pause ->
@@ -222,10 +204,6 @@ updateGame { space, reset, pause, start, dir, delta } ({ state, spaceship, invad
                                 otherwise ->
                                     newState
                     }
-
-
-
--- VIEW
 
 
 view : Game -> Html Msg

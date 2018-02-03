@@ -37,6 +37,11 @@ indexWhereProbabilitiesEnd =
     1
 
 
+invaderVelocity : Float
+invaderVelocity =
+    150.0
+
+
 
 -- Evaluate solution
 
@@ -52,7 +57,7 @@ evaluateSolution dna =
 
 randDnaGenerator : Generator Dna
 randDnaGenerator =
-    Random.float -100 100
+    Random.float -invaderVelocity invaderVelocity
         |> Random.list 2
         |> Random.map2 (++) randomProbabilityGenerator
         |> Random.map
@@ -100,7 +105,7 @@ mutateDna dna =
             Random.int 0 (numberOfGenes - 1)
 
         randomVelGenerator =
-            Random.float -100 100
+            Random.float -invaderVelocity invaderVelocity
 
         randomProbGenerator =
             Random.float 0 1

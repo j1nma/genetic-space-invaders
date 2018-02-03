@@ -76,35 +76,35 @@ spawnNewInvadersFromBestDna seed amount dna =
 
         n ->
             let
-                randomPositionAndSeed =
-                    randomPosition seed
+                newX =
+                    randomXCoordinate seed
+
+                newXCoordinate =
+                    Tuple.first newX
 
                 newSeed =
-                    Tuple.second randomPositionAndSeed
-
-                randomP =
-                    Tuple.first randomPositionAndSeed
-
-                newX =
-                    Tuple.first randomP
+                    Tuple.second newX
 
                 newY =
-                    Tuple.second randomP
+                    randomYCoordinate newSeed
 
-                --_ =
-                --    Debug.log "genes" dna.genes
+                newYCoordinate =
+                    Tuple.first newY
+
+                newestSeed =
+                    Tuple.second newY
             in
-                { x = newX
-                , y = newY
+                { x = newXCoordinate
+                , y = newYCoordinate
                 , vx = getValue (Array.get 2 (Array.fromList dna.genes))
                 , vy = getValue (Array.get 3 (Array.fromList dna.genes))
                 , xProbChange = getValue (Array.get 0 (Array.fromList dna.genes))
                 , yProbChange = getValue (Array.get 1 (Array.fromList dna.genes))
                 , seedX = newSeed
-                , seedY = newSeed
+                , seedY = newestSeed
                 , wasHit = False
                 }
-                    :: spawnNewInvadersFromBestDna newSeed (n - 1) dna
+                    :: spawnNewInvadersFromBestDna newestSeed (n - 1) dna
 
 
 calculateFitness : Dna -> List Invader -> Float
