@@ -19,6 +19,6 @@ make
 ````
 
 ## Running
-Open index.html.
+Open index.html
 
 **Enjoy!** 😉
