@@ -87,7 +87,7 @@ subscriptions _ =
 
 
 updateGame : Input -> Game -> Game
-updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
+updateGame ({ reset, pause, start } as input) ({ windowDimensions, state, currentTime } as game) =
     let
         newState =
             if start then
@@ -100,103 +100,108 @@ updateGame { space, reset, pause, start, dir, delta } ({ windowDimensions, state
         if reset then
             resetGame currentTime windowDimensions
         else
-            case state of
-                Play ->
+            updateState newState input game
+
+
+updateState : State -> Input -> Game -> Game
+updateState newState ({ space, dir, delta } as input) ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
+    case state of
+        Play ->
+            let
+                newBullet =
+                    if space then
+                        craftBullet spaceship bullets
+                    else
+                        []
+
+                updatedInvaders =
+                    updateInvaders delta invaders bullets
+
+                gameOver =
+                    (List.length updatedInvaders) >= gameOverInvaders
+
+                newScore =
+                    List.length invaders - List.length updatedInvaders
+
+                newFitness =
+                    calculateFitness (dnaFromValue (Tuple.first bestSolution)) updatedInvaders
+
+                updatedSolutionForFitness =
+                    updateSolution newFitness bestSolution
+            in
+                if (((round (inSeconds currentTime)) % 2) == 0) then
                     let
-                        newBullet =
-                            if space then
-                                craftBullet spaceship bullets
+                        betterSolution =
+                            if not hasSpawned then
+                                GeneticHelper.evolve updatedSolutionForFitness
                             else
-                                []
+                                updatedSolutionForFitness
 
-                        updatedInvaders =
-                            updateInvaders delta invaders bullets
-
-                        gameOver =
-                            (List.length updatedInvaders) >= gameOverInvaders
-
-                        newScore =
-                            List.length invaders - List.length updatedInvaders
-
-                        newFitness =
-                            calculateFitness (dnaFromValue (Tuple.first bestSolution)) updatedInvaders
-
-                        updatedSolutionForFitness =
-                            updateSolution newFitness bestSolution
+                        newInvaders =
+                            if not hasSpawned then
+                                updatedInvaders ++ spawnNewInvadersFromBestDna betterSolution newSpawnedInvaders
+                            else
+                                updatedInvaders
                     in
-                        if (((round (inSeconds currentTime)) % 2) == 0) then
-                            let
-                                betterSolution =
-                                    if not hasSpawned then
-                                        GeneticHelper.evolve updatedSolutionForFitness
-                                    else
-                                        updatedSolutionForFitness
-
-                                newInvaders =
-                                    if not hasSpawned then
-                                        updatedInvaders ++ spawnNewInvadersFromBestDna betterSolution newSpawnedInvaders
-                                    else
-                                        updatedInvaders
-                            in
-                                { game
-                                    | state =
-                                        if gameOver then
-                                            Over
-                                        else
-                                            newState
-                                    , spaceship = updateSpaceship delta dir spaceship
-                                    , bullets = newBullet ++ updateBullets delta bullets invaders
-                                    , bestSolution = betterSolution
-                                    , invaders = newInvaders
-                                    , hasSpawned = True
-                                    , score = score + newScore
-                                }
-                        else
-                            { game
-                                | state =
-                                    if gameOver then
-                                        Over
-                                    else
-                                        newState
-                                , spaceship = updateSpaceship delta dir spaceship
-                                , bullets = newBullet ++ updateBullets delta bullets invaders
-                                , bestSolution = updatedSolutionForFitness
-                                , invaders = updatedInvaders
-                                , hasSpawned = False
-                                , score = score + newScore
-                            }
-
-                Pause ->
-                    { game | state = newState }
-
-                Start ->
+                        { game
+                            | state =
+                                if gameOver then
+                                    Over
+                                else
+                                    newState
+                            , spaceship = updateSpaceship delta dir spaceship
+                            , bullets = newBullet ++ updateBullets delta bullets invaders
+                            , bestSolution = betterSolution
+                            , invaders = newInvaders
+                            , hasSpawned = True
+                            , score = score + newScore
+                        }
+                else
                     { game
                         | state =
-                            case newState of
-                                Pause ->
-                                    Start
-
-                                otherwise ->
-                                    newState
-                        , bestSolution = initialEvolve (initialSeed (round currentTime))
+                            if gameOver then
+                                Over
+                            else
+                                newState
+                        , spaceship = updateSpaceship delta dir spaceship
+                        , bullets = newBullet ++ updateBullets delta bullets invaders
+                        , bestSolution = updatedSolutionForFitness
+                        , invaders = updatedInvaders
+                        , hasSpawned = False
+                        , score = score + newScore
                     }
 
-                Over ->
-                    { game
-                        | state =
-                            case newState of
-                                Play ->
-                                    Over
+        Pause ->
+            { game | state = newState }
 
-                                Pause ->
-                                    Over
+        Start ->
+            { game
+                | state =
+                    case newState of
+                        Pause ->
+                            Start
 
-                                Start ->
-                                    Start
+                        otherwise ->
+                            newState
+                , bestSolution = initialEvolve (initialSeed (round currentTime))
+            }
 
-                                otherwise ->
-                                    newState
-                    }
+        Over ->
+            { game
+                | state =
+                    case newState of
+                        Play ->
+                            Over
+
+                        Pause ->
+                            Over
+
+                        Start ->
+                            Start
+
+                        otherwise ->
+                            newState
+            }
 
 
 view : Game -> Html Msg
