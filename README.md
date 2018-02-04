@@ -2,6 +2,10 @@
 
 Don't let the Java Dukes breed to 100! Shoot them with the Lambda Shuttle!
 
+Play now [here!](https://j1nma.github.io/genetic-space-invaders/)
+
+If you want to build it locally:
+
 ## Prerequisites
 [elm](https://guide.elm-lang.org/install.html)
 
@@ -13,6 +17,6 @@ make
 ````
 
 ## Running
-Open GeneticSpaceInvaders.html or play now [here!](https://j1nma.github.io/genetic-space-invaders/)
+Open index.html.
 
 **Enjoy!** 😉
