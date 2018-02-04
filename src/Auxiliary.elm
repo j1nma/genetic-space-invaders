@@ -16,7 +16,7 @@ probDirChange seed p =
             step generator seed
     in
         if p > addProbability then
-            ( (-1), s )
+            ( -1, s )
         else
             ( 1, s )
 
@@ -41,15 +41,15 @@ randomMovement t invader =
             probDirChange invader.seedX invader.xProbChange
 
         newVelX =
-            invader.vx * (Tuple.first changeX)
+            invader.vx * Tuple.first changeX
 
         changeY =
             probDirChange invader.seedY invader.yProbChange
 
         newVelY =
-            invader.vy * (Tuple.first changeY)
+            invader.vy * Tuple.first changeY
     in
-        physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = (Tuple.second changeX), seedY = (Tuple.second changeY) }
+        physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = Tuple.second changeX, seedY = Tuple.second changeY }
 
 
 stepV : Float -> Bool -> Bool -> Float
@@ -87,7 +87,7 @@ within : Bullet -> Invader -> Bool
 within bullet invader =
     let
         diff =
-            (invader.y - bullet.y)
+            invader.y - bullet.y
     in
         near invader.x 20 bullet.x && 0 <= diff && diff <= 40
 
@@ -95,16 +95,6 @@ within bullet invader =
 withinBullet : Bullet -> Bullet -> Bool
 withinBullet b1 b2 =
     near b1.x 70 b2.x && near b1.y 70 b2.y
-
-
-getValue : Maybe Float -> Float
-getValue m =
-    case m of
-        Just v ->
-            v
-
-        Nothing ->
-            Debug.crash "No value on dna list!"
 
 
 randomXCoordinate : Seed -> ( Float, Seed )

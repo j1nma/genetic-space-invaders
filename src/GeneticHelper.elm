@@ -133,7 +133,7 @@ mutateDna dna =
                             3 ->
                                 { genes | yProbChange = randomProbGene }
 
-                            otherwise ->
+                            _ ->
                                 genes
                 in
                     { genes = mutatedGenes

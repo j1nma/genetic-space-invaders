@@ -34,22 +34,22 @@ titleStatus : State -> Float -> Element
 titleStatus state currentTime =
     case state of
         Start ->
-            if (((round (inSeconds currentTime)) % 2) == 0) then
+            if (round (inSeconds currentTime) % 2) == 0 then
                 image 600 400 (resPath ++ "mainTitle.png")
             else
                 image 600 400 (resPath ++ "mainTitle2.png")
 
-        otherwise ->
+        _ ->
             txt identity ""
 
 
-shuttleTitleStatus : State -> Float -> Element
-shuttleTitleStatus state currentTime =
+shuttleTitleStatus : State -> Element
+shuttleTitleStatus state =
     case state of
         Start ->
             image 150 150 (resPath ++ "lambdaSpaceshuttleTitle.png")
 
-        otherwise ->
+        _ ->
             txt identity ""
 
 
@@ -59,8 +59,8 @@ invadersStatus state numberOfInvaders =
         Start ->
             txt identity ""
 
-        otherwise ->
-            txt (Text.color yellow) ("INVADERS: " ++ (toString numberOfInvaders))
+        _ ->
+            txt (Text.color yellow) ("INVADERS: " ++ toString numberOfInvaders)
 
 
 scoreStatus : State -> Int -> Element
@@ -69,8 +69,8 @@ scoreStatus state score =
         Start ->
             txt identity ""
 
-        otherwise ->
-            txt (Text.color yellow) ("SCORE: " ++ (toString score))
+        _ ->
+            txt (Text.color yellow) ("SCORE: " ++ toString score)
 
 
 verticalLine : Float -> Path

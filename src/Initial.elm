@@ -1,6 +1,6 @@
 module Initial exposing (..)
 
-import Set exposing (Set)
+import Set
 import Constants exposing (..)
 import Model exposing (..)
 import GeneticHelper exposing (..)
@@ -43,7 +43,7 @@ resetGame currentTime windowDimensions =
 initialSpaceship : { vx : Float, vy : Float, x : Float, y : Float }
 initialSpaceship =
     { x = 0
-    , y = (-halfHeight)
+    , y = -halfHeight
     , vx = 0
     , vy = 0
     }

@@ -6,7 +6,7 @@ import Time exposing (..)
 import Window
 import Html exposing (..)
 import Keyboard exposing (..)
-import Set exposing (Set)
+import Set
 import AnimationFrame
 import Initial exposing (..)
 import Constants exposing (..)
@@ -31,14 +31,14 @@ main =
 
 getInput : Game -> Float -> Input
 getInput game delta =
-    { space = Set.member (Char.toCode ' ') (game.keysDown)
-    , reset = Set.member (Char.toCode 'R') (game.keysDown)
-    , pause = Set.member (Char.toCode 'P') (game.keysDown)
-    , start = Set.member (Char.toCode 'S') (game.keysDown)
+    { space = Set.member (Char.toCode ' ') game.keysDown
+    , reset = Set.member (Char.toCode 'R') game.keysDown
+    , pause = Set.member (Char.toCode 'P') game.keysDown
+    , start = Set.member (Char.toCode 'S') game.keysDown
     , dir =
-        if Set.member rightArrow (game.keysDown) then
+        if Set.member rightArrow game.keysDown then
             1
-        else if Set.member leftArrow (game.keysDown) then
+        else if Set.member leftArrow game.keysDown then
             -1
         else
             0
@@ -104,7 +104,7 @@ updateGame ({ reset, pause, start } as input) ({ windowDimensions, state, curren
 
 
 updateState : State -> Input -> Game -> Game
-updateState newState ({ space, dir, delta } as input) ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
+updateState newState { space, dir, delta } ({ state, spaceship, invaders, bullets, bestSolution, currentTime, hasSpawned, score } as game) =
     case state of
         Play ->
             let
@@ -118,7 +118,7 @@ updateState newState ({ space, dir, delta } as input) ({ state, spaceship, invad
                     updateInvaders delta invaders bullets
 
                 gameOver =
-                    (List.length updatedInvaders) >= gameOverInvaders
+                    List.length updatedInvaders >= gameOverInvaders
 
                 newScore =
                     List.length invaders - List.length updatedInvaders
@@ -129,7 +129,7 @@ updateState newState ({ space, dir, delta } as input) ({ state, spaceship, invad
                 updatedSolutionForFitness =
                     updateSolution newFitness bestSolution
             in
-                if (((round (inSeconds currentTime)) % 2) == 0) then
+                if (round (inSeconds currentTime) % 2) == 0 then
                     let
                         betterSolution =
                             if not hasSpawned then
@@ -181,7 +181,7 @@ updateState newState ({ space, dir, delta } as input) ({ state, spaceship, invad
                         Pause ->
                             Start
 
-                        otherwise ->
+                        _ ->
                             newState
                 , bestSolution = initialEvolve (initialSeed (round currentTime))
             }
@@ -199,7 +199,7 @@ updateState newState ({ space, dir, delta } as input) ({ state, spaceship, invad
                         Start ->
                             Start
 
-                        otherwise ->
+                        _ ->
                             newState
             }
 
@@ -222,12 +222,12 @@ view { windowDimensions, state, spaceship, invaders, bullets, score, currentTime
                          , toForm (scoreStatus state score)
                             |> move ( -halfWidth + 50, halfHeight - 20 )
                          ]
-                            ++ (List.map (\o -> makeBullet o) bullets)
-                            ++ (List.map (\o -> makeInvader o) invaders)
+                            ++ List.map (\o -> makeBullet o) bullets
+                            ++ List.map (\o -> makeInvader o) invaders
                             ++ [ makeSpaceship spaceship
                                , toForm (titleStatus state currentTime)
                                     |> move ( 0, 0 )
-                               , toForm (shuttleTitleStatus state currentTime)
+                               , toForm (shuttleTitleStatus state)
                                     |> move ( 0, halfHeight - 90 )
                                , toForm (messageStatus state)
                                     |> move ( 0, 80 - gameHeight / 2 )

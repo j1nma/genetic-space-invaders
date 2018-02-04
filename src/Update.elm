@@ -62,7 +62,7 @@ updateBullets t bullets invaders =
 
 updateBullet : Time -> List Invader -> Bullet -> Bullet
 updateBullet t invaders bullet =
-    if (bullet.y >= (halfHeight - 40)) || (List.any (\i -> within bullet i) invaders) then
+    if (bullet.y >= (halfHeight - 40)) || List.any (\i -> within bullet i) invaders then
         { bullet | hit = True }
     else
         physicsUpdate t bullet
