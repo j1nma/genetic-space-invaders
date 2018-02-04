@@ -1,8 +1,5 @@
 module GeneticHelper exposing (..)
 
--- https://github.com/ckoster22/elm-genetic/blob/master/src/Genetic.elm
--- import State exposing (..)
-
 import Genetic exposing (..)
 import Random exposing (..)
 import Tuple exposing (..)
