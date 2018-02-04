@@ -1,3 +1,14 @@
+ifeq ($(OS),Windows_NT)
+	OPEN := start
+else
+	UNAME := $(shell uname -s)
+ifeq ($(UNAME),Linux)
+	OPEN := xdg-open
+else
+	OPEN := open
+endif
+endif
+
 ELM = elm
 OUTPUT = index.html
 SRCS = GeneticSpaceInvaders.elm
@@ -17,3 +28,6 @@ clean:
 	rm -rf ./elm-stuff/build-artifacts
 	rm -rf ./elm-linter/build-artifacts
 	rm -rf ./index.html
+
+open:
+	$(OPEN) index.html &
