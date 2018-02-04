@@ -9,6 +9,11 @@ import Time exposing (..)
 import Constants exposing (..)
 
 
+resPath : String
+resPath =
+    "src/res/"
+
+
 messageStatus : State -> Element
 messageStatus state =
     case state of
@@ -30,9 +35,9 @@ titleStatus state currentTime =
     case state of
         Start ->
             if (((round (inSeconds currentTime)) % 2) == 0) then
-                image 600 400 "src/res/mainTitle.png"
+                image 600 400 (resPath ++ "mainTitle.png")
             else
-                image 600 400 "src/res/mainTitle2.png"
+                image 600 400 (resPath ++ "mainTitle2.png")
 
         otherwise ->
             txt identity ""
@@ -42,7 +47,7 @@ shuttleTitleStatus : State -> Float -> Element
 shuttleTitleStatus state currentTime =
     case state of
         Start ->
-            image 150 150 "src/res/lambdaSpaceshuttleTitle.png"
+            image 150 150 (resPath ++ "lambdaSpaceshuttleTitle.png")
 
         otherwise ->
             txt identity ""
@@ -107,20 +112,20 @@ make obj shape =
 
 makeSpaceship : { a | x : Float, y : Float } -> Form
 makeSpaceship obj =
-    image 40 40 "src/res/lambdaSpaceshuttle0.png"
+    image 40 40 (resPath ++ "lambdaSpaceshuttle0.png")
         |> toForm
         |> move ( obj.x, obj.y + 20 )
 
 
 makeBullet : { a | x : Float, y : Float } -> Form
 makeBullet obj =
-    image 12 30 "src/res/missile.png"
+    image 12 30 (resPath ++ "missile.png")
         |> toForm
         |> move ( obj.x, obj.y + 40 )
 
 
 makeInvader : { a | x : Float, y : Float } -> Form
 makeInvader obj =
-    image 40 40 "src/res/javaInvader0.png"
+    image 40 40 (resPath ++ "javaInvader0.png")
         |> toForm
         |> move ( obj.x, obj.y )

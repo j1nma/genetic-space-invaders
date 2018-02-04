@@ -14,7 +14,7 @@ craftBullet spaceship bullets =
     let
         newBullet =
             { x = spaceship.x
-            , y = spaceship.y
+            , y = spaceship.y + 20
             , vx = 0
             , vy = 200
             , hit = False
@@ -116,14 +116,10 @@ calculateFitness dna invaders =
         (List.length
             (List.filter
                 (\invader ->
-                    invader.xProbChange
-                        == dna.genes.xProbChange
-                        || invader.yProbChange
-                        == dna.genes.yProbChange
-                        || invader.vx
-                        == dna.genes.vx
-                        || invader.vy
-                        == dna.genes.vy
+                    (invader.xProbChange == dna.genes.xProbChange)
+                        || (invader.yProbChange == dna.genes.yProbChange)
+                        || (invader.vx == dna.genes.vx)
+                        || (invader.vy == dna.genes.vy)
                 )
                 invaders
             )

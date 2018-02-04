@@ -94,7 +94,7 @@ within bullet invader =
 
 withinBullet : Bullet -> Bullet -> Bool
 withinBullet b1 b2 =
-    near b1.x 100 b2.x && near b1.y 100 b2.y
+    near b1.x 70 b2.x && near b1.y 70 b2.y
 
 
 getValue : Maybe Float -> Float
