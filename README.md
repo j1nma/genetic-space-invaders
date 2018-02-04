@@ -1,5 +1,7 @@
 # Genetic Space Invaders
 
+A functional game written in Elm.
+
 Don't let the Java Dukes breed to 100! Shoot them with the Lambda Shuttle!
 
 Play now [here!](https://j1nma.github.io/genetic-space-invaders/)
