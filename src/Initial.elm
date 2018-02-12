@@ -40,7 +40,7 @@ resetGame currentTime windowDimensions =
     }
 
 
-initialSpaceship : { vx : Float, vy : Float, x : Float, y : Float }
+initialSpaceship : Spaceship
 initialSpaceship =
     { x = 0
     , y = -halfHeight

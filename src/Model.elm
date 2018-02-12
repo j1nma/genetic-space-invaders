@@ -46,6 +46,7 @@ type State
     | Pause
     | Start
     | Over
+    | Won
 
 
 type alias Spaceship =

@@ -27,7 +27,10 @@ messageStatus state =
             txt (Text.italic >> Text.height 12 >> Text.color yellow) startMessage
 
         Over ->
-            txt (Text.italic >> Text.bold >> Text.color red >> Text.height 18) overMessage
+            txt (Text.italic >> Text.bold >> Text.color red >> Text.height 28) overMessage
+
+        Won ->
+            txt (Text.italic >> Text.bold >> Text.color green >> Text.height 28) wonMessage
 
 
 titleStatus : State -> Float -> Element
@@ -101,6 +104,11 @@ pauseMessage =
 overMessage : String
 overMessage =
     "Invaders reached " ++ toString gameOverInvaders ++ "! Game over!"
+
+
+wonMessage : String
+wonMessage =
+    "YOU WON! YAY!"
 
 
 make : { a | x : Float, y : Float } -> Shape -> Form

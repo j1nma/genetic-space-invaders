@@ -15,7 +15,6 @@ import Update exposing (..)
 import View exposing (..)
 import Collage exposing (..)
 import GeneticHelper exposing (..)
-import Genetic exposing (..)
 import Random exposing (..)
 
 
@@ -120,22 +119,22 @@ updateState newState { space, dir, delta } ({ state, spaceship, invaders, bullet
                 gameOver =
                     List.length updatedInvaders >= gameOverInvaders
 
+                gameWon =
+                    (List.length updatedInvaders == 0) && score /= 0
+
                 newScore =
                     List.length invaders - List.length updatedInvaders
 
-                newFitness =
-                    calculateFitness (dnaFromValue (Tuple.first bestSolution)) updatedInvaders
-
-                updatedSolutionForFitness =
-                    updateSolution newFitness bestSolution
+                evaluateDnaFunction =
+                    (\dna -> calculateFitness dna updatedInvaders)
             in
-                if (round (inSeconds currentTime) % 2) == 0 then
+                if (round (inSeconds currentTime) % spawnFrenquencyInSeconds) == 0 then
                     let
                         betterSolution =
                             if not hasSpawned then
-                                GeneticHelper.evolve updatedSolutionForFitness
+                                GeneticHelper.evolve evaluateDnaFunction bestSolution
                             else
-                                updatedSolutionForFitness
+                                bestSolution
 
                         newInvaders =
                             if not hasSpawned then
@@ -147,6 +146,8 @@ updateState newState { space, dir, delta } ({ state, spaceship, invaders, bullet
                             | state =
                                 if gameOver then
                                     Over
+                                else if gameWon then
+                                    Won
                                 else
                                     newState
                             , spaceship = updateSpaceship delta dir spaceship
@@ -161,11 +162,12 @@ updateState newState { space, dir, delta } ({ state, spaceship, invaders, bullet
                         | state =
                             if gameOver then
                                 Over
+                            else if gameWon then
+                                Won
                             else
                                 newState
                         , spaceship = updateSpaceship delta dir spaceship
                         , bullets = newBullet ++ updateBullets delta bullets invaders
-                        , bestSolution = updatedSolutionForFitness
                         , invaders = updatedInvaders
                         , hasSpawned = False
                         , score = score + newScore
@@ -186,15 +188,15 @@ updateState newState { space, dir, delta } ({ state, spaceship, invaders, bullet
                 , bestSolution = initialEvolve (initialSeed (round currentTime))
             }
 
-        Over ->
+        gameDone ->
             { game
                 | state =
                     case newState of
                         Play ->
-                            Over
+                            gameDone
 
                         Pause ->
-                            Over
+                            gameDone
 
                         Start ->
                             Start

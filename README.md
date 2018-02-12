@@ -21,4 +21,13 @@ make
 ## Running
 Open index.html
 
+Or you can do both previous steps through terminal:
+
+
+````
+~/genetic-space-invaders» elm-reactor
+````
+
+and open http://localhost:8000 or wherever it's listening in your browser.
+
 **Enjoy!** 😉

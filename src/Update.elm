@@ -34,11 +34,11 @@ checkBullet b1 b2 =
 updateSpaceship : Time -> Int -> Spaceship -> Spaceship
 updateSpaceship t dir spaceship =
     let
-        spaceship1 =
-            physicsUpdate t { spaceship | vx = toFloat dir * 200 }
+        newSpaceship =
+            physicsUpdate t { spaceship | vx = toFloat dir * spaceshipVelocity }
     in
-        { spaceship1
-            | x = clamp (22 - halfWidth) (halfWidth - 22) spaceship1.x
+        { newSpaceship
+            | x = clamp (22 - halfWidth) (halfWidth - 22) newSpaceship.x
         }
 
 
@@ -99,10 +99,10 @@ spawnNewInvadersFromBestDna ( intermediate, seed ) amount =
             in
                 { x = newXCoordinate
                 , y = newYCoordinate
-                , vx = dna.genes.vx
-                , vy = dna.genes.vy
-                , xProbChange = dna.genes.xProbChange
-                , yProbChange = dna.genes.yProbChange
+                , vx = dna.vx
+                , vy = dna.vy
+                , xProbChange = dna.xProbChange
+                , yProbChange = dna.yProbChange
                 , seedX = newSeed
                 , seedY = newestSeed
                 , wasHit = False
@@ -116,16 +116,11 @@ calculateFitness dna invaders =
         (List.length
             (List.filter
                 (\invader ->
-                    (invader.xProbChange == dna.genes.xProbChange)
-                        || (invader.yProbChange == dna.genes.yProbChange)
-                        || (invader.vx == dna.genes.vx)
-                        || (invader.vy == dna.genes.vy)
+                    (invader.xProbChange == dna.xProbChange)
+                        || (invader.yProbChange == dna.yProbChange)
+                        || (invader.vx == dna.vx)
+                        || (invader.vy == dna.vy)
                 )
                 invaders
             )
         )
-
-
-updateSolution : Float -> ( IntermediateValue Dna, Seed ) -> ( IntermediateValue Dna, Seed )
-updateSolution newFitness ( IntermediateValue p pd ng, seed ) =
-    ( IntermediateValue p { dna = { genes = pd.dna.genes, fitness = newFitness }, points = newFitness } ng, seed )
