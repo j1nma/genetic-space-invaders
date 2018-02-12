@@ -21,6 +21,33 @@ probDirChange seed p =
             ( 1, s )
 
 
+physicsUpdateInvader : Float -> { a | vx : Float, vy : Float, x : Float, y : Float } -> { a | vx : Float, vy : Float, x : Float, y : Float }
+physicsUpdateInvader t ({ x, y, vx, vy } as obj) =
+    let
+        auxX =
+            (vx * t)
+
+        auxY =
+            (vy * t)
+
+        changeX =
+            if ((abs auxX) > 10) then
+                0
+            else
+                auxX
+
+        changeY =
+            if ((abs auxY) > 10) then
+                0
+            else
+                auxY
+    in
+        { obj
+            | x = x + changeX
+            , y = y + changeY
+        }
+
+
 physicsUpdate : Float -> { a | vx : Float, vy : Float, x : Float, y : Float } -> { a | vx : Float, vy : Float, x : Float, y : Float }
 physicsUpdate t ({ x, y, vx, vy } as obj) =
     { obj
@@ -49,7 +76,7 @@ randomMovement t invader =
         newVelY =
             invader.vy * Tuple.first changeY
     in
-        physicsUpdate t { invader | vx = newVelX, vy = newVelY, seedX = Tuple.second changeX, seedY = Tuple.second changeY }
+        physicsUpdateInvader t { invader | vx = newVelX, vy = newVelY, seedX = Tuple.second changeX, seedY = Tuple.second changeY }
 
 
 stepV : Float -> Bool -> Bool -> Float
@@ -78,7 +105,7 @@ decideMovement t invader =
             near invader.y 60 -halfHeight
     in
         if leftCollision || rightCollision || upperCollision || lowerCollision then
-            physicsUpdate t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
+            physicsUpdateInvader t { invader | vx = stepV invader.vx leftCollision rightCollision, vy = stepV invader.vy lowerCollision upperCollision }
         else
             randomMovement t invader
 

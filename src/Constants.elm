@@ -18,6 +18,11 @@ gameOverInvaders =
     100
 
 
+spawnFrenquencyInSeconds : Int
+spawnFrenquencyInSeconds =
+    2
+
+
 
 -- MODEL
 
@@ -30,4 +35,13 @@ gameOverInvaders =
 
 newSpawnedInvaders : Int
 newSpawnedInvaders =
-    3
+    4
+
+
+
+-- UPDATE
+
+
+spaceshipVelocity : Float
+spaceshipVelocity =
+    170.0

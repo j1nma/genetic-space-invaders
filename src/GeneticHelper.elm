@@ -5,18 +5,11 @@ import Random exposing (..)
 import Tuple exposing (..)
 
 
-type alias Genes =
+type alias Dna =
     { vx : Float
     , vy : Float
     , xProbChange : Float
     , yProbChange : Float
-    }
-
-
-type alias Dna =
-    { genes :
-        Genes
-    , fitness : Float
     }
 
 
@@ -25,13 +18,13 @@ numberOfGenes =
     4
 
 
-myOptions : Options Dna
-myOptions =
+options : (Dna -> Float) -> Options Dna
+options evaluateSolution =
     { randomDnaGenerator = randDnaGenerator
     , evaluateSolution = evaluateSolution
     , crossoverDnas = crossoverDnas
     , mutateDna = mutateDna
-    , isDoneEvolving = isDoneEvolving
+    , isDoneEvolving = (\_ _ _ -> False)
     , method = MaximizeScore
     }
 
@@ -42,20 +35,11 @@ invaderVelocity =
 
 
 
--- Evaluate solution
-
-
-evaluateSolution : Dna -> Float
-evaluateSolution dna =
-    dna.fitness
-
-
-
 -- Dna generator
 
 
-randGeneGenerator : Generator Genes
-randGeneGenerator =
+randDnaGenerator : Generator Dna
+randDnaGenerator =
     Random.map4
         (\randXVel randYVel randXProb randYProb ->
             { vx = randXVel
@@ -70,30 +54,16 @@ randGeneGenerator =
         (Random.float 0 1)
 
 
-randDnaGenerator : Generator Dna
-randDnaGenerator =
-    Random.map
-        (\randGenes ->
-            { genes = randGenes
-            , fitness = 0.0
-            }
-        )
-        randGeneGenerator
-
-
 
 -- Crossover
 
 
 crossoverDnas : Dna -> Dna -> Dna
 crossoverDnas dna1 dna2 =
-    { genes =
-        { vx = dna1.genes.vx
-        , vy = dna2.genes.vy
-        , xProbChange = dna1.genes.xProbChange
-        , yProbChange = dna2.genes.yProbChange
-        }
-    , fitness = (dna1.fitness + dna2.fitness) / 2
+    { vx = dna1.vx
+    , vy = dna2.vy
+    , xProbChange = dna1.xProbChange
+    , yProbChange = dna2.yProbChange
     }
 
 
@@ -116,52 +86,33 @@ mutateDna dna =
         Random.map3
             (\randomIndex randomVelGene randomProbGene ->
                 let
-                    genes =
-                        dna.genes
-
-                    mutatedGenes =
+                    mutatedDna =
                         case randomIndex of
                             0 ->
-                                { genes | vx = randomVelGene }
+                                { dna | vx = randomVelGene }
 
                             1 ->
-                                { genes | vy = randomVelGene }
+                                { dna | vy = randomVelGene }
 
                             2 ->
-                                { genes | xProbChange = randomProbGene }
+                                { dna | xProbChange = randomProbGene }
 
                             3 ->
-                                { genes | yProbChange = randomProbGene }
+                                { dna | yProbChange = randomProbGene }
 
                             _ ->
-                                genes
+                                dna
                 in
-                    { genes = mutatedGenes
-                    , fitness = dna.fitness
-                    }
+                    mutatedDna
             )
             randomIndexGenerator
             randomVelGenerator
             randomProbGenerator
 
 
-
--- Stop evolution
-
-
-max_iterations : Int
-max_iterations =
-    3000
-
-
-isDoneEvolving : Dna -> Float -> Int -> Bool
-isDoneEvolving bestDna bestDnaScore numGenerations =
-    bestDnaScore == toFloat Random.maxInt || numGenerations >= max_iterations
-
-
 initialEvolve : Seed -> ( IntermediateValue Dna, Seed )
 initialEvolve seed =
-    Random.step (Genetic.executeInitialStep myOptions) seed
+    Random.step (Genetic.executeInitialStep (options (\_ -> 0.0))) seed
 
 
 initialDna : Seed -> Dna
@@ -169,6 +120,6 @@ initialDna seed =
     dnaFromValue (Tuple.first (initialEvolve seed))
 
 
-evolve : ( IntermediateValue Dna, Seed ) -> ( IntermediateValue Dna, Seed )
-evolve ( intermediate, seed ) =
-    Random.step (Genetic.executeStep myOptions intermediate) seed
+evolve : (Dna -> Float) -> ( IntermediateValue Dna, Seed ) -> ( IntermediateValue Dna, Seed )
+evolve evaluateSolution ( intermediate, seed ) =
+    Random.step (Genetic.executeStep (options evaluateSolution) intermediate) seed
