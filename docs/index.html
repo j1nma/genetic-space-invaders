@@ -13569,7 +13569,7 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateState = F3(
 					return _elm_lang$core$Native_Utils.update(
 						_p16,
 						{
-							state: gameOver ? _j1nma$genetic_spaceinvaders$Model$Over : newState,
+							state: gameOver ? _j1nma$genetic_spaceinvaders$Model$Over : (gameWon ? _j1nma$genetic_spaceinvaders$Model$Won : newState),
 							spaceship: A3(_j1nma$genetic_spaceinvaders$Update$updateSpaceship, _p21, _p22, _p20),
 							bullets: A2(
 								_elm_lang$core$Basics_ops['++'],
