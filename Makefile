@@ -10,7 +10,7 @@ endif
 endif
 
 ELM = elm
-OUTPUT = index.html
+OUTPUT = ./docs/index.html
 SRCS = GeneticSpaceInvaders.elm
 TARGETS = $(SRCS:.elm=.html)
 ELM_STUFF = elm-stuff/exact-dependencies.json
@@ -27,7 +27,7 @@ clean:
 	echo "Removing build artifacts..."
 	rm -rf ./elm-stuff/build-artifacts
 	rm -rf ./elm-linter/build-artifacts
-	rm -rf ./index.html
+	rm -rf ./docs/index.html
 
 open:
-	$(OPEN) index.html &
+	$(OPEN) ./docs/index.html &
