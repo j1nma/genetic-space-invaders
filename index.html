@@ -12980,7 +12980,7 @@ var _j1nma$genetic_spaceinvaders$Constants$_p1 = {ctor: '_Tuple2', _0: _j1nma$ge
 var _j1nma$genetic_spaceinvaders$Constants$halfWidth = _j1nma$genetic_spaceinvaders$Constants$_p1._0;
 var _j1nma$genetic_spaceinvaders$Constants$halfHeight = _j1nma$genetic_spaceinvaders$Constants$_p1._1;
 var _j1nma$genetic_spaceinvaders$Constants$spawnFrenquencyInSeconds = 2;
-var _j1nma$genetic_spaceinvaders$Constants$gameOverInvaders = 100;
+var _j1nma$genetic_spaceinvaders$Constants$gameOverInvaders = 50;
 var _j1nma$genetic_spaceinvaders$Constants$leftArrow = 37;
 var _j1nma$genetic_spaceinvaders$Constants$rightArrow = 39;
 var _j1nma$genetic_spaceinvaders$Auxiliary$randomYCoordinate = function (seed) {
@@ -13245,7 +13245,13 @@ var _j1nma$genetic_spaceinvaders$View$overMessage = A2(
 		_elm_lang$core$Basics$toString(_j1nma$genetic_spaceinvaders$Constants$gameOverInvaders),
 		'! Game over!'));
 var _j1nma$genetic_spaceinvaders$View$pauseMessage = 'PAUSE';
-var _j1nma$genetic_spaceinvaders$View$startMessage = 'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet';
+var _j1nma$genetic_spaceinvaders$View$startMessage = A2(
+	_elm_lang$core$Basics_ops['++'],
+	'S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet. \n                Zap all to win. They reach ',
+	A2(
+		_elm_lang$core$Basics_ops['++'],
+		_elm_lang$core$Basics$toString(_j1nma$genetic_spaceinvaders$Constants$gameOverInvaders),
+		', you lose!'));
 var _j1nma$genetic_spaceinvaders$View$txt = function (f) {
 	return function (_p0) {
 		return _evancz$elm_graphics$Element$leftAligned(

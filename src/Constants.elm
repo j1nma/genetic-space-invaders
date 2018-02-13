@@ -15,7 +15,7 @@ leftArrow =
 
 gameOverInvaders : Int
 gameOverInvaders =
-    100
+    50
 
 
 spawnFrenquencyInSeconds : Int

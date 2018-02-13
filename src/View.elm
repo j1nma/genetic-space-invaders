@@ -93,7 +93,7 @@ txt f =
 
 startMessage : String
 startMessage =
-    "S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet"
+    "S to start, P to pause, R to reset, &larr;&rarr; to move, SPACE to shoot bullet. \n                Zap all to win. They reach " ++ toString gameOverInvaders ++ ", you lose!"
 
 
 pauseMessage : String
