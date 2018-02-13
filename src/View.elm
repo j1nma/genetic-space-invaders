@@ -24,7 +24,7 @@ messageStatus state =
             txt (Text.italic >> Text.color yellow) pauseMessage
 
         Start ->
-            txt (Text.italic >> Text.height 12 >> Text.color yellow) startMessage
+            txt (Text.italic >> Text.height 13 >> Text.color yellow) startMessage
 
         Over ->
             txt (Text.italic >> Text.bold >> Text.color red >> Text.height 28) overMessage

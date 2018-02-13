@@ -13327,7 +13327,7 @@ var _j1nma$genetic_spaceinvaders$View$messageStatus = function (state) {
 						_elm_lang$core$Color$yellow,
 						A2(
 							_evancz$elm_graphics$Text$height,
-							12,
+							13,
 							_evancz$elm_graphics$Text$italic(_p5)));
 				},
 				_j1nma$genetic_spaceinvaders$View$startMessage);
@@ -13555,6 +13555,9 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateState = F3(
 				var gameWon = _elm_lang$core$Native_Utils.eq(
 					_elm_lang$core$List$length(updatedInvaders),
 					0) && (!_elm_lang$core$Native_Utils.eq(_p19, 0));
+				var spawnFirstInvaders = (!gameWon) && _elm_lang$core$Native_Utils.eq(
+					_elm_lang$core$List$length(_p18),
+					0);
 				var newScore = _elm_lang$core$List$length(_p18) - _elm_lang$core$List$length(updatedInvaders);
 				var evaluateDnaFunction = function (dna) {
 					return A2(_j1nma$genetic_spaceinvaders$Update$calculateFitness, dna, updatedInvaders);
@@ -13566,7 +13569,7 @@ var _j1nma$genetic_spaceinvaders$GeneticSpaceInvaders$updateState = F3(
 						_elm_lang$core$Basics$round(
 							_elm_lang$core$Time$inSeconds(_p15)),
 						_j1nma$genetic_spaceinvaders$Constants$spawnFrenquencyInSeconds),
-					0)) {
+					0) || spawnFirstInvaders) {
 					var betterSolution = (!_p17) ? A2(_j1nma$genetic_spaceinvaders$GeneticHelper$evolve, evaluateDnaFunction, _p13) : _p13;
 					var newInvaders = (!_p17) ? A2(
 						_elm_lang$core$Basics_ops['++'],
