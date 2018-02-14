@@ -127,8 +127,11 @@ updateState newState { space, dir, delta } ({ state, spaceship, invaders, bullet
 
                 evaluateDnaFunction =
                     (\dna -> calculateFitness dna updatedInvaders)
+
+                spawnFirstInvaders =
+                    not gameWon && (List.length invaders == 0)
             in
-                if (round (inSeconds currentTime) % spawnFrenquencyInSeconds) == 0 then
+                if ((round (inSeconds currentTime) % spawnFrenquencyInSeconds == 0) || spawnFirstInvaders) then
                     let
                         betterSolution =
                             if not hasSpawned then
